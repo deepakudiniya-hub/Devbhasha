@@ -40,9 +40,8 @@ fun WalletScreen(userId: String) {
         // पैसे जोड़ने (Add Money) का बटन
         Button(
             onClick = {
-                val newBalance = walletBalance + 100.0
-                userSession.setWalletBalance(newBalance)
-                walletBalance = newBalance
+                // SECURITY FIX: free local credit removed - recharge must go
+                // through Razorpay and the balance must be server-owned.
             },
             modifier = Modifier.fillMaxWidth(),
             enabled = !isLoading
