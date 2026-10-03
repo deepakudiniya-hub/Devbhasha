@@ -122,10 +122,14 @@ object RazorpayPaymentManager {
 
         Log.d(TAG, "Payment Success: id=$txnId, amount=$amount, user=$userId")
 
-        // Update local wallet balance in UserSession
-        val userSession = UserSession(activity)
-        val currentBalance = userSession.getWalletBalance()
-        userSession.setWalletBalance(currentBalance + amount)
+        // FIX: only a wallet recharge may credit the wallet. Crediting every
+        // success also inflated the balance for non-recharge purposes (e.g. a
+        // paid dream interpretation) and credited a wallet with no bound user.
+        if (userId.isNotBlank() && pendingPurpose == "wallet_recharge") {
+            val userSession = UserSession(activity)
+            val currentBalance = userSession.getWalletBalance()
+            userSession.setWalletBalance(currentBalance + amount)
+        }
 
         val successMsg = "₹${amount.toInt()} का भुगतान सफल रहा! वॉलेट बैलेंस अपडेट हो गया।"
         Toast.makeText(activity, successMsg, Toast.LENGTH_LONG).show()

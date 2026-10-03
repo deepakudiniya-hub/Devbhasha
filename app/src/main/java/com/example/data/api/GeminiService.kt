@@ -18,12 +18,23 @@ interface GeminiApi {
 // 3. आपकी मुख्य क्लास (GeminiService)
 class GeminiService {
 
+    companion object {
+        // Backend that proxies Gemini for the app. Replace with the exact
+        // deployed Cloud Functions URL for the devbhasha project if it differs.
+        private const val BACKEND_BASE_URL =
+            "https://us-central1-devbhasha-d9e22.cloudfunctions.net/"
+    }
+
     private val api: GeminiApi
 
     init {
         // यहाँ हमने आपका बिल्कुल नया लाइव सर्वर लिंक जोड़ दिया है
+        // FIX: a host-only base URL ("https://cloudfunctions.net") has no path
+        // segment, so Retrofit.Builder().build() throws IllegalArgumentException
+        // and the caller always fell into the catch block. Point this at the
+        // Firebase Cloud Functions backend that exposes `askGeminiServer`.
         val retrofit = Retrofit.Builder()
-            .baseUrl("https://cloudfunctions.net")
+            .baseUrl(BACKEND_BASE_URL)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
 
