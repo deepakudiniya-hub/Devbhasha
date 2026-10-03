@@ -128,11 +128,20 @@ fun LoginScreen(
             return
         }
 
+        // FIX: `context as Activity` throws ClassCastException when the host is
+        // not an Activity (e.g. a wrapped Context). Use a safe cast instead.
+        val activity = context as? Activity
+        if (activity == null) {
+            isLoading = false
+            showToast("Unable to start verification on this device")
+            return
+        }
+
         isLoading = true
         val options = com.google.firebase.auth.PhoneAuthOptions.newBuilder(auth)
             .setPhoneNumber("+91$phoneNumber")
             .setTimeout(30L, java.util.concurrent.TimeUnit.SECONDS)
-            .setActivity(context as Activity)
+            .setActivity(activity)
             .setCallbacks(callbacks)
             .build()
         PhoneAuthProvider.verifyPhoneNumber(options)
@@ -174,7 +183,7 @@ fun LoginScreen(
     fun triggerGoogleSignIn() {
         val activity = context as? Activity
         if (activity == null) {
-            loginAsGoogleDevotee("Deepakudiniya@gmail.com", "दीपक जी")
+            loginAsGoogleDevotee("guest@devbhasha.app", "साधक")
             return
         }
 
@@ -201,11 +210,11 @@ fun LoginScreen(
                     val name = googleIdTokenCredential.displayName ?: "दीपक जी"
                     loginAsGoogleDevotee(email, name)
                 } else {
-                    loginAsGoogleDevotee("Deepakudiniya@gmail.com", "दीपक जी")
+                    loginAsGoogleDevotee("guest@devbhasha.app", "साधक")
                 }
             } catch (e: Exception) {
                 // In emulator or without Play Services signed-in account, gracefully log in directly
-                loginAsGoogleDevotee("Deepakudiniya@gmail.com", "दीपक जी")
+                loginAsGoogleDevotee("guest@devbhasha.app", "साधक")
             }
         }
     }

@@ -527,6 +527,17 @@ fun LiveAudioCallScreen(
         AgoraVoiceManager.onRemoteLeft = { showReviewDialog = true }
     }
 
+    // FIX: release the Agora engine and clear the global callbacks when the
+    // call screen leaves composition. Without this the RTC engine (and the mic)
+    // stayed alive and leaked across screens/calls.
+    DisposableEffect(Unit) {
+        onDispose {
+            AgoraVoiceManager.leave()
+            AgoraVoiceManager.onRemoteJoined = null
+            AgoraVoiceManager.onRemoteLeft = null
+        }
+    }
+
     // Call Duration Timer
     LaunchedEffect(isCallConnected) {
         if (isCallConnected) {
