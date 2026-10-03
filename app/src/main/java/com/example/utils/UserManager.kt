@@ -35,8 +35,15 @@ object UserManager {
     }
 
     fun updateLanguagePreference(uid: String, language: String) {
+        if (uid.isBlank()) return
+        // FIX: update() fails when the user document does not exist yet (e.g. a
+        // brand-new / guest user who only changed the language). set(merge)
+        // creates-or-updates, so the preference is never silently lost.
         db.collection("users").document(uid)
-            .update("language", language)
+            .set(
+                mapOf("language" to language),
+                com.google.firebase.firestore.SetOptions.merge()
+            )
             .addOnSuccessListener { Log.d(TAG, "Language updated in Firestore") }
             .addOnFailureListener { e -> Log.e(TAG, "Failed to update language", e) }
     }

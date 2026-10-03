@@ -47,7 +47,7 @@ import com.example.ui.models.getAvatarById
 import com.example.ui.theme.*
 import com.example.utils.UserSession
 
-// Preset Vedic Sacred Mantras for the "Saved Mantras" section
+// Preset Vedic Sacred Mantras for the \"Saved Mantras\" section
 data class VedicMantraItem(
     val id: String,
     val titleHi: String,
@@ -55,66 +55,66 @@ data class VedicMantraItem(
     val shloka: String,
     val meaningHi: String,
     val benefitHi: String,
-    val symbol: String = "🕉️",
+    val symbol: String = "\ud83d\udd49\ufe0f",
     val defaultSaved: Boolean = false
 )
 
 val DEFAULT_VEDIC_MANTRAS = listOf(
     VedicMantraItem(
         id = "mantra_mahamrityunjaya",
-        titleHi = "महामृत्युंजय मंत्र",
-        deityHi = "भगवान शिव",
-        shloka = "ॐ त्र्यम्बकं यजामहे सुगन्धिं पुष्टिवर्धनम्।\nउर्वारुकमिव बन्धनान्मृत्योर्मुक्षीय मामृतात्॥",
-        meaningHi = "हम त्रिनेत्रधारी सुगंधित व पुष्टि करने वाले भगवान शिव की वंदना करते हैं। जिस प्रकार पका हुआ खरबूजा बेल से मुक्त होता है, वैसे ही हम मृत्यु व भय से मुक्त होकर अमरता प्राप्त करें।",
-        benefitHi = "आरोग्य, अकाल मृत्यु से सुरक्षा, भय मुक्ति एवं मानसिक शांति।",
-        symbol = "🔱",
+        titleHi = "\u092e\u0939\u093e\u092e\u0943\u0924\u094d\u092f\u0941\u0902\u091c\u092f \u092e\u0902\u0924\u094d\u0930",
+        deityHi = "\u092d\u0917\u0935\u093e\u0928 \u0936\u093f\u0935",
+        shloka = "\u0950 \u0924\u094d\u0930\u094d\u092f\u092e\u094d\u092c\u0915\u0902 \u092f\u091c\u093e\u092e\u0939\u0947 \u0938\u0941\u0917\u0928\u094d\u0927\u093f\u0902 \u092a\u0941\u0937\u094d\u091f\u093f\u0935\u0930\u094d\u0927\u0928\u092e\u094d\u0964\n\u0909\u0930\u094d\u0935\u093e\u0930\u0941\u0915\u092e\u093f\u0935 \u092c\u0928\u094d\u0927\u0928\u093e\u0928\u094d\u092e\u0943\u0924\u094d\u092f\u094b\u0930\u094d\u092e\u0941\u0915\u094d\u0937\u0940\u092f \u092e\u093e\u092e\u0943\u0924\u093e\u0924\u094d\u0965",
+        meaningHi = "\u0939\u092e \u0924\u094d\u0930\u093f\u0928\u0947\u0924\u094d\u0930\u0927\u093e\u0930\u0940 \u0938\u0941\u0917\u0902\u0927\u093f\u0924 \u0935 \u092a\u0941\u0937\u094d\u091f\u093f \u0915\u0930\u0928\u0947 \u0935\u093e\u0932\u0947 \u092d\u0917\u0935\u093e\u0928 \u0936\u093f\u0935 \u0915\u0940 \u0935\u0902\u0926\u0928\u093e \u0915\u0930\u0924\u0947 \u0939\u0948\u0902\u0964 \u091c\u093f\u0938 \u092a\u094d\u0930\u0915\u093e\u0930 \u092a\u0915\u093e \u0939\u0941\u0906 \u0916\u0930\u092c\u0942\u091c\u093e \u092c\u0947\u0932 \u0938\u0947 \u092e\u0941\u0915\u094d\u0924 \u0939\u094b\u0924\u093e \u0939\u0948, \u0935\u0948\u0938\u0947 \u0939\u0940 \u0939\u092e \u092e\u0943\u0924\u094d\u092f\u0941 \u0935 \u092d\u092f \u0938\u0947 \u092e\u0941\u0915\u094d\u0924 \u0939\u094b\u0915\u0930 \u0905\u092e\u0930\u0924\u093e \u092a\u094d\u0930\u093e\u092a\u094d\u0924 \u0915\u0930\u0947\u0902\u0964",
+        benefitHi = "\u0906\u0930\u094b\u0917\u094d\u092f, \u0905\u0915\u093e\u0932 \u092e\u0943\u0924\u094d\u092f\u0941 \u0938\u0947 \u0938\u0941\u0930\u0915\u094d\u0937\u093e, \u092d\u092f \u092e\u0941\u0915\u094d\u0924\u093f \u090f\u0935\u0902 \u092e\u093e\u0928\u0938\u093f\u0915 \u0936\u093e\u0902\u0924\u093f\u0964",
+        symbol = "\ud83d\udd31",
         defaultSaved = true
     ),
     VedicMantraItem(
         id = "mantra_gayatri",
-        titleHi = "गायत्री महामंत्र",
-        deityHi = "सविता देव (सूर्य)",
-        shloka = "ॐ भूर्भुवः स्वः तत्सवितुर्वरेण्यं\nभर्गो देवस्य धीमहि धियो यो नः प्रचोदयात्॥",
-        meaningHi = "उस प्राणस्वरूप, दुःखनिवारक, सुखदाता, श्रेष्ठ, तेजस्वी परमपिता परमात्मा के तेज को हम अपनी बुद्धि में धारण करें, जो हमारी बुद्धि को सत्कर्मों की ओर प्रेरित करे।",
-        benefitHi = "बुद्धि, तेज, सकारात्मक ऊर्जा, एकाग्रता एवं पाप निवारण।",
-        symbol = "☀️",
+        titleHi = "\u0917\u093e\u092f\u0924\u094d\u0930\u0940 \u092e\u0939\u093e\u092e\u0902\u0924\u094d\u0930",
+        deityHi = "\u0938\u0935\u093f\u0924\u093e \u0926\u0947\u0935 (\u0938\u0942\u0930\u094d\u092f)",
+        shloka = "\u0950 \u092d\u0942\u0930\u094d\u092d\u0941\u0935\u0903 \u0938\u094d\u0935\u0903 \u0924\u0924\u094d\u0938\u0935\u093f\u0924\u0941\u0930\u094d\u0935\u0930\u0947\u0923\u094d\u092f\u0902\n\u092d\u0930\u094d\u0917\u094b \u0926\u0947\u0935\u0938\u094d\u092f \u0927\u0940\u092e\u0939\u093f \u0927\u093f\u092f\u094b \u092f\u094b \u0928\u0903 \u092a\u094d\u0930\u091a\u094b\u0926\u092f\u093e\u0924\u094d\u0965",
+        meaningHi = "\u0909\u0938 \u092a\u094d\u0930\u093e\u0923\u0938\u094d\u0935\u0930\u0942\u092a, \u0926\u0941\u0903\u0916\u0928\u093f\u0935\u093e\u0930\u0915, \u0938\u0941\u0916\u0926\u093e\u0924\u093e, \u0936\u094d\u0930\u0947\u0937\u094d\u0920, \u0924\u0947\u091c\u0938\u094d\u0935\u0940 \u092a\u0930\u092e\u092a\u093f\u0924\u093e \u092a\u0930\u092e\u093e\u0924\u094d\u092e\u093e \u0915\u0947 \u0924\u0947\u091c \u0915\u094b \u0939\u092e \u0905\u092a\u0928\u0940 \u092c\u0941\u0926\u094d\u0927\u093f \u092e\u0947\u0902 \u0927\u093e\u0930\u0923 \u0915\u0930\u0947\u0902, \u091c\u094b \u0939\u092e\u093e\u0930\u0940 \u092c\u0941\u0926\u094d\u0927\u093f \u0915\u094b \u0938\u0924\u094d\u0915\u0930\u094d\u092e\u094b\u0902 \u0915\u0940 \u0913\u0930 \u092a\u094d\u0930\u0947\u0930\u093f\u0924 \u0915\u0930\u0947\u0964",
+        benefitHi = "\u092c\u0941\u0926\u094d\u0927\u093f, \u0924\u0947\u091c, \u0938\u0915\u093e\u0930\u093e\u0924\u094d\u092e\u0915 \u090a\u0930\u094d\u091c\u093e, \u090f\u0915\u093e\u0917\u094d\u0930\u0924\u093e \u090f\u0935\u0902 \u092a\u093e\u092a \u0928\u093f\u0935\u093e\u0930\u0923\u0964",
+        symbol = "\u2600\ufe0f",
         defaultSaved = true
     ),
     VedicMantraItem(
         id = "mantra_ganesh",
-        titleHi = "श्री गणेश संकट नाशन मंत्र",
-        deityHi = "प्रथम पूज्य श्री गणेश",
-        shloka = "ॐ गं गणपतये नमः।\nवक्रतुण्ड महाकाय सूर्यकोटि समप्रभ।\nनिर्विघ्नं कुरु मे देव सर्वकार्येषु सर्वदा॥",
-        meaningHi = "हे विशाल शरीर वाले, करोड़ सूर्यों के समान तेजस्वी महाप्रतापी भगवान गणेश! आप मेरे सभी कार्यों को बिना किसी विघ्न के सदैव पूर्ण करें।",
-        benefitHi = "समस्त विघ्न-बाधाओं का शमन, व्यापार व अध्ययन में सफलता।",
-        symbol = "🪔",
+        titleHi = "\u0936\u094d\u0930\u0940 \u0917\u0923\u0947\u0936 \u0938\u0902\u0915\u091f \u0928\u093e\u0936\u0928 \u092e\u0902\u0924\u094d\u0930",
+        deityHi = "\u092a\u094d\u0930\u0925\u092e \u092a\u0942\u091c\u094d\u092f \u0936\u094d\u0930\u0940 \u0917\u0923\u0947\u0936",
+        shloka = "\u0950 \u0917\u0902 \u0917\u0923\u092a\u0924\u092f\u0947 \u0928\u092e\u0903\u0964\n\u0935\u0915\u094d\u0930\u0924\u0941\u0923\u094d\u0921 \u092e\u0939\u093e\u0915\u093e\u092f \u0938\u0942\u0930\u094d\u092f\u0915\u094b\u091f\u093f \u0938\u092e\u092a\u094d\u0930\u092d\u0964\n\u0928\u093f\u0930\u094d\u0935\u093f\u0918\u094d\u0928\u0902 \u0915\u0941\u0930\u0941 \u092e\u0947 \u0926\u0947\u0935 \u0938\u0930\u094d\u0935\u0915\u093e\u0930\u094d\u092f\u0947\u0937\u0941 \u0938\u0930\u094d\u0935\u0926\u093e\u0965",
+        meaningHi = "\u0939\u0947 \u0935\u093f\u0936\u093e\u0932 \u0936\u0930\u0940\u0930 \u0935\u093e\u0932\u0947, \u0915\u0930\u094b\u0921\u093c \u0938\u0942\u0930\u094d\u092f\u094b\u0902 \u0915\u0947 \u0938\u092e\u093e\u0928 \u0924\u0947\u091c\u0938\u094d\u0935\u0940 \u092e\u0939\u093e\u092a\u094d\u0930\u0924\u093e\u092a\u0940 \u092d\u0917\u0935\u093e\u0928 \u0917\u0923\u0947\u0936! \u0906\u092a \u092e\u0947\u0930\u0947 \u0938\u092d\u0940 \u0915\u093e\u0930\u094d\u092f\u094b\u0902 \u0915\u094b \u092c\u093f\u0928\u093e \u0915\u093f\u0938\u0940 \u0935\u093f\u0918\u094d\u0928 \u0915\u0947 \u0938\u0926\u0948\u0935 \u092a\u0942\u0930\u094d\u0923 \u0915\u0930\u0947\u0902\u0964",
+        benefitHi = "\u0938\u092e\u0938\u094d\u0924 \u0935\u093f\u0918\u094d\u0928-\u092c\u093e\u0927\u093e\u0913\u0902 \u0915\u093e \u0936\u092e\u0928, \u0935\u094d\u092f\u093e\u092a\u093e\u0930 \u0935 \u0905\u0927\u094d\u092f\u092f\u0928 \u092e\u0947\u0902 \u0938\u092b\u0932\u0924\u093e\u0964",
+        symbol = "\ud83e\ude94",
         defaultSaved = false
     ),
     VedicMantraItem(
         id = "mantra_lakshmi",
-        titleHi = "महालक्ष्मी समृद्धि मंत्र",
-        deityHi = "माता महालक्ष्मी",
-        shloka = "ॐ श्रीं ह्रीं क्लीं श्रीं सिद्ध लक्ष्म्यै नमः॥\nॐ हिरण्यवर्णां हरिणीं सुवर्णरजतस्रजाम्।",
-        meaningHi = "हे ऐश्वर्य, सौभाग्य एवं समृद्धि की अधिष्ठात्री माँ महालक्ष्मी! हमारे जीवन में धन, सात्विक संपदा व शांति का संचार करें।",
-        benefitHi = "दरिद्रता का नाश, धन-धान्य वृद्धि, गृह शांति व ऐश्वर्य प्राप्ति।",
-        symbol = "🪷",
+        titleHi = "\u092e\u0939\u093e\u0932\u0915\u094d\u0937\u094d\u092e\u0940 \u0938\u092e\u0943\u0926\u094d\u0927\u093f \u092e\u0902\u0924\u094d\u0930",
+        deityHi = "\u092e\u093e\u0924\u093e \u092e\u0939\u093e\u0932\u0915\u094d\u0937\u094d\u092e\u0940",
+        shloka = "\u0950 \u0936\u094d\u0930\u0940\u0902 \u0939\u094d\u0930\u0940\u0902 \u0915\u094d\u0932\u0940\u0902 \u0936\u094d\u0930\u0940\u0902 \u0938\u093f\u0926\u094d\u0927 \u0932\u0915\u094d\u0937\u094d\u092e\u094d\u092f\u0948 \u0928\u092e\u0903\u0965\n\u0950 \u0939\u093f\u0930\u0923\u094d\u092f\u0935\u0930\u094d\u0923\u093e\u0902 \u0939\u0930\u093f\u0923\u0940\u0902 \u0938\u0941\u0935\u0930\u094d\u0923\u0930\u091c\u0924\u0938\u094d\u0930\u091c\u093e\u092e\u094d\u0964",
+        meaningHi = "\u0939\u0947 \u0910\u0936\u094d\u0935\u0930\u094d\u092f, \u0938\u094c\u092d\u093e\u0917\u094d\u092f \u090f\u0935\u0902 \u0938\u092e\u0943\u0926\u094d\u0927\u093f \u0915\u0940 \u0905\u0927\u093f\u0937\u094d\u0920\u093e\u0924\u094d\u0930\u0940 \u092e\u093e\u0901 \u092e\u0939\u093e\u0932\u0915\u094d\u0937\u094d\u092e\u0940! \u0939\u092e\u093e\u0930\u0947 \u091c\u0940\u0935\u0928 \u092e\u0947\u0902 \u0927\u0928, \u0938\u093e\u0924\u094d\u0935\u093f\u0915 \u0938\u0902\u092a\u0926\u093e \u0935 \u0936\u093e\u0902\u0924\u093f \u0915\u093e \u0938\u0902\u091a\u093e\u0930 \u0915\u0930\u0947\u0902\u0964",
+        benefitHi = "\u0926\u0930\u093f\u0926\u094d\u0930\u0924\u093e \u0915\u093e \u0928\u093e\u0936, \u0927\u0928-\u0927\u093e\u0928\u094d\u092f \u0935\u0943\u0926\u094d\u0927\u093f, \u0917\u0943\u0939 \u0936\u093e\u0902\u0924\u093f \u0935 \u0910\u0936\u094d\u0935\u0930\u094d\u092f \u092a\u094d\u0930\u093e\u092a\u094d\u0924\u093f\u0964",
+        symbol = "\ud83e\udeb7",
         defaultSaved = false
     )
 )
 
 /**
- * Sanitizes any raw string to prevent awkward values like 'साधक (Facebook)', 'null', or blank strings.
- * Gracefully returns 'प्रिय साधक' when user's name is missing.
+ * Sanitizes any raw string to prevent awkward values like '\u0938\u093e\u0927\u0915 (Facebook)', 'null', or blank strings.
+ * Gracefully returns '\u092a\u094d\u0930\u093f\u092f \u0938\u093e\u0927\u0915' when user's name is missing.
  */
 private fun sanitizeDevoteeName(raw: String?): String {
     val trimmed = raw?.trim() ?: ""
     if (trimmed.isBlank() ||
         trimmed.equals("null", ignoreCase = true) ||
         trimmed.contains("Facebook", ignoreCase = true) ||
-        trimmed == "साधक" ||
+        trimmed == "\u0938\u093e\u0927\u0915" ||
         trimmed.startsWith("user_", ignoreCase = true)
     ) {
-        return "दीपक जी"
+        return "\u0926\u0940\u092a\u0915 \u091c\u0940"
     }
     return trimmed
 }
@@ -137,7 +137,7 @@ private fun sanitizeDevoteePhone(raw: String?): String {
 @Composable
 fun UserProfileScreen(
     userId: String,
-    userNameInitial: String = "साधक",
+    userNameInitial: String = "\u0938\u093e\u0927\u0915",
     onLogoutClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
@@ -146,14 +146,14 @@ fun UserProfileScreen(
     val effectiveUserId = userId.ifBlank { userSession.getUserId().ifBlank { "user_live" } }
 
     val initialSanitizedName = sanitizeDevoteeName(
-        if (userNameInitial.isNotBlank() && userNameInitial != "साधक") userNameInitial else userSession.getUserName()
+        if (userNameInitial.isNotBlank() && userNameInitial != "\u0938\u093e\u0927\u0915") userNameInitial else userSession.getUserName()
     )
     val initialSanitizedPhone = sanitizeDevoteePhone(userSession.getPhoneNumber())
 
     // User State
     var userName by remember { mutableStateOf(initialSanitizedName) }
     var phone by remember { mutableStateOf(initialSanitizedPhone) }
-    var email by remember { mutableStateOf("Deepakudiniya@gmail.com") }
+    var email by remember { mutableStateOf("") }
     var dob by remember { mutableStateOf("") }
     var birthTime by remember { mutableStateOf("") }
     var birthPlace by remember { mutableStateOf("") }
@@ -166,10 +166,10 @@ fun UserProfileScreen(
     val initialQuestions = remember {
         listOf<Map<String, Any>>(
             mapOf(
-                "questionText" to "सपने में शिवलिंग पर जल चढ़ाना",
-                "sadhakName" to "आचार्य देव शर्मा",
+                "questionText" to "\u0938\u092a\u0928\u0947 \u092e\u0947\u0902 \u0936\u093f\u0935\u0932\u093f\u0902\u0917 \u092a\u0930 \u091c\u0932 \u091a\u0922\u093c\u093e\u0928\u093e",
+                "sadhakName" to "\u0906\u091a\u093e\u0930\u094d\u092f \u0926\u0947\u0935 \u0936\u0930\u094d\u092e\u093e",
                 "status" to "Answered",
-                "providerAnswer" to "यह अत्यंत शुभ स्वप्न है। आपके रुके कार्य पूर्ण होंगे।",
+                "providerAnswer" to "\u092f\u0939 \u0905\u0924\u094d\u092f\u0902\u0924 \u0936\u0941\u092d \u0938\u094d\u0935\u092a\u094d\u0928 \u0939\u0948\u0964 \u0906\u092a\u0915\u0947 \u0930\u0941\u0915\u0947 \u0915\u093e\u0930\u094d\u092f \u092a\u0942\u0930\u094d\u0923 \u0939\u094b\u0902\u0917\u0947\u0964",
                 "type" to "dream"
             )
         )
@@ -237,10 +237,10 @@ fun UserProfileScreen(
                                 modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Text(text = "🕉️", fontSize = 12.sp)
+                                Text(text = "\ud83d\udd49\ufe0f", fontSize = 12.sp)
                                 Spacer(modifier = Modifier.width(5.dp))
                                 Text(
-                                    text = "वैदिक साधक प्रोफाइल",
+                                    text = "\u0935\u0948\u0926\u093f\u0915 \u0938\u093e\u0927\u0915 \u092a\u094d\u0930\u094b\u092b\u093c\u093e\u0907\u0932",
                                     fontSize = 11.5.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = SaffronDeep
@@ -256,7 +256,7 @@ fun UserProfileScreen(
                                 val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
                                 val clip = ClipData.newPlainText("Devbhasha UID", effectiveUserId)
                                 clipboard?.setPrimaryClip(clip)
-                                Toast.makeText(context, "साधक UID कॉपी हुआ!", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, "\u0938\u093e\u0927\u0915 UID \u0915\u0949\u092a\u0940 \u0939\u0941\u0906!", Toast.LENGTH_SHORT).show()
                             }
                         ) {
                             Row(
@@ -323,7 +323,7 @@ fun UserProfileScreen(
                                 ) {
                                     Icon(
                                         imageVector = Icons.Filled.Edit,
-                                        contentDescription = "अवतार बदलें",
+                                        contentDescription = "\u0905\u0935\u0924\u093e\u0930 \u092c\u0926\u0932\u0947\u0902",
                                         tint = Color.White,
                                         modifier = Modifier.size(11.dp)
                                     )
@@ -380,7 +380,7 @@ fun UserProfileScreen(
                                         )
                                         Spacer(modifier = Modifier.width(4.dp))
                                         Text(
-                                            text = "फ़ोन नंबर जोड़ें (+)",
+                                            text = "\u092b\u093c\u094b\u0928 \u0928\u0902\u092c\u0930 \u091c\u094b\u0921\u093c\u0947\u0902 (+)",
                                             fontSize = 11.5.sp,
                                             fontWeight = FontWeight.Bold,
                                             color = Color(0xFFB45309)
@@ -395,9 +395,9 @@ fun UserProfileScreen(
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     Text(
                                         text = buildString {
-                                            if (dob.isNotBlank()) append("जन्म: $dob")
-                                            if (dob.isNotBlank() && gotra.isNotBlank()) append(" • ")
-                                            if (gotra.isNotBlank()) append("गोत्र: $gotra")
+                                            if (dob.isNotBlank()) append("\u091c\u0928\u094d\u092e: $dob")
+                                            if (dob.isNotBlank() && gotra.isNotBlank()) append(" \u2022 ")
+                                            if (gotra.isNotBlank()) append("\u0917\u094b\u0924\u094d\u0930: $gotra")
                                         },
                                         fontSize = 11.5.sp,
                                         color = Color(0xFF64748B),
@@ -460,13 +460,13 @@ fun UserProfileScreen(
                             Spacer(modifier = Modifier.width(10.dp))
                             Column {
                                 Text(
-                                    text = "वॉलेट दक्षिणा शेष",
+                                    text = "\u0935\u0949\u0932\u0947\u091f \u0926\u0915\u094d\u0937\u093f\u0923\u093e \u0936\u0947\u0937",
                                     fontSize = 11.sp,
                                     color = Color(0xFF9A3412),
                                     fontWeight = FontWeight.Medium
                                 )
                                 Text(
-                                    text = "₹${walletBalance.toInt()}",
+                                    text = "\u20b9${walletBalance.toInt()}",
                                     fontSize = 16.sp,
                                     fontWeight = FontWeight.ExtraBold,
                                     color = SaffronDeep
@@ -477,7 +477,7 @@ fun UserProfileScreen(
                         // Consultations summary count
                         Column(horizontalAlignment = Alignment.End) {
                             Text(
-                                text = "परामर्श प्रश्न",
+                                text = "\u092a\u0930\u093e\u092e\u0930\u094d\u0936 \u092a\u094d\u0930\u0936\u094d\u0928",
                                 fontSize = 11.sp,
                                 color = Color(0xFF64748B)
                             )
@@ -497,7 +497,7 @@ fun UserProfileScreen(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
-                        // "विवरण जोड़ें / संपादित करें" Button
+                        // "\u0935\u093f\u0935\u0930\u0923 \u091c\u094b\u0921\u093c\u0947\u0902 / \u0938\u0902\u092a\u093e\u0926\u093f\u0924 \u0915\u0930\u0947\u0902" Button
                         Button(
                             onClick = { showEditProfileDialog = true },
                             modifier = Modifier
@@ -518,14 +518,14 @@ fun UserProfileScreen(
                             )
                             Spacer(modifier = Modifier.width(6.dp))
                             Text(
-                                text = if (isProfileIncomplete) "विवरण जोड़ें (Add Details)" else "विवरण बदलें (Edit)",
+                                text = if (isProfileIncomplete) "\u0935\u093f\u0935\u0930\u0923 \u091c\u094b\u0921\u093c\u0947\u0902 (Add Details)" else "\u0935\u093f\u0935\u0930\u0923 \u092c\u0926\u0932\u0947\u0902 (Edit)",
                                 fontSize = 12.5.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = Color.White
                             )
                         }
 
-                        // "अवतार बदलें" Button
+                        // "\u0905\u0935\u0924\u093e\u0930 \u092c\u0926\u0932\u0947\u0902" Button
                         OutlinedButton(
                             onClick = { showAvatarPickerDialog = true },
                             modifier = Modifier
@@ -544,7 +544,7 @@ fun UserProfileScreen(
                             )
                             Spacer(modifier = Modifier.width(6.dp))
                             Text(
-                                text = "अवतार चुनें",
+                                text = "\u0905\u0935\u0924\u093e\u0930 \u091a\u0941\u0928\u0947\u0902",
                                 fontSize = 12.5.sp,
                                 fontWeight = FontWeight.Bold
                             )
@@ -580,21 +580,21 @@ fun UserProfileScreen(
                                 .background(Color(0xFFFEF3C7)),
                             contentAlignment = Alignment.Center
                         ) {
-                            Text(text = "✍️", fontSize = 20.sp)
+                            Text(text = "\u270d\ufe0f", fontSize = 20.sp)
                         }
 
                         Spacer(modifier = Modifier.width(12.dp))
 
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = "प्रोफ़ाइल विवरण पूर्ण करें",
+                                text = "\u092a\u094d\u0930\u094b\u092b\u093c\u093e\u0907\u0932 \u0935\u093f\u0935\u0930\u0923 \u092a\u0942\u0930\u094d\u0923 \u0915\u0930\u0947\u0902",
                                 fontSize = 13.5.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = Color(0xFF92400E)
                             )
                             Spacer(modifier = Modifier.height(2.dp))
                             Text(
-                                text = "सटीक कुंडली विचार, वैदिक परामर्श कॉल व अनुष्ठान हेतु अपना नाम व फ़ोन नंबर दर्ज करें।",
+                                text = "\u0938\u091f\u0940\u0915 \u0915\u0941\u0902\u0921\u0932\u0940 \u0935\u093f\u091a\u093e\u0930, \u0935\u0948\u0926\u093f\u0915 \u092a\u0930\u093e\u092e\u0930\u094d\u0936 \u0915\u0949\u0932 \u0935 \u0905\u0928\u0941\u0937\u094d\u0920\u093e\u0928 \u0939\u0947\u0924\u0941 \u0905\u092a\u0928\u093e \u0928\u093e\u092e \u0935 \u092b\u093c\u094b\u0928 \u0928\u0902\u092c\u0930 \u0926\u0930\u094d\u091c \u0915\u0930\u0947\u0902\u0964",
                                 fontSize = 11.5.sp,
                                 color = Color(0xFFB45309),
                                 lineHeight = 16.sp
@@ -610,7 +610,7 @@ fun UserProfileScreen(
                             contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
                         ) {
                             Text(
-                                text = "जोड़ें (+)",
+                                text = "\u091c\u094b\u0921\u093c\u0947\u0902 (+)",
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = Color.White
@@ -622,7 +622,7 @@ fun UserProfileScreen(
         }
 
         // -------------------------------------------------------------
-        // 2. Consultation History Card (परामर्श इतिहास)
+        // 2. Consultation History Card (\u092a\u0930\u093e\u092e\u0930\u094d\u0936 \u0907\u0924\u093f\u0939\u093e\u0938)
         // -------------------------------------------------------------
         item {
             Card(
@@ -649,18 +649,18 @@ fun UserProfileScreen(
                                     .background(Color(0xFFFFF7ED)),
                                 contentAlignment = Alignment.Center
                             ) {
-                                Text(text = "📜", fontSize = 18.sp)
+                                Text(text = "\ud83d\udcdc", fontSize = 18.sp)
                             }
                             Spacer(modifier = Modifier.width(10.dp))
                             Column {
                                 Text(
-                                    text = "परामर्श इतिहास (Consultation History)",
+                                    text = "\u092a\u0930\u093e\u092e\u0930\u094d\u0936 \u0907\u0924\u093f\u0939\u093e\u0938 (Consultation History)",
                                     fontSize = 15.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = TextDark
                                 )
                                 Text(
-                                    text = "पूछे गए प्रश्न, समाधान व मार्गदर्शन",
+                                    text = "\u092a\u0942\u091b\u0947 \u0917\u090f \u092a\u094d\u0930\u0936\u094d\u0928, \u0938\u092e\u093e\u0927\u093e\u0928 \u0935 \u092e\u093e\u0930\u094d\u0917\u0926\u0930\u094d\u0936\u0928",
                                     fontSize = 11.5.sp,
                                     color = TextMuted
                                 )
@@ -673,7 +673,7 @@ fun UserProfileScreen(
                                 color = SaffronSoftBg
                             ) {
                                 Text(
-                                    text = "${userQuestions.size} प्रश्न",
+                                    text = "${userQuestions.size} \u092a\u094d\u0930\u0936\u094d\u0928",
                                     fontSize = 11.5.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = SaffronDeep,
@@ -709,17 +709,17 @@ fun UserProfileScreen(
                                 .padding(vertical = 20.dp, horizontal = 16.dp),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            Text(text = "🪔", fontSize = 32.sp)
+                            Text(text = "\ud83e\ude94", fontSize = 32.sp)
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(
-                                text = "अभी कोई परामर्श इतिहास उपलब्ध नहीं है",
+                                text = "\u0905\u092d\u0940 \u0915\u094b\u0908 \u092a\u0930\u093e\u092e\u0930\u094d\u0936 \u0907\u0924\u093f\u0939\u093e\u0938 \u0909\u092a\u0932\u092c\u094d\u0927 \u0928\u0939\u0940\u0902 \u0939\u0948",
                                 fontSize = 13.5.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = Color(0xFF475569)
                             )
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(
-                                text = "कुंडली, गृह दोष, विवाह या करियर संबंधी प्रश्नों के लिए हमारे वैदिक साधकों से संपर्क करें।",
+                                text = "\u0915\u0941\u0902\u0921\u0932\u0940, \u0917\u0943\u0939 \u0926\u094b\u0937, \u0935\u093f\u0935\u093e\u0939 \u092f\u093e \u0915\u0930\u093f\u092f\u0930 \u0938\u0902\u092c\u0902\u0927\u0940 \u092a\u094d\u0930\u0936\u094d\u0928\u094b\u0902 \u0915\u0947 \u0932\u093f\u090f \u0939\u092e\u093e\u0930\u0947 \u0935\u0948\u0926\u093f\u0915 \u0938\u093e\u0927\u0915\u094b\u0902 \u0938\u0947 \u0938\u0902\u092a\u0930\u094d\u0915 \u0915\u0930\u0947\u0902\u0964",
                                 fontSize = 12.sp,
                                 color = Color(0xFF94A3B8),
                                 textAlign = TextAlign.Center,
@@ -765,7 +765,7 @@ fun UserProfileScreen(
                                                 )
                                                 Spacer(modifier = Modifier.width(6.dp))
                                                 Text(
-                                                    text = questionText.ifBlank { "वैदिक परामर्श प्रश्न" },
+                                                    text = questionText.ifBlank { "\u0935\u0948\u0926\u093f\u0915 \u092a\u0930\u093e\u092e\u0930\u094d\u0936 \u092a\u094d\u0930\u0936\u094d\u0928" },
                                                     fontSize = 13.sp,
                                                     fontWeight = FontWeight.SemiBold,
                                                     color = TextDark,
@@ -779,7 +779,7 @@ fun UserProfileScreen(
                                                 color = if (isAnswered) GreenPrimary.copy(alpha = 0.15f) else Color(0xFFF59E0B).copy(alpha = 0.15f)
                                             ) {
                                                 Text(
-                                                    text = if (isAnswered) "समाधान प्राप्त ✓" else "प्रतीक्षारत ⏳",
+                                                    text = if (isAnswered) "\u0938\u092e\u093e\u0927\u093e\u0928 \u092a\u094d\u0930\u093e\u092a\u094d\u0924 \u2713" else "\u092a\u094d\u0930\u0924\u0940\u0915\u094d\u0937\u093e\u0930\u0924 \u23f3",
                                                     fontSize = 10.5.sp,
                                                     fontWeight = FontWeight.Bold,
                                                     color = if (isAnswered) GreenPrimary else Color(0xFFB45309),
@@ -793,7 +793,7 @@ fun UserProfileScreen(
                                             HorizontalDivider(color = Color(0xFFDCFCE7))
                                             Spacer(modifier = Modifier.height(8.dp))
                                             Text(
-                                                text = "साधक का समाधान:",
+                                                text = "\u0938\u093e\u0927\u0915 \u0915\u093e \u0938\u092e\u093e\u0927\u093e\u0928:",
                                                 fontSize = 11.5.sp,
                                                 fontWeight = FontWeight.Bold,
                                                 color = GreenPrimary
@@ -816,7 +816,7 @@ fun UserProfileScreen(
         }
 
         // -------------------------------------------------------------
-        // 3. Saved Mantras & Daily Japa Card (संग्रहीत मंत्र)
+        // 3. Saved Mantras & Daily Japa Card (\u0938\u0902\u0917\u094d\u0930\u0939\u0940\u0924 \u092e\u0902\u0924\u094d\u0930)
         // -------------------------------------------------------------
         item {
             Card(
@@ -843,18 +843,18 @@ fun UserProfileScreen(
                                     .background(Color(0xFFFFF7ED)),
                                 contentAlignment = Alignment.Center
                             ) {
-                                Text(text = "📿", fontSize = 18.sp)
+                                Text(text = "\ud83d\udcff", fontSize = 18.sp)
                             }
                             Spacer(modifier = Modifier.width(10.dp))
                             Column {
                                 Text(
-                                    text = "संग्रहीत मंत्र एवं नित्य पाठ (Saved Mantras)",
+                                    text = "\u0938\u0902\u0917\u094d\u0930\u0939\u0940\u0924 \u092e\u0902\u0924\u094d\u0930 \u090f\u0935\u0902 \u0928\u093f\u0924\u094d\u092f \u092a\u093e\u0920 (Saved Mantras)",
                                     fontSize = 15.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = TextDark
                                 )
                                 Text(
-                                    text = "नित्य जाप व साधना हेतु पावन वैदिक मंत्र",
+                                    text = "\u0928\u093f\u0924\u094d\u092f \u091c\u093e\u092a \u0935 \u0938\u093e\u0927\u0928\u093e \u0939\u0947\u0924\u0941 \u092a\u093e\u0935\u0928 \u0935\u0948\u0926\u093f\u0915 \u092e\u0902\u0924\u094d\u0930",
                                     fontSize = 11.5.sp,
                                     color = TextMuted
                                 )
@@ -920,7 +920,7 @@ fun UserProfileScreen(
                                                 savedMantraIds = newSet
                                                 Toast.makeText(
                                                     context,
-                                                    if (newSet.contains(mantra.id)) "${mantra.titleHi} संग्रह में जोड़ा गया" else "${mantra.titleHi} हटाया गया",
+                                                    if (newSet.contains(mantra.id)) "${mantra.titleHi} \u0938\u0902\u0917\u094d\u0930\u0939 \u092e\u0947\u0902 \u091c\u094b\u0921\u093c\u093e \u0917\u092f\u093e" else "${mantra.titleHi} \u0939\u091f\u093e\u092f\u093e \u0917\u092f\u093e",
                                                     Toast.LENGTH_SHORT
                                                 ).show()
                                             },
@@ -963,14 +963,14 @@ fun UserProfileScreen(
 
                                             Spacer(modifier = Modifier.height(8.dp))
                                             Text(
-                                                text = "सरल अर्थ: ${mantra.meaningHi}",
+                                                text = "\u0938\u0930\u0932 \u0905\u0930\u094d\u0925: ${mantra.meaningHi}",
                                                 fontSize = 11.5.sp,
                                                 color = Color(0xFF475569),
                                                 lineHeight = 16.sp
                                             )
                                             Spacer(modifier = Modifier.height(4.dp))
                                             Text(
-                                                text = "साधना लाभ: ${mantra.benefitHi}",
+                                                text = "\u0938\u093e\u0927\u0928\u093e \u0932\u093e\u092d: ${mantra.benefitHi}",
                                                 fontSize = 11.sp,
                                                 fontWeight = FontWeight.SemiBold,
                                                 color = GreenPrimary
@@ -986,7 +986,7 @@ fun UserProfileScreen(
         }
 
         // -------------------------------------------------------------
-        // 4. Settings & Support Card (सेटिंग्स एवं सहायता)
+        // 4. Settings & Support Card (\u0938\u0947\u091f\u093f\u0902\u0917\u094d\u0938 \u090f\u0935\u0902 \u0938\u0939\u093e\u092f\u0924\u093e)
         // -------------------------------------------------------------
         item {
             Card(
@@ -1008,18 +1008,18 @@ fun UserProfileScreen(
                                 .background(Color(0xFFFFF7ED)),
                             contentAlignment = Alignment.Center
                         ) {
-                            Text(text = "⚙️", fontSize = 18.sp)
+                            Text(text = "\u2699\ufe0f", fontSize = 18.sp)
                         }
                         Spacer(modifier = Modifier.width(10.dp))
                         Column {
                             Text(
-                                text = "सेटिंग्स एवं सहायता (Settings & Support)",
+                                text = "\u0938\u0947\u091f\u093f\u0902\u0917\u094d\u0938 \u090f\u0935\u0902 \u0938\u0939\u093e\u092f\u0924\u093e (Settings & Support)",
                                 fontSize = 15.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = TextDark
                             )
                             Text(
-                                text = "ऐप प्राथमिकताएं, गोपनीयता एवं संपर्क",
+                                text = "\u0910\u092a \u092a\u094d\u0930\u093e\u0925\u092e\u093f\u0915\u0924\u093e\u090f\u0902, \u0917\u094b\u092a\u0928\u0940\u092f\u0924\u093e \u090f\u0935\u0902 \u0938\u0902\u092a\u0930\u094d\u0915",
                                 fontSize = 11.5.sp,
                                 color = TextMuted
                             )
@@ -1051,13 +1051,13 @@ fun UserProfileScreen(
                             Spacer(modifier = Modifier.width(12.dp))
                             Column {
                                 Text(
-                                    text = "दैनिक पंचांग व शुभ मुहूर्त सूचनाएं",
+                                    text = "\u0926\u0948\u0928\u093f\u0915 \u092a\u0902\u091a\u093e\u0902\u0917 \u0935 \u0936\u0941\u092d \u092e\u0941\u0939\u0942\u0930\u094d\u0924 \u0938\u0942\u091a\u0928\u093e\u090f\u0902",
                                     fontSize = 13.5.sp,
                                     fontWeight = FontWeight.Medium,
                                     color = TextDark
                                 )
                                 Text(
-                                    text = "प्रातःकाल शुभ चौघड़िया व राहुकाल अलर्ट",
+                                    text = "\u092a\u094d\u0930\u093e\u0924\u0903\u0915\u093e\u0932 \u0936\u0941\u092d \u091a\u094c\u0918\u0921\u093c\u093f\u092f\u093e \u0935 \u0930\u093e\u0939\u0941\u0915\u093e\u0932 \u0905\u0932\u0930\u094d\u091f",
                                     fontSize = 11.sp,
                                     color = TextMuted
                                 )
@@ -1069,7 +1069,7 @@ fun UserProfileScreen(
                                 dailyNotificationsEnabled = it
                                 Toast.makeText(
                                     context,
-                                    if (it) "दैनिक सूचनाएं सक्रिय की गईं" else "दैनिक सूचनाएं बंद की गईं",
+                                    if (it) "\u0926\u0948\u0928\u093f\u0915 \u0938\u0942\u091a\u0928\u093e\u090f\u0902 \u0938\u0915\u094d\u0930\u093f\u092f \u0915\u0940 \u0917\u0908\u0902" else "\u0926\u0948\u0928\u093f\u0915 \u0938\u0942\u091a\u0928\u093e\u090f\u0902 \u092c\u0902\u0926 \u0915\u0940 \u0917\u0908\u0902",
                                     Toast.LENGTH_SHORT
                                 ).show()
                             },
@@ -1101,13 +1101,13 @@ fun UserProfileScreen(
                             Spacer(modifier = Modifier.width(12.dp))
                             Column {
                                 Text(
-                                    text = "साधक सहायता एवं समाधान केंद्र",
+                                    text = "\u0938\u093e\u0927\u0915 \u0938\u0939\u093e\u092f\u0924\u093e \u090f\u0935\u0902 \u0938\u092e\u093e\u0927\u093e\u0928 \u0915\u0947\u0902\u0926\u094d\u0930",
                                     fontSize = 13.5.sp,
                                     fontWeight = FontWeight.Medium,
                                     color = TextDark
                                 )
                                 Text(
-                                    text = "कॉल / चैट सहायता एवं प्रश्न निवारण",
+                                    text = "\u0915\u0949\u0932 / \u091a\u0948\u091f \u0938\u0939\u093e\u092f\u0924\u093e \u090f\u0935\u0902 \u092a\u094d\u0930\u0936\u094d\u0928 \u0928\u093f\u0935\u093e\u0930\u0923",
                                     fontSize = 11.sp,
                                     color = TextMuted
                                 )
@@ -1142,13 +1142,13 @@ fun UserProfileScreen(
                             Spacer(modifier = Modifier.width(12.dp))
                             Column {
                                 Text(
-                                    text = "नियम, शर्तें एवं गोपनीयता नीति",
+                                    text = "\u0928\u093f\u092f\u092e, \u0936\u0930\u094d\u0924\u0947\u0902 \u090f\u0935\u0902 \u0917\u094b\u092a\u0928\u0940\u092f\u0924\u093e \u0928\u0940\u0924\u093f",
                                     fontSize = 13.5.sp,
                                     fontWeight = FontWeight.Medium,
                                     color = TextDark
                                 )
                                 Text(
-                                    text = "साधक गोपनीयता एवं सात्विक सेवा नियम",
+                                    text = "\u0938\u093e\u0927\u0915 \u0917\u094b\u092a\u0928\u0940\u092f\u0924\u093e \u090f\u0935\u0902 \u0938\u093e\u0924\u094d\u0935\u093f\u0915 \u0938\u0947\u0935\u093e \u0928\u093f\u092f\u092e",
                                     fontSize = 11.sp,
                                     color = TextMuted
                                 )
@@ -1187,7 +1187,7 @@ fun UserProfileScreen(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "लॉगआउट करें (Logout)",
+                        text = "\u0932\u0949\u0917\u0906\u0909\u091f \u0915\u0930\u0947\u0902 (Logout)",
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold
                     )
@@ -1200,7 +1200,7 @@ fun UserProfileScreen(
     // Dialog 1: Comprehensive "Edit Profile" Dialog (Name, Phone, DOB, Gotra)
     // =========================================================================
     if (showEditProfileDialog) {
-        var editName by remember { mutableStateOf(if (userName == "प्रिय साधक") "" else userName) }
+        var editName by remember { mutableStateOf(if (userName == "\u092a\u094d\u0930\u093f\u092f \u0938\u093e\u0927\u0915") "" else userName) }
         var editPhone by remember { mutableStateOf(phone) }
         var editEmail by remember { mutableStateOf(email) }
         var editDob by remember { mutableStateOf(dob) }
@@ -1213,10 +1213,10 @@ fun UserProfileScreen(
             onDismissRequest = { if (!isSaving) showEditProfileDialog = false },
             title = {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(text = "🕉️", fontSize = 20.sp)
+                    Text(text = "\ud83d\udd49\ufe0f", fontSize = 20.sp)
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "साधक व्यक्तिगत विवरण",
+                        text = "\u0938\u093e\u0927\u0915 \u0935\u094d\u092f\u0915\u094d\u0924\u093f\u0917\u0924 \u0935\u093f\u0935\u0930\u0923",
                         fontWeight = FontWeight.Bold,
                         fontSize = 18.sp,
                         color = TextDark
@@ -1231,7 +1231,7 @@ fun UserProfileScreen(
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     Text(
-                        text = "सटीक कुंडली विचार, वैदिक परामर्श एवं पूजा संकल्प हेतु अपना प्रामाणिक विवरण दर्ज करें:",
+                        text = "\u0938\u091f\u0940\u0915 \u0915\u0941\u0902\u0921\u0932\u0940 \u0935\u093f\u091a\u093e\u0930, \u0935\u0948\u0926\u093f\u0915 \u092a\u0930\u093e\u092e\u0930\u094d\u0936 \u090f\u0935\u0902 \u092a\u0942\u091c\u093e \u0938\u0902\u0915\u0932\u094d\u092a \u0939\u0947\u0924\u0941 \u0905\u092a\u0928\u093e \u092a\u094d\u0930\u093e\u092e\u093e\u0923\u093f\u0915 \u0935\u093f\u0935\u0930\u0923 \u0926\u0930\u094d\u091c \u0915\u0930\u0947\u0902:",
                         fontSize = 12.sp,
                         color = TextMuted,
                         lineHeight = 16.sp
@@ -1241,8 +1241,8 @@ fun UserProfileScreen(
                     OutlinedTextField(
                         value = editName,
                         onValueChange = { editName = it },
-                        label = { Text("पूरा नाम (Full Name) *") },
-                        placeholder = { Text("उदा. अनुराग शर्मा") },
+                        label = { Text("\u092a\u0942\u0930\u093e \u0928\u093e\u092e (Full Name) *") },
+                        placeholder = { Text("\u0909\u0926\u093e. \u0905\u0928\u0941\u0930\u093e\u0917 \u0936\u0930\u094d\u092e\u093e") },
                         leadingIcon = {
                             Icon(Icons.Filled.Person, contentDescription = null, tint = SaffronPrimary)
                         },
@@ -1260,8 +1260,8 @@ fun UserProfileScreen(
                     OutlinedTextField(
                         value = editPhone,
                         onValueChange = { editPhone = it },
-                        label = { Text("फ़ोन नंबर (Phone Number) *") },
-                        placeholder = { Text("उदा. 9876543210") },
+                        label = { Text("\u092b\u093c\u094b\u0928 \u0928\u0902\u092c\u0930 (Phone Number) *") },
+                        placeholder = { Text("\u0909\u0926\u093e. 9876543210") },
                         leadingIcon = {
                             Icon(Icons.Filled.Phone, contentDescription = null, tint = SaffronPrimary)
                         },
@@ -1280,7 +1280,7 @@ fun UserProfileScreen(
                     OutlinedTextField(
                         value = editEmail,
                         onValueChange = { editEmail = it },
-                        label = { Text("ईमेल (Email - वैकल्पिक)") },
+                        label = { Text("\u0908\u092e\u0947\u0932 (Email - \u0935\u0948\u0915\u0932\u094d\u092a\u093f\u0915)") },
                         placeholder = { Text("name@example.com") },
                         leadingIcon = {
                             Icon(Icons.Outlined.Email, contentDescription = null, tint = SaffronPrimary)
@@ -1298,8 +1298,8 @@ fun UserProfileScreen(
                     OutlinedTextField(
                         value = editDob,
                         onValueChange = { editDob = it },
-                        label = { Text("जन्मतिथि (Date of Birth)") },
-                        placeholder = { Text("DD/MM/YYYY (उदा. 15/08/1995)") },
+                        label = { Text("\u091c\u0928\u094d\u092e\u0924\u093f\u0925\u093f (Date of Birth)") },
+                        placeholder = { Text("DD/MM/YYYY (\u0909\u0926\u093e. 15/08/1995)") },
                         leadingIcon = {
                             Icon(Icons.Filled.DateRange, contentDescription = null, tint = SaffronPrimary)
                         },
@@ -1317,8 +1317,8 @@ fun UserProfileScreen(
                     OutlinedTextField(
                         value = editBirthPlace,
                         onValueChange = { editBirthPlace = it },
-                        label = { Text("जन्म स्थान (नगर / राज्य)") },
-                        placeholder = { Text("उदा. वाराणसी, उत्तर प्रदेश") },
+                        label = { Text("\u091c\u0928\u094d\u092e \u0938\u094d\u0925\u093e\u0928 (\u0928\u0917\u0930 / \u0930\u093e\u091c\u094d\u092f)") },
+                        placeholder = { Text("\u0909\u0926\u093e. \u0935\u093e\u0930\u093e\u0923\u0938\u0940, \u0909\u0924\u094d\u0924\u0930 \u092a\u094d\u0930\u0926\u0947\u0936") },
                         leadingIcon = {
                             Icon(Icons.Outlined.LocationOn, contentDescription = null, tint = SaffronPrimary)
                         },
@@ -1334,8 +1334,8 @@ fun UserProfileScreen(
                     OutlinedTextField(
                         value = editGotra,
                         onValueChange = { editGotra = it },
-                        label = { Text("गोत्र (Gotra - पूजा संकल्प हेतु)") },
-                        placeholder = { Text("उदा. कश्यप / भारद्वाज / वत्स") },
+                        label = { Text("\u0917\u094b\u0924\u094d\u0930 (Gotra - \u092a\u0942\u091c\u093e \u0938\u0902\u0915\u0932\u094d\u092a \u0939\u0947\u0924\u0941)") },
+                        placeholder = { Text("\u0909\u0926\u093e. \u0915\u0936\u094d\u092f\u092a / \u092d\u093e\u0930\u0926\u094d\u0935\u093e\u091c / \u0935\u0924\u094d\u0938") },
                         leadingIcon = {
                             Icon(Icons.Outlined.SelfImprovement, contentDescription = null, tint = SaffronPrimary)
                         },
@@ -1353,7 +1353,7 @@ fun UserProfileScreen(
                     onClick = {
                         val trimmedName = editName.trim()
                         val finalCleanName = if (trimmedName.isBlank() || trimmedName == "null" || trimmedName.contains("Facebook", true)) {
-                            "दीपक जी"
+                            "\u0926\u0940\u092a\u0915 \u091c\u0940"
                         } else {
                             trimmedName
                         }
@@ -1378,13 +1378,13 @@ fun UserProfileScreen(
 
                         isSaving = false
                         showEditProfileDialog = false
-                        Toast.makeText(context, "विवरण सफलतापूर्वक सुरक्षित हुआ!", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "\u0935\u093f\u0935\u0930\u0923 \u0938\u092b\u0932\u0924\u093e\u092a\u0942\u0930\u094d\u0935\u0915 \u0938\u0941\u0930\u0915\u094d\u0937\u093f\u0924 \u0939\u0941\u0906!", Toast.LENGTH_SHORT).show()
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = SaffronPrimary),
                     enabled = !isSaving
                 ) {
                     Text(
-                        text = if (isSaving) "सुरक्षित हो रहा है..." else "विवरण सहेजें (Save)",
+                        text = if (isSaving) "\u0938\u0941\u0930\u0915\u094d\u0937\u093f\u0924 \u0939\u094b \u0930\u0939\u093e \u0939\u0948..." else "\u0935\u093f\u0935\u0930\u0923 \u0938\u0939\u0947\u091c\u0947\u0902 (Save)",
                         color = Color.White,
                         fontWeight = FontWeight.Bold
                     )
@@ -1395,7 +1395,7 @@ fun UserProfileScreen(
                     onClick = { showEditProfileDialog = false },
                     enabled = !isSaving
                 ) {
-                    Text("रद्द करें", color = TextMuted)
+                    Text("\u0930\u0926\u094d\u0926 \u0915\u0930\u0947\u0902", color = TextMuted)
                 }
             }
         )
@@ -1417,10 +1417,10 @@ fun UserProfileScreen(
             title = {
                 Column {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(text = "🕉️", fontSize = 20.sp)
+                        Text(text = "\ud83d\udd49\ufe0f", fontSize = 20.sp)
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "पवित्र आध्यात्मिक अवतार",
+                            text = "\u092a\u0935\u093f\u0924\u094d\u0930 \u0906\u0927\u094d\u092f\u093e\u0924\u094d\u092e\u093f\u0915 \u0905\u0935\u0924\u093e\u0930",
                             fontWeight = FontWeight.Bold,
                             fontSize = 18.sp,
                             color = TextDark
@@ -1428,7 +1428,7 @@ fun UserProfileScreen(
                     }
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "प्रोफ़ाइल में अपनी आध्यात्मिक साधना के अनुकूल प्रतीक या साधक अवतार चुनें।",
+                        text = "\u092a\u094d\u0930\u094b\u092b\u093c\u093e\u0907\u0932 \u092e\u0947\u0902 \u0905\u092a\u0928\u0940 \u0906\u0927\u094d\u092f\u093e\u0924\u094d\u092e\u093f\u0915 \u0938\u093e\u0927\u0928\u093e \u0915\u0947 \u0905\u0928\u0941\u0915\u0942\u0932 \u092a\u094d\u0930\u0924\u0940\u0915 \u092f\u093e \u0938\u093e\u0927\u0915 \u0905\u0935\u0924\u093e\u0930 \u091a\u0941\u0928\u0947\u0902\u0964",
                         fontSize = 11.5.sp,
                         color = TextMuted,
                         lineHeight = 16.sp
@@ -1556,16 +1556,16 @@ fun UserProfileScreen(
                         avatarId = tempSelectedAvatarId
                         showAvatarPickerDialog = false
                         val chosenName = getAvatarById(tempSelectedAvatarId).nameHi
-                        Toast.makeText(context, "$chosenName अवतार सफलतापूर्वक सेट हुआ!", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "$chosenName \u0905\u0935\u0924\u093e\u0930 \u0938\u092b\u0932\u0924\u093e\u092a\u0942\u0930\u094d\u0935\u0915 \u0938\u0947\u091f \u0939\u0941\u0906!", Toast.LENGTH_SHORT).show()
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = SaffronPrimary)
                 ) {
-                    Text("अवतार सेट करें", color = Color.White, fontWeight = FontWeight.Bold)
+                    Text("\u0905\u0935\u0924\u093e\u0930 \u0938\u0947\u091f \u0915\u0930\u0947\u0902", color = Color.White, fontWeight = FontWeight.Bold)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showAvatarPickerDialog = false }) {
-                    Text("रद्द करें", color = TextMuted)
+                    Text("\u0930\u0926\u094d\u0926 \u0915\u0930\u0947\u0902", color = TextMuted)
                 }
             }
         )
@@ -1579,10 +1579,10 @@ fun UserProfileScreen(
             onDismissRequest = { showSupportDialog = false },
             title = {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(text = "🕉️", fontSize = 20.sp)
+                    Text(text = "\ud83d\udd49\ufe0f", fontSize = 20.sp)
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "साधक सहायता केंद्र",
+                        text = "\u0938\u093e\u0927\u0915 \u0938\u0939\u093e\u092f\u0924\u093e \u0915\u0947\u0902\u0926\u094d\u0930",
                         fontWeight = FontWeight.Bold,
                         fontSize = 17.sp,
                         color = TextDark
@@ -1592,7 +1592,7 @@ fun UserProfileScreen(
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text(
-                        text = "देवभाषा वैदिक सहायता केंद्र में आपका स्वागत है। किसी भी तकनीकी सहायता, वॉलेट रिचार्ज या परामर्श प्रश्न हेतु संपर्क करें:",
+                        text = "\u0926\u0947\u0935\u092d\u093e\u0937\u093e \u0935\u0948\u0926\u093f\u0915 \u0938\u0939\u093e\u092f\u0924\u093e \u0915\u0947\u0902\u0926\u094d\u0930 \u092e\u0947\u0902 \u0906\u092a\u0915\u093e \u0938\u094d\u0935\u093e\u0917\u0924 \u0939\u0948\u0964 \u0915\u093f\u0938\u0940 \u092d\u0940 \u0924\u0915\u0928\u0940\u0915\u0940 \u0938\u0939\u093e\u092f\u0924\u093e, \u0935\u0949\u0932\u0947\u091f \u0930\u093f\u091a\u093e\u0930\u094d\u091c \u092f\u093e \u092a\u0930\u093e\u092e\u0930\u094d\u0936 \u092a\u094d\u0930\u0936\u094d\u0928 \u0939\u0947\u0924\u0941 \u0938\u0902\u092a\u0930\u094d\u0915 \u0915\u0930\u0947\u0902:",
                         fontSize = 12.5.sp,
                         color = Color(0xFF475569),
                         lineHeight = 17.sp
@@ -1605,7 +1605,7 @@ fun UserProfileScreen(
                     ) {
                         Column(modifier = Modifier.padding(12.dp)) {
                             Text(
-                                text = "ईमेल सहायता:",
+                                text = "\u0908\u092e\u0947\u0932 \u0938\u0939\u093e\u092f\u0924\u093e:",
                                 fontSize = 11.5.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = SaffronDeep
@@ -1618,13 +1618,13 @@ fun UserProfileScreen(
                             )
                             Spacer(modifier = Modifier.height(6.dp))
                             Text(
-                                text = "उपलब्धता समय:",
+                                text = "\u0909\u092a\u0932\u092c\u094d\u0927\u0924\u093e \u0938\u092e\u092f:",
                                 fontSize = 11.5.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = SaffronDeep
                             )
                             Text(
-                                text = "सोमवार से रविवार: प्रातः 8:00 से रात्रि 9:00",
+                                text = "\u0938\u094b\u092e\u0935\u093e\u0930 \u0938\u0947 \u0930\u0935\u093f\u0935\u093e\u0930: \u092a\u094d\u0930\u093e\u0924\u0903 8:00 \u0938\u0947 \u0930\u093e\u0924\u094d\u0930\u093f 9:00",
                                 fontSize = 12.sp,
                                 color = TextDark
                             )
@@ -1637,7 +1637,7 @@ fun UserProfileScreen(
                     onClick = { showSupportDialog = false },
                     colors = ButtonDefaults.buttonColors(containerColor = SaffronPrimary)
                 ) {
-                    Text("ठीक है", color = Color.White)
+                    Text("\u0920\u0940\u0915 \u0939\u0948", color = Color.White)
                 }
             }
         )
@@ -1651,10 +1651,10 @@ fun UserProfileScreen(
             onDismissRequest = { showTermsDialog = false },
             title = {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(text = "📜", fontSize = 20.sp)
+                    Text(text = "\ud83d\udcdc", fontSize = 20.sp)
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "नियम एवं गोपनीयता नीति",
+                        text = "\u0928\u093f\u092f\u092e \u090f\u0935\u0902 \u0917\u094b\u092a\u0928\u0940\u092f\u0924\u093e \u0928\u0940\u0924\u093f",
                         fontWeight = FontWeight.Bold,
                         fontSize = 17.sp,
                         color = TextDark
@@ -1667,19 +1667,19 @@ fun UserProfileScreen(
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Text(
-                        text = "1. सात्विक एवं वैदिक परंपरा: देवभाषा ऐप पर सभी परामर्श भारतीय वैदिक ज्योतिष, कर्मकांड एवं सनातन परंपरा पर आधारित हैं।",
+                        text = "1. \u0938\u093e\u0924\u094d\u0935\u093f\u0915 \u090f\u0935\u0902 \u0935\u0948\u0926\u093f\u0915 \u092a\u0930\u0902\u092a\u0930\u093e: \u0926\u0947\u0935\u092d\u093e\u0937\u093e \u0910\u092a \u092a\u0930 \u0938\u092d\u0940 \u092a\u0930\u093e\u092e\u0930\u094d\u0936 \u092d\u093e\u0930\u0924\u0940\u092f \u0935\u0948\u0926\u093f\u0915 \u091c\u094d\u092f\u094b\u0924\u093f\u0937, \u0915\u0930\u094d\u092e\u0915\u093e\u0902\u0921 \u090f\u0935\u0902 \u0938\u0928\u093e\u0924\u0928 \u092a\u0930\u0902\u092a\u0930\u093e \u092a\u0930 \u0906\u0927\u093e\u0930\u093f\u0924 \u0939\u0948\u0902\u0964",
                         fontSize = 12.sp,
                         color = Color(0xFF334155),
                         lineHeight = 16.sp
                     )
                     Text(
-                        text = "2. डेटा गोपनीयता: आपके जन्म विवरण (जन्म समय, स्थान, जन्मतिथि) का उपयोग केवल कुंडली एवं ग्रह विचार हेतु पूर्णतः सुरक्षित रखा जाता है।",
+                        text = "2. \u0921\u0947\u091f\u093e \u0917\u094b\u092a\u0928\u0940\u092f\u0924\u093e: \u0906\u092a\u0915\u0947 \u091c\u0928\u094d\u092e \u0935\u093f\u0935\u0930\u0923 (\u091c\u0928\u094d\u092e \u0938\u092e\u092f, \u0938\u094d\u0925\u093e\u0928, \u091c\u0928\u094d\u092e\u0924\u093f\u0925\u093f) \u0915\u093e \u0909\u092a\u092f\u094b\u0917 \u0915\u0947\u0935\u0932 \u0915\u0941\u0902\u0921\u0932\u0940 \u090f\u0935\u0902 \u0917\u094d\u0930\u0939 \u0935\u093f\u091a\u093e\u0930 \u0939\u0947\u0924\u0941 \u092a\u0942\u0930\u094d\u0923\u0924\u0903 \u0938\u0941\u0930\u0915\u094d\u0937\u093f\u0924 \u0930\u0916\u093e \u091c\u093e\u0924\u093e \u0939\u0948\u0964",
                         fontSize = 12.sp,
                         color = Color(0xFF334155),
                         lineHeight = 16.sp
                     )
                     Text(
-                        text = "3. वॉलेट दक्षिणा: वॉलेट में जोड़ी गई राशि का उपयोग साधकों से परामर्श एवं दक्षिणा हेतु किया जाता है।",
+                        text = "3. \u0935\u0949\u0932\u0947\u091f \u0926\u0915\u094d\u0937\u093f\u0923\u093e: \u0935\u0949\u0932\u0947\u091f \u092e\u0947\u0902 \u091c\u094b\u0921\u093c\u0940 \u0917\u0908 \u0930\u093e\u0936\u093f \u0915\u093e \u0909\u092a\u092f\u094b\u0917 \u0938\u093e\u0927\u0915\u094b\u0902 \u0938\u0947 \u092a\u0930\u093e\u092e\u0930\u094d\u0936 \u090f\u0935\u0902 \u0926\u0915\u094d\u0937\u093f\u0923\u093e \u0939\u0947\u0924\u0941 \u0915\u093f\u092f\u093e \u091c\u093e\u0924\u093e \u0939\u0948\u0964",
                         fontSize = 12.sp,
                         color = Color(0xFF334155),
                         lineHeight = 16.sp
@@ -1691,7 +1691,7 @@ fun UserProfileScreen(
                     onClick = { showTermsDialog = false },
                     colors = ButtonDefaults.buttonColors(containerColor = SaffronPrimary)
                 ) {
-                    Text("स्वीकार है", color = Color.White)
+                    Text("\u0938\u094d\u0935\u0940\u0915\u093e\u0930 \u0939\u0948", color = Color.White)
                 }
             }
         )
@@ -1705,7 +1705,7 @@ fun UserProfileScreen(
             onDismissRequest = { showLogoutConfirmDialog = false },
             title = {
                 Text(
-                    text = "लॉगआउट की पुष्टि",
+                    text = "\u0932\u0949\u0917\u0906\u0909\u091f \u0915\u0940 \u092a\u0941\u0937\u094d\u091f\u093f",
                     fontWeight = FontWeight.Bold,
                     fontSize = 17.sp,
                     color = TextDark
@@ -1713,7 +1713,7 @@ fun UserProfileScreen(
             },
             text = {
                 Text(
-                    text = "क्या आप सचमुच अपने साधक खाते से बाहर निकलना चाहते हैं?",
+                    text = "\u0915\u094d\u092f\u093e \u0906\u092a \u0938\u091a\u092e\u0941\u091a \u0905\u092a\u0928\u0947 \u0938\u093e\u0927\u0915 \u0916\u093e\u0924\u0947 \u0938\u0947 \u092c\u093e\u0939\u0930 \u0928\u093f\u0915\u0932\u0928\u093e \u091a\u093e\u0939\u0924\u0947 \u0939\u0948\u0902?",
                     fontSize = 13.5.sp,
                     color = Color(0xFF475569)
                 )
@@ -1726,12 +1726,12 @@ fun UserProfileScreen(
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFEF4444))
                 ) {
-                    Text("हाँ, लॉगआउट करें", color = Color.White, fontWeight = FontWeight.Bold)
+                    Text("\u0939\u093e\u0901, \u0932\u0949\u0917\u0906\u0909\u091f \u0915\u0930\u0947\u0902", color = Color.White, fontWeight = FontWeight.Bold)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showLogoutConfirmDialog = false }) {
-                    Text("रद्द करें", color = TextMuted)
+                    Text("\u0930\u0926\u094d\u0926 \u0915\u0930\u0947\u0902", color = TextMuted)
                 }
             }
         )

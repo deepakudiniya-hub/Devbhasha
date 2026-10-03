@@ -71,7 +71,9 @@ class UserSession(context: Context) {
     }
 
     fun getWalletBalance(): Double {
-        return prefs.getFloat("wallet_balance", 100.0f).toDouble()
+        // FIX: default to 0 (no free local credit). Recharge must go through
+        // Razorpay, consistent with the wallet-integrity fix on main.
+        return prefs.getFloat("wallet_balance", 0.0f).toDouble()
     }
 
     fun setWalletBalance(balance: Double) {
