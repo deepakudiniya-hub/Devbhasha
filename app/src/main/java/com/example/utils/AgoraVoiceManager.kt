@@ -20,8 +20,8 @@ object AgoraVoiceManager {
     var onJoined: (() -> Unit)? = null
 
     fun initEngine(context: Context): Boolean {
-        // AppID managed via server-side token generation
-        val appId = "f13eed0b60d9479f88402de067953d90" 
+        // App ID comes from config (.env / BuildConfig), not hardcoded in logic.
+        val appId = BuildConfig.AGORA_APP_ID
 
         if (!appId.trim().matches(Regex("^[0-9a-fA-F]{32}$"))) {
             Log.w(TAG, "Invalid Agora App ID — simulation mode")

@@ -3,6 +3,7 @@ package com.example.utils
 import android.app.Activity
 import android.content.Context
 import android.util.Log
+import com.example.BuildConfig
 import android.widget.Toast
 import com.razorpay.Checkout
 import com.razorpay.PaymentData
@@ -27,9 +28,9 @@ sealed class PaymentResultEvent {
 object RazorpayPaymentManager {
     private const val TAG = "RazorpayPaymentManager"
 
-    // Active Razorpay API Key (Test / Live)
-    private const val RAZORPAY_KEY = "rzp_test_TfPLdzetfOzcfD"
-    private const val DEFAULT_RAZORPAY_TEST_KEY = RAZORPAY_KEY
+    // Razorpay API key comes from config (.env / BuildConfig), not hardcoded.
+    private val RAZORPAY_KEY = BuildConfig.RAZORPAY_KEY
+    private val DEFAULT_RAZORPAY_TEST_KEY = RAZORPAY_KEY
 
     // Session states for ongoing checkout
     var pendingAmount: Double = 0.0
