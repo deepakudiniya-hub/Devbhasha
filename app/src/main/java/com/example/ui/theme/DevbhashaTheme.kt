@@ -135,3 +135,54 @@ fun DevbhashaTheme(
         content = content
     )
 }
+
+// ==========================================
+// SEMANTIC TOKEN LAYER (UI consistency pass)
+// Values match the colours already used across screens, so migrating a
+// screen from a literal to a token does NOT change its look — it only
+// removes the 130 one-off colours and centralises them here.
+// ==========================================
+
+// Neutrals (the slate scale the screens already use)
+val Neutral900 = Color(0xFF0F172A)
+val Neutral800 = Color(0xFF1E293B)
+val Neutral700 = Color(0xFF334155)
+val Neutral600 = Color(0xFF475569)
+val Neutral500 = Color(0xFF64748B)
+val Neutral400 = Color(0xFF94A3B8)
+val Neutral300 = Color(0xFFCBD5E1)
+val Neutral200 = Color(0xFFE2E8F0)
+val Neutral100 = Color(0xFFF1F5F9)
+val Neutral50  = Color(0xFFF8FAFC)
+val SurfaceWhite = Color(0xFFFFFFFF)
+val SurfaceAlt   = Color(0xFFFAFAFA)
+val BorderSoft   = Color(0xFFE5E5E5)
+
+// Brand — saffron
+val SaffronBase = Color(0xFFFF6B00)
+val SaffronDeep2 = Color(0xFFFF6D00)
+val SaffronSoft = Color(0xFFFFF7ED)
+val SaffronSoftAlt = Color(0xFFFFF8E1)
+
+// Success — green
+val GreenBase = Color(0xFF16A34A)
+val GreenDeepBase = Color(0xFF15803D)
+val GreenSoftBase = Color(0xFFDCFCE7)
+val GreenLightBase = Color(0xFF86EFAC)
+val EmeraldBase = Color(0xFF10B981)
+
+// Danger — red
+val DangerRed = Color(0xFFEF4444)
+val DangerRedDeep = Color(0xFFDC2626)
+val DangerSoft = Color(0xFFFEE2E2)
+
+// Warning — amber
+val WarningAmberBase = Color(0xFFF59E0B)
+val WarningAmberDeep = Color(0xFFD97706)
+val WarningSoft = Color(0xFFFFF3C7)
+
+// Accents
+val AccentViolet = Color(0xFF7C3AED)
+val AccentVioletSoft = Color(0xFFF3E8FF)
+val AccentBlue = Color(0xFF2563EB)
+val AccentBlueSoft = Color(0xFFEFF6FF)
