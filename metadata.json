@@ -1,0 +1,6 @@
+{
+  "name": "Devbhasha",
+  "description": "Devbhasha - Bento Editorial Vedic Almanac & Verified Sadhaks",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
