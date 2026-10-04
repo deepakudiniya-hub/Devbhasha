@@ -84,12 +84,12 @@ fun SadhakDirectoryScreen(
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(20.dp))
                 .background(Color.White)
-                .border(1.dp, Color(0xFFE2E8F0), RoundedCornerShape(20.dp)),
+                .border(1.dp, Neutral200, RoundedCornerShape(20.dp)),
             placeholder = {
                 Text(
                     text = if (isHindi) "साधक, विशेषज्ञता या नाम से खोजें..." else "Search sadhaks by name or expertise...",
                     fontSize = 13.5.sp,
-                    color = Color(0xFF94A3B8)
+                    color = Neutral400
                 )
             },
             leadingIcon = {
@@ -106,7 +106,7 @@ fun SadhakDirectoryScreen(
                         Icon(
                             imageVector = Icons.Outlined.Close,
                             contentDescription = "Clear",
-                            tint = Color(0xFF94A3B8),
+                            tint = Neutral400,
                             modifier = Modifier.size(16.dp)
                         )
                     }
@@ -177,14 +177,14 @@ fun SadhakDirectoryScreen(
                     Icon(
                         imageVector = Icons.Outlined.PersonOff,
                         contentDescription = null,
-                        tint = Color(0xFF94A3B8),
+                        tint = Neutral400,
                         modifier = Modifier.size(48.dp)
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         text = if (isHindi) "कोई साधक नहीं मिला" else "No Sadhaks Found",
                         fontWeight = FontWeight.Medium,
-                        color = Color(0xFF64748B)
+                        color = Neutral500
                     )
                 }
             }
@@ -221,7 +221,7 @@ fun SadhakDirectoryCard(
         shape = RoundedCornerShape(18.dp),
         color = Color.White,
         shadowElevation = 2.dp,
-        border = BorderStroke(1.dp, Color(0xFFE2E8F0)),
+        border = BorderStroke(1.dp, Neutral200),
         modifier = modifier.fillMaxWidth()
     ) {
         Column(modifier = Modifier.padding(14.dp)) {
@@ -261,7 +261,7 @@ fun SadhakDirectoryCard(
                                 modifier = Modifier
                                     .fillMaxSize()
                                     .clip(CircleShape)
-                                    .background(Color(0xFF10B981))
+                                    .background(EmeraldBase)
                             )
                         }
                     }
@@ -275,7 +275,7 @@ fun SadhakDirectoryCard(
                             text = if (isHindi) sadhak.nameHi else sadhak.nameEn,
                             fontWeight = FontWeight.Bold,
                             fontSize = 15.sp,
-                            color = Color(0xFF1E293B)
+                            color = Neutral800
                         )
                         Spacer(modifier = Modifier.width(6.dp))
                         if (sadhak.isOnline) {
@@ -310,13 +310,13 @@ fun SadhakDirectoryCard(
                             text = sadhak.rating,
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold,
-                            color = Color(0xFF1E293B)
+                            color = Neutral800
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             text = "• ${if (isHindi) sadhak.experienceHi else sadhak.experienceEn}",
                             fontSize = 12.sp,
-                            color = Color(0xFF64748B)
+                            color = Neutral500
                         )
                     }
                 }
@@ -358,7 +358,7 @@ fun SadhakDirectoryCard(
                     Button(
                         onClick = onConsultClick,
                         shape = RoundedCornerShape(12.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF94A3B8)),
+                        colors = ButtonDefaults.buttonColors(containerColor = Neutral400),
                         contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
                     ) {
                         Text(
@@ -371,13 +371,13 @@ fun SadhakDirectoryCard(
             }
 
             Spacer(modifier = Modifier.height(10.dp))
-            HorizontalDivider(color = Color(0xFFF1F5F9))
+            HorizontalDivider(color = Neutral100)
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
                 text = sadhak.bio,
                 fontSize = 12.5.sp,
-                color = Color(0xFF475569),
+                color = Neutral600,
                 lineHeight = 17.sp
             )
         }
@@ -421,7 +421,7 @@ fun RemedyScreen(
                             modifier = Modifier
                                 .size(40.dp)
                                 .clip(CircleShape)
-                                .background(Color(0xFFFAFAFA)),
+                                .background(SurfaceAlt),
                             contentAlignment = Alignment.Center
                         ) {
                             Text(text = "🕉️", fontSize = 20.sp)
@@ -432,7 +432,7 @@ fun RemedyScreen(
                                 text = if (isHindi) "आज का पंचांग व शुभ मुहूर्त" else "Today's Panchang & Muhurat",
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 16.sp,
-                                color = Color(0xFF000000)
+                                color = InkPrimary
                             )
                             Text(
                                 text = "विक्रम संवत् 2083 • आश्विन मास",
@@ -444,7 +444,7 @@ fun RemedyScreen(
                 }
 
                 Spacer(modifier = Modifier.height(14.dp))
-                HorizontalDivider(color = Color(0xFFF8FAFC))
+                HorizontalDivider(color = Neutral50)
                 Spacer(modifier = Modifier.height(12.dp))
 
                 Row(
@@ -508,12 +508,12 @@ fun RemedyScreen(
                             text = if (isHindi) "डिजिटल मंत्र जाप माला" else "Digital Japa Mala",
                             fontWeight = FontWeight.Bold,
                             fontSize = 16.sp,
-                            color = Color(0xFF000000)
+                            color = InkPrimary
                         )
                         Text(
                             text = if (isHindi) "108 मनकों का सात्विक चक्र" else "108 Beads sacred cycle",
                             fontSize = 12.sp,
-                            color = Color(0xFF737373)
+                            color = InkSoft
                         )
                     }
                 }
@@ -546,12 +546,12 @@ fun RemedyScreen(
                             text = "$malaCount",
                             fontSize = 38.sp,
                             fontWeight = FontWeight.Black,
-                            color = Color(0xFF000000)
+                            color = InkPrimary
                         )
                         Text(
                             text = "/ 108",
                             fontSize = 13.sp,
-                            color = Color(0xFF94A3B8),
+                            color = Neutral400,
                             fontWeight = FontWeight.Bold
                         )
                     }
@@ -577,11 +577,11 @@ fun RemedyScreen(
                             malaLaps = 0
                         },
                         shape = RoundedCornerShape(12.dp),
-                        border = BorderStroke(1.dp, Color(0xFFCBD5E1))
+                        border = BorderStroke(1.dp, Neutral300)
                     ) {
                         Text(
                             text = if (isHindi) "रीसेट करें" else "Reset",
-                            color = Color(0xFF64748B),
+                            color = Neutral500,
                             fontSize = 12.5.sp
                         )
                     }
@@ -620,14 +620,14 @@ private fun PanchangDetailItem(
         Text(
             text = label,
             fontSize = 11.5.sp,
-            color = Color(0xFF64748B)
+            color = Neutral500
         )
         Spacer(modifier = Modifier.height(2.dp))
         Text(
             text = value,
             fontSize = 13.sp,
             fontWeight = if (isHighlight) FontWeight.Bold else FontWeight.Medium,
-            color = if (isHighlight) SaffronDeep else Color(0xFF1E293B)
+            color = if (isHighlight) SaffronDeep else Neutral800
         )
     }
 }
@@ -673,13 +673,13 @@ fun UserProfileScreen(
             text = userNameInitial,
             fontSize = 19.sp,
             fontWeight = FontWeight.Bold,
-            color = Color(0xFF1E293B)
+            color = Neutral800
         )
 
         Text(
             text = "ID: $userId",
             fontSize = 12.5.sp,
-            color = Color(0xFF64748B)
+            color = Neutral500
         )
 
         Spacer(modifier = Modifier.height(28.dp))
@@ -688,7 +688,7 @@ fun UserProfileScreen(
         Surface(
             shape = RoundedCornerShape(18.dp),
             color = Color.White,
-            border = BorderStroke(1.dp, Color(0xFFE2E8F0)),
+            border = BorderStroke(1.dp, Neutral200),
             modifier = Modifier.fillMaxWidth()
         ) {
             Column(modifier = Modifier.padding(8.dp)) {
@@ -697,13 +697,13 @@ fun UserProfileScreen(
                     title = "पूछा व परामर्श इतिहास",
                     onClick = {}
                 )
-                HorizontalDivider(color = Color(0xFFF1F5F9))
+                HorizontalDivider(color = Neutral100)
                 ProfileOptionRow(
                     icon = Icons.Outlined.FavoriteBorder,
                     title = "सहेजे गए मंत्र व उपाय",
                     onClick = {}
                 )
-                HorizontalDivider(color = Color(0xFFF1F5F9))
+                HorizontalDivider(color = Neutral100)
                 ProfileOptionRow(
                     icon = Icons.AutoMirrored.Outlined.HelpOutline,
                     title = "सहायता एवं समर्थन",
@@ -717,7 +717,7 @@ fun UserProfileScreen(
         Button(
             onClick = onLogoutClick,
             modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFEF4444)),
+            colors = ButtonDefaults.buttonColors(containerColor = DangerRed),
             shape = RoundedCornerShape(14.dp),
             contentPadding = PaddingValues(vertical = 12.dp)
         ) {
@@ -758,13 +758,13 @@ private fun ProfileOptionRow(
             text = title,
             fontSize = 14.sp,
             fontWeight = FontWeight.Medium,
-            color = Color(0xFF1E293B),
+            color = Neutral800,
             modifier = Modifier.weight(1f)
         )
         Icon(
             imageVector = Icons.Default.ChevronRight,
             contentDescription = null,
-            tint = Color(0xFF94A3B8),
+            tint = Neutral400,
             modifier = Modifier.size(20.dp)
         )
     }

@@ -1,5 +1,6 @@
 package com.example.ui.screens
 
+import com.example.ui.theme.*
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
@@ -96,7 +97,7 @@ fun FestivalPromoCouponCard(
             Color(0xFFFF5E36), // Vibrant Coral Saffron
             Color(0xFFFFA000), // Rich Golden Amber
             Color(0xFFFFD54F), // Sunburst Yellow
-            Color(0xFFFF6D00)  // Deep Sacred Orange
+            SaffronDeep2  // Deep Sacred Orange
         ),
         start = Offset(0f, 0f),
         end = Offset(800f, 600f)
@@ -116,7 +117,7 @@ fun FestivalPromoCouponCard(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 6.dp)
-            .shadow(14.dp, RoundedCornerShape(24.dp), spotColor = Color(0xFFFF6D00))
+            .shadow(14.dp, RoundedCornerShape(24.dp), spotColor = SaffronDeep2)
             .background(cardGradient, RoundedCornerShape(24.dp))
             .border(BorderStroke(1.5.dp, foilBorder), RoundedCornerShape(24.dp))
             .clip(RoundedCornerShape(24.dp))
@@ -249,7 +250,7 @@ fun FestivalPromoCouponCard(
                     ) {
                         Text(
                             text = "100% MUFT",
-                            color = Color(0xFFFFF8E1),
+                            color = SaffronSoftAlt,
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Black,
                             fontFamily = FontFamily.Serif
@@ -380,7 +381,7 @@ fun FestivalPromoCouponCard(
                         Icon(
                             imageVector = if (isClaimed) Icons.Default.CheckCircle else Icons.Default.Bolt,
                             contentDescription = null,
-                            tint = if (isClaimed) Color(0xFF81C784) else Color(0xFFFF6D00),
+                            tint = if (isClaimed) Color(0xFF81C784) else SaffronDeep2,
                             modifier = Modifier.size(18.dp)
                         )
                         Text(

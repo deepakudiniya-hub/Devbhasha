@@ -53,8 +53,8 @@ fun HeroAstroPromoBanner(
 ) {
     val gradient = Brush.horizontalGradient(
         colors = listOf(
-            Color(0xFFFF8A00), // Saffron Gradient Start
-            Color(0xFFFF6B00)  // Strict Saffron #FF6B00
+            SaffronGold, // Saffron Gradient Start
+            Saffron  // Strict Saffron #FF6B00
         )
     )
 
@@ -239,7 +239,7 @@ fun TodayPanchangCard(
                         modifier = Modifier
                             .size(28.dp)
                             .clip(CircleShape)
-                            .background(Color(0xFFFAFAFA)),
+                            .background(SurfaceAlt),
                         contentAlignment = Alignment.Center
                     ) {
                         Text("🪔", fontSize = 14.sp)
@@ -250,12 +250,12 @@ fun TodayPanchangCard(
                             text = if (isHindi) "आज का पंचांग एवं शुभ मुहूर्त" else "Today's Panchang & Muhurat",
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Bold,
-                            color = Color(0xFF000000)
+                            color = InkPrimary
                         )
                         Text(
                             text = todayFormatted,
                             fontSize = 11.sp,
-                            color = Color(0xFF737373)
+                            color = InkSoft
                         )
                     }
                 }
@@ -322,14 +322,14 @@ private fun PanchangPill(
                 text = label,
                 fontSize = 10.sp,
                 fontWeight = FontWeight.Medium,
-                color = Color(0xFF94A3B8)
+                color = Neutral400
             )
             Spacer(modifier = Modifier.height(2.dp))
             Text(
                 text = value,
                 fontSize = 11.sp,
                 fontWeight = FontWeight.Bold,
-                color = if (isGood == true) Color(0xFF047857) else Color(0xFF1E293B),
+                color = if (isGood == true) Color(0xFF047857) else Neutral800,
                 maxLines = 1
             )
         }
@@ -383,18 +383,18 @@ fun DailyHoroscopeBottomSheet(
                             text = if (isHindi) "आज का दैनिक राशिफल" else "Today's Horoscope",
                             fontSize = 17.sp,
                             fontWeight = FontWeight.Bold,
-                            color = Color(0xFF1E293B)
+                            color = Neutral800
                         )
                         Text(
                             text = if (isHindi) "अपनी राशि चुनें और भविष्यफल जानें" else "Select your Zodiac sign",
                             fontSize = 12.sp,
-                            color = Color(0xFF64748B)
+                            color = Neutral500
                         )
                     }
                 }
 
                 IconButton(onClick = onDismiss) {
-                    Icon(Icons.Default.Close, contentDescription = "Close", tint = Color(0xFF94A3B8))
+                    Icon(Icons.Default.Close, contentDescription = "Close", tint = Neutral400)
                 }
             }
 
@@ -405,7 +405,7 @@ fun DailyHoroscopeBottomSheet(
                 text = if (isHindi) "राशि चयन करें:" else "Select Sign:",
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF475569)
+                color = Neutral600
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -423,10 +423,10 @@ fun DailyHoroscopeBottomSheet(
                             .clip(RoundedCornerShape(16.dp))
                             .clickable { selectedRashi = rashi },
                         shape = RoundedCornerShape(16.dp),
-                        color = if (isSelected) Color(0xFF000000) else Color(0xFFFAFAFA),
+                        color = if (isSelected) InkPrimary else SurfaceAlt,
                         border = BorderStroke(
                             1.dp,
-                            if (isSelected) Color(0xFF000000) else BorderLight
+                            if (isSelected) InkPrimary else BorderLight
                         )
                     ) {
                         Column(
@@ -439,7 +439,7 @@ fun DailyHoroscopeBottomSheet(
                                 text = if (isHindi) rashi.nameHi else rashi.nameEn,
                                 fontSize = 12.sp,
                                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                                color = if (isSelected) Color.White else Color(0xFF000000)
+                                color = if (isSelected) Color.White else InkPrimary
                             )
                         }
                     }
@@ -470,19 +470,19 @@ fun DailyHoroscopeBottomSheet(
                                     else "${selectedRashi.nameEn} (${selectedRashi.nameHi})",
                                     fontSize = 17.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = Color(0xFF000000)
+                                    color = InkPrimary
                                 )
                                 Text(
                                     text = selectedRashi.dates,
                                     fontSize = 11.5.sp,
-                                    color = Color(0xFF737373)
+                                    color = InkSoft
                                 )
                             }
                         }
 
                         Surface(
                             shape = RoundedCornerShape(10.dp),
-                            color = Color(0xFFFAFAFA),
+                            color = SurfaceAlt,
                             border = BorderStroke(1.dp, BorderLight)
                         ) {
                             Row(
@@ -500,7 +500,7 @@ fun DailyHoroscopeBottomSheet(
                                     text = selectedRashi.rating,
                                     fontSize = 11.5.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = Color(0xFF000000)
+                                    color = InkPrimary
                                 )
                             }
                         }
@@ -542,7 +542,7 @@ fun DailyHoroscopeBottomSheet(
                     Text(
                         text = if (isHindi) selectedRashi.predictionHi else selectedRashi.predictionEn,
                         fontSize = 13.5.sp,
-                        color = Color(0xFF334155),
+                        color = Neutral700,
                         lineHeight = 20.sp
                     )
 
@@ -587,22 +587,22 @@ private fun LuckyAttrPill(
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(12.dp),
-        color = Color(0xFFF8FAFC),
-        border = BorderStroke(1.dp, Color(0xFFE2E8F0))
+        color = Neutral50,
+        border = BorderStroke(1.dp, Neutral200)
     ) {
         Column(modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp)) {
             Text(
                 text = label,
                 fontSize = 10.sp,
                 fontWeight = FontWeight.Medium,
-                color = Color(0xFF64748B)
+                color = Neutral500
             )
             Spacer(modifier = Modifier.height(2.dp))
             Text(
                 text = value,
                 fontSize = 11.5.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF1E293B),
+                color = Neutral800,
                 maxLines = 1
             )
         }
@@ -652,7 +652,7 @@ fun FreeKundliBottomSheet(
                         modifier = Modifier
                             .size(38.dp)
                             .clip(CircleShape)
-                            .background(Color(0xFFFAFAFA)),
+                            .background(SurfaceAlt),
                         contentAlignment = Alignment.Center
                     ) {
                         Text("📜", fontSize = 20.sp)
@@ -663,18 +663,18 @@ fun FreeKundliBottomSheet(
                             text = if (isHindi) "मुफ्त जन्म कुंडली विश्लेषण" else "Free Kundli Analysis",
                             fontSize = 17.sp,
                             fontWeight = FontWeight.Bold,
-                            color = Color(0xFF000000)
+                            color = InkPrimary
                         )
                         Text(
                             text = if (isHindi) "वैदिक ज्योतिष गणना अनुसार लग्न व ग्रह स्थिति" else "Vedic planetary calculation",
                             fontSize = 12.sp,
-                            color = Color(0xFF737373)
+                            color = InkSoft
                         )
                     }
                 }
 
                 IconButton(onClick = onDismiss) {
-                    Icon(Icons.Default.Close, contentDescription = "Close", tint = Color(0xFF94A3B8))
+                    Icon(Icons.Default.Close, contentDescription = "Close", tint = Neutral400)
                 }
             }
 
@@ -750,12 +750,12 @@ fun FreeKundliBottomSheet(
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(Icons.Default.CheckCircle, contentDescription = null, tint = Color(0xFF16A34A))
+                            Icon(Icons.Default.CheckCircle, contentDescription = null, tint = GreenBase)
                             Spacer(modifier = Modifier.width(6.dp))
                             Text(
                                 text = if (isHindi) "कुंडली चक्र तैयार है" else "Kundli Chart Ready",
                                 fontWeight = FontWeight.Bold,
-                                color = Color(0xFF000000)
+                                color = InkPrimary
                             )
                         }
 
@@ -785,7 +785,7 @@ fun FreeKundliBottomSheet(
                             else
                                 "Sun in 5th house forms strong Raja Yoga for recognition. Jupiter aspect brings sustained financial prosperity.",
                             fontSize = 12.5.sp,
-                            color = Color(0xFF334155),
+                            color = Neutral700,
                             lineHeight = 18.sp
                         )
                     }
@@ -840,7 +840,7 @@ private fun KundliInfoBox(
             modifier = Modifier.padding(8.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(text = title, fontSize = 10.sp, color = Color(0xFF64748B), textAlign = TextAlign.Center)
+            Text(text = title, fontSize = 10.sp, color = Neutral500, textAlign = TextAlign.Center)
             Spacer(modifier = Modifier.height(2.dp))
             Text(text = value, fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Saffron, textAlign = TextAlign.Center)
         }
@@ -882,7 +882,7 @@ fun KundliMatchingBottomSheet(
                         modifier = Modifier
                             .size(38.dp)
                             .clip(CircleShape)
-                            .background(Color(0xFFFEE2E2)),
+                            .background(DangerSoft),
                         contentAlignment = Alignment.Center
                     ) {
                         Text("💍", fontSize = 20.sp)
@@ -893,18 +893,18 @@ fun KundliMatchingBottomSheet(
                             text = if (isHindi) "कुंडली मिलान (36 गुण)" else "Kundli Matching",
                             fontSize = 17.sp,
                             fontWeight = FontWeight.Bold,
-                            color = Color(0xFF1E293B)
+                            color = Neutral800
                         )
                         Text(
                             text = if (isHindi) "वर-कन्या का अष्टकूट गुण मिलान" else "Ashtakoot Guna Matching",
                             fontSize = 12.sp,
-                            color = Color(0xFF64748B)
+                            color = Neutral500
                         )
                     }
                 }
 
                 IconButton(onClick = onDismiss) {
-                    Icon(Icons.Default.Close, contentDescription = "Close", tint = Color(0xFF94A3B8))
+                    Icon(Icons.Default.Close, contentDescription = "Close", tint = Neutral400)
                 }
             }
 
@@ -1023,9 +1023,9 @@ fun AstroQuickFeatureCards(
                 title = if (isHindi) "दैनिक राशिफल" else "Daily Horoscope",
                 subtitle = if (isHindi) "12 राशियों का भविष्य" else "12 Zodiac Signs",
                 badgeText = if (isHindi) "दैनिक" else "Daily",
-                bgColor = Color(0xFFFAFAFA),
+                bgColor = SurfaceAlt,
                 borderColor = BorderLight,
-                badgeBg = Color(0xFF000000),
+                badgeBg = InkPrimary,
                 badgeTextColor = Color.White,
                 onClick = onHoroscopeClick,
                 modifier = Modifier.weight(1f)
@@ -1037,7 +1037,7 @@ fun AstroQuickFeatureCards(
                 title = if (isHindi) "पारिवारिक समस्या" else "Family Problems",
                 subtitle = if (isHindi) "क्लेश निवारण व शांति" else "Peace & Harmony",
                 badgeText = if (isHindi) "समाधान" else "Remedies",
-                bgColor = Color(0xFFFAFAFA),
+                bgColor = SurfaceAlt,
                 borderColor = BorderLight,
                 badgeBg = Saffron,
                 badgeTextColor = Color.White,
@@ -1058,9 +1058,9 @@ fun AstroQuickFeatureCards(
                 title = if (isHindi) "धन समस्या" else "Money Problem",
                 subtitle = if (isHindi) "कर्ज मुक्ति व धन लाभ" else "Debt Relief & Wealth",
                 badgeText = if (isHindi) "उपाय" else "Remedies",
-                bgColor = Color(0xFFFAFAFA),
+                bgColor = SurfaceAlt,
                 borderColor = BorderLight,
-                badgeBg = Color(0xFF000000),
+                badgeBg = InkPrimary,
                 badgeTextColor = Color.White,
                 onClick = onKundliMilanClick,
                 modifier = Modifier.weight(1f)
@@ -1072,9 +1072,9 @@ fun AstroQuickFeatureCards(
                 title = if (isHindi) "दैनिक पंचांग" else "Daily Panchang",
                 subtitle = if (isHindi) "शुभ मुहूर्त व राहुकाल" else "Muhurat & Tithi",
                 badgeText = if (isHindi) "आज" else "Today",
-                bgColor = Color(0xFFFAFAFA),
+                bgColor = SurfaceAlt,
                 borderColor = BorderLight,
-                badgeBg = Color(0xFF16A34A),
+                badgeBg = GreenBase,
                 badgeTextColor = Color.White,
                 onClick = onPanchangClick,
                 modifier = Modifier.weight(1f)
@@ -1143,14 +1143,14 @@ private fun AstroMiniCard(
                 text = title,
                 fontSize = 13.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF1E293B),
+                color = Neutral800,
                 maxLines = 1
             )
             Spacer(modifier = Modifier.height(2.dp))
             Text(
                 text = subtitle,
                 fontSize = 10.5.sp,
-                color = Color(0xFF64748B),
+                color = Neutral500,
                 maxLines = 1
             )
         }

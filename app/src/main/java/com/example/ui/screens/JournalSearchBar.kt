@@ -229,10 +229,10 @@ fun HomeJournalSearchBar(
         // Main Search Bar Pill (#FAFAFA fill, rounded-xl, black text, 1px #EFEFEF border)
         Surface(
             shape = RoundedCornerShape(18.dp),
-            color = Color(0xFFFAFAFA),
+            color = SurfaceAlt,
             border = BorderStroke(
                 width = 1.dp,
-                color = if (query.isNotBlank() || customDateMillis != null || activeFilter != JournalFilterType.ALL) Color(0xFF000000) else Color(0xFFEFEFEF)
+                color = if (query.isNotBlank() || customDateMillis != null || activeFilter != JournalFilterType.ALL) InkPrimary else BorderLight
             ),
             shadowElevation = 0.dp,
             modifier = Modifier.fillMaxWidth()
@@ -255,7 +255,7 @@ fun HomeJournalSearchBar(
                     Icon(
                         imageVector = Icons.Outlined.Search,
                         contentDescription = "Search",
-                        tint = Color(0xFF000000),
+                        tint = InkPrimary,
                         modifier = Modifier.size(17.dp)
                     )
                 }
@@ -351,7 +351,7 @@ fun HomeJournalSearchBar(
                     modifier = Modifier
                         .size(32.dp)
                         .clip(CircleShape)
-                        .background(if (showFilters || activeFilter != JournalFilterType.ALL) Terra.copy(alpha = 0.15f) else Color(0xFFF1F5F9))
+                        .background(if (showFilters || activeFilter != JournalFilterType.ALL) Terra.copy(alpha = 0.15f) else Neutral100)
                 ) {
                     Icon(
                         imageVector = Icons.Outlined.Tune,
@@ -367,7 +367,7 @@ fun HomeJournalSearchBar(
                     modifier = Modifier
                         .size(32.dp)
                         .clip(CircleShape)
-                        .background(if (customDateMillis != null) Terra.copy(alpha = 0.15f) else Color(0xFFF1F5F9))
+                        .background(if (customDateMillis != null) Terra.copy(alpha = 0.15f) else Neutral100)
                 ) {
                     Icon(
                         imageVector = Icons.Outlined.CalendarMonth,
@@ -420,10 +420,10 @@ fun HomeJournalSearchBar(
 
                         Surface(
                             shape = RoundedCornerShape(999.dp),
-                            color = if (isSelected) Color(0xFF000000) else Color.White,
+                            color = if (isSelected) InkPrimary else Color.White,
                             border = BorderStroke(
                                 width = 1.dp,
-                                color = if (isSelected) Color(0xFF000000) else Color(0xFFEFEFEF)
+                                color = if (isSelected) InkPrimary else BorderLight
                             ),
                             modifier = Modifier
                                 .clip(RoundedCornerShape(999.dp))
@@ -440,7 +440,7 @@ fun HomeJournalSearchBar(
                                 )
                                 Text(
                                     text = label,
-                                    color = if (isSelected) Color.White else Color(0xFF737373),
+                                    color = if (isSelected) Color.White else InkSoft,
                                     fontSize = 11.5.sp,
                                     fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
                                 )
@@ -722,7 +722,7 @@ fun JournalSearchResultCard(
                                 shape = RoundedCornerShape(6.dp),
                                 color = when {
                                     isAlert -> Color(0xFFFFF1F0)
-                                    isLucidOrSpecial -> Color(0xFFF3E8FF)
+                                    isLucidOrSpecial -> AccentVioletSoft
                                     else -> Color(0xFFF2F7EC)
                                 },
                                 border = BorderStroke(
@@ -738,7 +738,7 @@ fun JournalSearchResultCard(
                                     text = t,
                                     color = when {
                                         isAlert -> Color(0xFFCF1322)
-                                        isLucidOrSpecial -> Color(0xFF7C3AED)
+                                        isLucidOrSpecial -> AccentViolet
                                         else -> Color(0xFF389E0D)
                                     },
                                     fontSize = 10.sp,

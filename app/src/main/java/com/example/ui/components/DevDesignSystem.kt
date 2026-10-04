@@ -174,7 +174,7 @@ fun DevSecondaryButton(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     leadingIcon: ImageVector? = null,
-    borderColor: Color = Color(0xFF000000)
+    borderColor: Color = InkPrimary
 ) {
     OutlinedButton(
         onClick = onClick,
@@ -183,7 +183,7 @@ fun DevSecondaryButton(
         border = BorderStroke(1.dp, if (enabled) borderColor else BorderLight),
         colors = ButtonDefaults.outlinedButtonColors(
             containerColor = Color.White,
-            contentColor = Color(0xFF000000),
+            contentColor = InkPrimary,
             disabledContainerColor = Color.White.copy(alpha = 0.5f),
             disabledContentColor = TextTertiary
         ),
@@ -195,7 +195,7 @@ fun DevSecondaryButton(
             Icon(
                 imageVector = leadingIcon,
                 contentDescription = null,
-                tint = if (enabled) Color(0xFF000000) else TextTertiary,
+                tint = if (enabled) InkPrimary else TextTertiary,
                 modifier = Modifier.size(18.dp)
             )
             Spacer(modifier = Modifier.width(DevSpacing.small))
@@ -204,7 +204,7 @@ fun DevSecondaryButton(
             text = text,
             fontSize = 13.5.sp,
             fontWeight = FontWeight.SemiBold,
-            color = if (enabled) Color(0xFF000000) else TextTertiary
+            color = if (enabled) InkPrimary else TextTertiary
         )
     }
 }
@@ -252,12 +252,12 @@ fun DevPill(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     leadingIcon: ImageVector? = null,
-    accentColor: Color = Color(0xFF000000)
+    accentColor: Color = InkPrimary
 ) {
     Surface(
         shape = RoundedCornerShape(DevRadius.pill),
-        color = if (isSelected) Color(0xFF000000) else Color.White,
-        border = BorderStroke(1.dp, if (isSelected) Color(0xFF000000) else BorderLight),
+        color = if (isSelected) InkPrimary else Color.White,
+        border = BorderStroke(1.dp, if (isSelected) InkPrimary else BorderLight),
         shadowElevation = if (isSelected) 1.dp else 0.dp,
         modifier = modifier
             .clip(RoundedCornerShape(DevRadius.pill))

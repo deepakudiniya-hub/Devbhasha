@@ -1,5 +1,6 @@
 package com.example.ui.components
 
+import com.example.ui.theme.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -64,8 +65,8 @@ fun DevLogoIcon(
                 width = 1.dp,
                 brush = Brush.linearGradient(
                     colors = listOf(
-                        Color(0xFFFF8A00),
-                        Color(0xFFFF6B00)
+                        SaffronGold,
+                        Saffron
                     )
                 )
             ),
@@ -107,7 +108,7 @@ fun DevBrandLockup(
                     text = if (isHindi) "भाषा" else "Bhasha",
                     fontSize = 18.sp,
                     fontWeight = FontWeight.ExtraBold,
-                    color = Color(0xFF000000),
+                    color = InkPrimary,
                     letterSpacing = 0.5.sp
                 )
             }
@@ -115,7 +116,7 @@ fun DevBrandLockup(
                 text = if (isHindi) "वैदिक आध्यात्मिक मार्गदर्शन" else "Spiritual Guidance & Solutions",
                 fontSize = 11.sp,
                 fontWeight = FontWeight.Medium,
-                color = Color(0xFF64748B)
+                color = Neutral500
             )
         }
     }
@@ -155,7 +156,7 @@ fun DevBrandBanner(
                 text = if (isHindi) "भाषा" else "Bhasha",
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF1E293B)
+                color = Neutral800
             )
 
             Spacer(modifier = Modifier.height(4.dp))
@@ -164,7 +165,7 @@ fun DevBrandBanner(
                 text = if (isHindi) "सनातन ज्ञान, कर्मकांड एवं विश्वसनीय साधक सेवा"
                 else "Sanatan Wisdom, Vedic Remedies & Verified Sadhak Guidance",
                 fontSize = 12.5.sp,
-                color = Color(0xFF64748B),
+                color = Neutral500,
                 lineHeight = 18.sp,
                 textAlign = androidx.compose.ui.text.style.TextAlign.Center
             )
