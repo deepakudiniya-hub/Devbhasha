@@ -652,7 +652,7 @@ fun PoochhoProblemConsultSheet(
                             fontFamily = FontFamily.Serif,
                             fontSize = 22.sp,
                             fontWeight = FontWeight.Bold,
-                            color = Color(0xFF000000)
+                            color = InkPrimary
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Surface(
@@ -671,13 +671,13 @@ fun PoochhoProblemConsultSheet(
                     Text(
                         text = "अपनी किसी भी समस्या का समाधान पाएं — साधक से चैट अथवा वॉइस कॉल द्वारा",
                         fontSize = 12.sp,
-                        color = Color(0xFF737373)
+                        color = InkSoft
                     )
                 }
 
                 Surface(
                     shape = CircleShape,
-                    color = Color(0xFFFAFAFA),
+                    color = SurfaceAlt,
                     border = BorderStroke(1.dp, BorderLight),
                     modifier = Modifier.size(36.dp).clickable { onDismiss() }
                 ) {
@@ -685,7 +685,7 @@ fun PoochhoProblemConsultSheet(
                         Icon(
                             imageVector = Icons.Outlined.Close,
                             contentDescription = "Close",
-                            tint = Color(0xFF000000),
+                            tint = InkPrimary,
                             modifier = Modifier.size(18.dp)
                         )
                     }
@@ -703,8 +703,8 @@ fun PoochhoProblemConsultSheet(
                     val isSelected = selectedCategory == cat
                     Surface(
                         shape = RoundedCornerShape(999.dp),
-                        color = if (isSelected) Color(0xFF000000) else Color.White,
-                        border = BorderStroke(1.dp, if (isSelected) Color(0xFF000000) else BorderLight),
+                        color = if (isSelected) InkPrimary else Color.White,
+                        border = BorderStroke(1.dp, if (isSelected) InkPrimary else BorderLight),
                         modifier = Modifier
                             .clip(RoundedCornerShape(999.dp))
                             .clickable {
@@ -718,7 +718,7 @@ fun PoochhoProblemConsultSheet(
                             text = cat,
                             fontSize = 11.5.sp,
                             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                            color = if (isSelected) Color.White else Color(0xFF737373),
+                            color = if (isSelected) Color.White else InkSoft,
                             modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
                         )
                     }
@@ -730,7 +730,7 @@ fun PoochhoProblemConsultSheet(
             // Problem Input Box
             Surface(
                 shape = RoundedCornerShape(16.dp),
-                color = Color(0xFFFAFAFA),
+                color = SurfaceAlt,
                 border = BorderStroke(1.dp, BorderLight),
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -742,7 +742,7 @@ fun PoochhoProblemConsultSheet(
                             Text(
                                 text = "अपनी समस्या या प्रश्न यहाँ लिखें या माइक दबाकर बोलें...",
                                 fontSize = 13.5.sp,
-                                color = Color(0xFFA8A8A8)
+                                color = TextTertiary
                             )
                         },
                         colors = OutlinedTextFieldDefaults.colors(
@@ -782,14 +782,14 @@ fun PoochhoProblemConsultSheet(
                                 Icon(
                                     imageVector = Icons.Default.Mic,
                                     contentDescription = "Mic",
-                                    tint = if (isListening) Saffron else Color(0xFF000000),
+                                    tint = if (isListening) Saffron else InkPrimary,
                                     modifier = Modifier.size(15.dp)
                                 )
                                 Text(
                                     text = if (isListening) "बोलें (Recording...)" else "माइक से बोलें",
                                     fontSize = 11.sp,
                                     fontWeight = FontWeight.SemiBold,
-                                    color = if (isListening) Saffron else Color(0xFF000000)
+                                    color = if (isListening) Saffron else InkPrimary
                                 )
                             }
                         }
@@ -798,7 +798,7 @@ fun PoochhoProblemConsultSheet(
                             Text(
                                 text = "मिटाएं",
                                 fontSize = 11.sp,
-                                color = Color(0xFF737373),
+                                color = InkSoft,
                                 modifier = Modifier.clickable { problemText = "" }
                             )
                         }
@@ -813,7 +813,7 @@ fun PoochhoProblemConsultSheet(
                 text = "परामर्श हेतु साधक चुनें:",
                 fontSize = 12.5.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF000000)
+                color = InkPrimary
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -826,8 +826,8 @@ fun PoochhoProblemConsultSheet(
                     val isSelected = selectedSadhak?.id == sadhak.id
                     Surface(
                         shape = RoundedCornerShape(16.dp),
-                        color = if (isSelected) Color(0xFFFAFAFA) else Color.White,
-                        border = BorderStroke(1.5.dp, if (isSelected) Color(0xFF000000) else BorderLight),
+                        color = if (isSelected) SurfaceAlt else Color.White,
+                        border = BorderStroke(1.5.dp, if (isSelected) InkPrimary else BorderLight),
                         modifier = Modifier
                             .clip(RoundedCornerShape(16.dp))
                             .clickable { selectedSadhak = sadhak }
@@ -849,7 +849,7 @@ fun PoochhoProblemConsultSheet(
                                             text = sadhak.initialEn.take(2).ifEmpty { "SA" },
                                             fontSize = 13.sp,
                                             fontWeight = FontWeight.Bold,
-                                            color = Color(0xFF000000)
+                                            color = InkPrimary
                                         )
                                     }
                                 }
@@ -870,12 +870,12 @@ fun PoochhoProblemConsultSheet(
                                     text = sadhak.nameEn,
                                     fontSize = 13.sp,
                                     fontWeight = FontWeight.SemiBold,
-                                    color = Color(0xFF000000)
+                                    color = InkPrimary
                                 )
                                 Text(
                                     text = "₹19/min · ⭐ ${sadhak.rating}",
                                     fontSize = 10.5.sp,
-                                    color = Color(0xFF737373)
+                                    color = InkSoft
                                 )
                             }
                         }
@@ -933,7 +933,7 @@ fun PoochhoProblemConsultSheet(
                 Surface(
                     shape = RoundedCornerShape(999.dp),
                     color = Color.White,
-                    border = BorderStroke(1.5.dp, Color(0xFF000000)),
+                    border = BorderStroke(1.5.dp, InkPrimary),
                     modifier = Modifier
                         .weight(1f)
                         .height(50.dp)
@@ -954,7 +954,7 @@ fun PoochhoProblemConsultSheet(
                         Icon(
                             imageVector = Icons.Outlined.Phone,
                             contentDescription = "Call",
-                            tint = Color(0xFF000000),
+                            tint = InkPrimary,
                             modifier = Modifier.size(18.dp)
                         )
                         Spacer(modifier = Modifier.width(6.dp))
@@ -962,7 +962,7 @@ fun PoochhoProblemConsultSheet(
                             text = "कॉल करें (Call)",
                             fontSize = 13.5.sp,
                             fontWeight = FontWeight.Bold,
-                            color = Color(0xFF000000)
+                            color = InkPrimary
                         )
                     }
                 }
@@ -1054,7 +1054,7 @@ fun DreamQuickRecorderSheet(
                             fontFamily = FontFamily.Serif,
                             fontSize = 22.sp,
                             fontWeight = FontWeight.Bold,
-                            color = Color(0xFF000000)
+                            color = InkPrimary
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Surface(
@@ -1073,13 +1073,13 @@ fun DreamQuickRecorderSheet(
                     Text(
                         text = "सपना दर्ज करें और साधक से उसका आध्यात्मिक अर्थ व फल जानें 🌙✨",
                         fontSize = 12.sp,
-                        color = Color(0xFF737373)
+                        color = InkSoft
                     )
                 }
 
                 Surface(
                     shape = CircleShape,
-                    color = Color(0xFFFAFAFA),
+                    color = SurfaceAlt,
                     border = BorderStroke(1.dp, BorderLight),
                     modifier = Modifier.size(36.dp).clickable { onDismiss() }
                 ) {
@@ -1087,7 +1087,7 @@ fun DreamQuickRecorderSheet(
                         Icon(
                             imageVector = Icons.Outlined.Close,
                             contentDescription = "Close",
-                            tint = Color(0xFF000000),
+                            tint = InkPrimary,
                             modifier = Modifier.size(18.dp)
                         )
                     }
@@ -1103,8 +1103,8 @@ fun DreamQuickRecorderSheet(
             ) {
                 Surface(
                     shape = RoundedCornerShape(999.dp),
-                    color = if (mode == "write") Color(0xFF000000) else Color.White,
-                    border = BorderStroke(1.dp, if (mode == "write") Color(0xFF000000) else BorderLight),
+                    color = if (mode == "write") InkPrimary else Color.White,
+                    border = BorderStroke(1.dp, if (mode == "write") InkPrimary else BorderLight),
                     modifier = Modifier
                         .weight(1f)
                         .clip(RoundedCornerShape(999.dp))
@@ -1114,7 +1114,7 @@ fun DreamQuickRecorderSheet(
                         text = "✍️ लिखना (Write Dream)",
                         fontSize = 12.sp,
                         fontWeight = if (mode == "write") FontWeight.Bold else FontWeight.Medium,
-                        color = if (mode == "write") Color.White else Color(0xFF737373),
+                        color = if (mode == "write") Color.White else InkSoft,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.padding(vertical = 8.dp)
                     )
@@ -1122,8 +1122,8 @@ fun DreamQuickRecorderSheet(
 
                 Surface(
                     shape = RoundedCornerShape(999.dp),
-                    color = if (mode == "voice") Color(0xFF000000) else Color.White,
-                    border = BorderStroke(1.dp, if (mode == "voice") Color(0xFF000000) else BorderLight),
+                    color = if (mode == "voice") InkPrimary else Color.White,
+                    border = BorderStroke(1.dp, if (mode == "voice") InkPrimary else BorderLight),
                     modifier = Modifier
                         .weight(1f)
                         .clip(RoundedCornerShape(999.dp))
@@ -1133,7 +1133,7 @@ fun DreamQuickRecorderSheet(
                         text = "🎙️ वॉइस रिकॉर्डर (Voice Record)",
                         fontSize = 12.sp,
                         fontWeight = if (mode == "voice") FontWeight.Bold else FontWeight.Medium,
-                        color = if (mode == "voice") Color.White else Color(0xFF737373),
+                        color = if (mode == "voice") Color.White else InkSoft,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.padding(vertical = 8.dp)
                     )
@@ -1146,7 +1146,7 @@ fun DreamQuickRecorderSheet(
                 // Write Input Field
                 Surface(
                     shape = RoundedCornerShape(16.dp),
-                    color = Color(0xFFFAFAFA),
+                    color = SurfaceAlt,
                     border = BorderStroke(1.dp, BorderLight),
                     modifier = Modifier.fillMaxWidth()
                 ) {
@@ -1158,7 +1158,7 @@ fun DreamQuickRecorderSheet(
                                 Text(
                                     text = "सपने में क्या देखा? (उदा. पावन नदी, मंदिर के शिखर, सफेद अश्व अथवा उड़ते हुए दृश्य)...",
                                     fontSize = 13.5.sp,
-                                    color = Color(0xFFA8A8A8)
+                                    color = TextTertiary
                                 )
                             },
                             colors = OutlinedTextFieldDefaults.colors(
@@ -1180,13 +1180,13 @@ fun DreamQuickRecorderSheet(
                             Text(
                                 text = "${dreamText.length} अक्षर",
                                 fontSize = 10.5.sp,
-                                color = Color(0xFFA8A8A8)
+                                color = TextTertiary
                             )
                             if (dreamText.isNotBlank()) {
                                 Text(
                                     text = "हटाएं (Clear)",
                                     fontSize = 11.sp,
-                                    color = Color(0xFF737373),
+                                    color = InkSoft,
                                     modifier = Modifier.clickable { dreamText = "" }
                                 )
                             }
@@ -1197,7 +1197,7 @@ fun DreamQuickRecorderSheet(
                 // Voice Recorder Mode UI
                 Surface(
                     shape = RoundedCornerShape(16.dp),
-                    color = Color(0xFFFAFAFA),
+                    color = SurfaceAlt,
                     border = BorderStroke(1.dp, if (isRecording) Saffron else BorderLight),
                     modifier = Modifier.fillMaxWidth()
                 ) {
@@ -1231,7 +1231,7 @@ fun DreamQuickRecorderSheet(
                                 Icon(
                                     imageVector = if (isRecording) Icons.Default.Stop else Icons.Default.Mic,
                                     contentDescription = "Record",
-                                    tint = if (isRecording) Saffron else Color(0xFF000000),
+                                    tint = if (isRecording) Saffron else InkPrimary,
                                     modifier = Modifier.size(28.dp)
                                 )
                             }
@@ -1244,7 +1244,7 @@ fun DreamQuickRecorderSheet(
                             text = if (isRecording) "रिकॉर्डिंग चालू • $formattedSec" else (if (dreamText.isNotBlank()) "ऑडियो तैयार • टैप कर पुनः रिकॉर्ड करें" else "टैप करें और अपना सपना बोलें"),
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold,
-                            color = if (isRecording) Saffron else Color(0xFF000000)
+                            color = if (isRecording) Saffron else InkPrimary
                         )
 
                         if (dreamText.isNotBlank()) {
@@ -1258,7 +1258,7 @@ fun DreamQuickRecorderSheet(
                                 Text(
                                     text = "ट्रांसक्रिप्शन: $dreamText",
                                     fontSize = 11.5.sp,
-                                    color = Color(0xFF737373),
+                                    color = InkSoft,
                                     modifier = Modifier.padding(10.dp)
                                 )
                             }
@@ -1278,8 +1278,8 @@ fun DreamQuickRecorderSheet(
                     val isSelected = selectedTag == tag
                     Surface(
                         shape = RoundedCornerShape(999.dp),
-                        color = if (isSelected) Color(0xFF000000) else Color.White,
-                        border = BorderStroke(1.dp, if (isSelected) Color(0xFF000000) else BorderLight),
+                        color = if (isSelected) InkPrimary else Color.White,
+                        border = BorderStroke(1.dp, if (isSelected) InkPrimary else BorderLight),
                         modifier = Modifier
                             .clip(RoundedCornerShape(999.dp))
                             .clickable { selectedTag = tag }
@@ -1288,7 +1288,7 @@ fun DreamQuickRecorderSheet(
                             text = tag,
                             fontSize = 11.sp,
                             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                            color = if (isSelected) Color.White else Color(0xFF737373),
+                            color = if (isSelected) Color.White else InkSoft,
                             modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
                         )
                     }
@@ -1308,7 +1308,7 @@ fun DreamQuickRecorderSheet(
                 Surface(
                     shape = RoundedCornerShape(999.dp),
                     color = Color.White,
-                    border = BorderStroke(1.5.dp, Color(0xFF000000)),
+                    border = BorderStroke(1.5.dp, InkPrimary),
                     modifier = Modifier
                         .weight(1f)
                         .height(50.dp)
@@ -1324,7 +1324,7 @@ fun DreamQuickRecorderSheet(
                             text = "💾 सपना सहेजें",
                             fontSize = 13.5.sp,
                             fontWeight = FontWeight.Bold,
-                            color = Color(0xFF000000)
+                            color = InkPrimary
                         )
                     }
                 }
@@ -1370,7 +1370,7 @@ fun DreamQuickRecorderSheet(
                     text = "📖 पूरी स्वप्न डायरी देखें (Open Journal) →",
                     fontSize = 12.sp,
                     fontWeight = FontWeight.SemiBold,
-                    color = Color(0xFF000000)
+                    color = InkPrimary
                 )
             }
         }
