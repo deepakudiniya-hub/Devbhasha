@@ -70,7 +70,7 @@ fun GuidanceCategoriesSection(
                             .shadow(if (isSelected) 4.dp else 1.dp, CircleShape)
                             .clip(CircleShape)
                             .background(
-                                if (isSelected) Color(0xFF000000) else Color(0xFFFAFAFA)
+                                if (isSelected) InkPrimary else SurfaceAlt
                             )
                             .border(
                                 width = if (isSelected) 2.dp else 1.dp,
@@ -100,7 +100,7 @@ fun GuidanceCategoriesSection(
                         text = if (isHindi) item.titleHi else item.titleEn,
                         fontSize = 11.5.sp,
                         fontWeight = if (isSelected) FontWeight.Bold else FontWeight.SemiBold,
-                        color = if (isSelected) SaffronDeep else Color(0xFF334155),
+                        color = if (isSelected) SaffronDeep else Neutral700,
                         textAlign = TextAlign.Center,
                         maxLines = 1
                     )
@@ -164,7 +164,7 @@ fun ChatAndCallDualActionCards(
                     }
 
                     Surface(
-                        color = Color(0xFFDCFCE7),
+                        color = GreenSoftBase,
                         shape = RoundedCornerShape(8.dp)
                     ) {
                         Row(
@@ -175,12 +175,12 @@ fun ChatAndCallDualActionCards(
                                 modifier = Modifier
                                     .size(5.dp)
                                     .clip(CircleShape)
-                                    .background(Color(0xFF16A34A))
+                                    .background(GreenBase)
                             )
                             Spacer(modifier = Modifier.width(3.dp))
                             Text(
                                 text = if (isHindi) "12 लाइव" else "12 Live",
-                                color = Color(0xFF15803D),
+                                color = GreenDeepBase,
                                 fontSize = 9.5.sp,
                                 fontWeight = FontWeight.Bold
                             )
@@ -200,7 +200,7 @@ fun ChatAndCallDualActionCards(
                 Text(
                     text = if (isHindi) "तुरंत चैट • ₹20 मात्र" else "Instant Chat • ₹20",
                     fontSize = 11.sp,
-                    color = Color(0xFF64748B),
+                    color = Neutral500,
                     fontWeight = FontWeight.Medium
                 )
 
@@ -264,14 +264,14 @@ fun ChatAndCallDualActionCards(
                         modifier = Modifier
                             .size(36.dp)
                             .clip(CircleShape)
-                            .background(Color(0xFFDCFCE7)),
+                            .background(GreenSoftBase),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(text = "📞", fontSize = 18.sp)
                     }
 
                     Surface(
-                        color = Color(0xFFDCFCE7),
+                        color = GreenSoftBase,
                         shape = RoundedCornerShape(8.dp)
                     ) {
                         Row(
@@ -282,12 +282,12 @@ fun ChatAndCallDualActionCards(
                                 modifier = Modifier
                                     .size(5.dp)
                                     .clip(CircleShape)
-                                    .background(Color(0xFF16A34A))
+                                    .background(GreenBase)
                             )
                             Spacer(modifier = Modifier.width(3.dp))
                             Text(
                                 text = if (isHindi) "9 उपलब्ध" else "9 Live",
-                                color = Color(0xFF15803D),
+                                color = GreenDeepBase,
                                 fontSize = 9.5.sp,
                                 fontWeight = FontWeight.Bold
                             )
@@ -301,13 +301,13 @@ fun ChatAndCallDualActionCards(
                     text = if (isHindi) "साधक कॉल" else "Call Astrologer",
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF15803D)
+                    color = GreenDeepBase
                 )
 
                 Text(
                     text = if (isHindi) "सीधी बात • ₹20 मात्र" else "Voice Call • ₹20",
                     fontSize = 11.sp,
-                    color = Color(0xFF64748B),
+                    color = Neutral500,
                     fontWeight = FontWeight.Medium
                 )
 
@@ -315,7 +315,7 @@ fun ChatAndCallDualActionCards(
 
                 Surface(
                     shape = RoundedCornerShape(10.dp),
-                    color = Color(0xFF16A34A),
+                    color = GreenBase,
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Row(
@@ -400,18 +400,18 @@ fun VerifiedSadhaksSection(
                     text = when(language) { "hi" -> "लाइव साधक एवं ज्योतिषी"; "hinglish" -> "Live Astrologers & Sadhaks"; else -> "Live Astrologers & Sadhaks" },
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF1E293B)
+                    color = Neutral800
                 )
                 Spacer(modifier = Modifier.width(6.dp))
                 Surface(
-                    color = Color(0xFFDCFCE7),
+                    color = GreenSoftBase,
                     shape = RoundedCornerShape(10.dp)
                 ) {
                     Text(
                         text = "🟢 LIVE",
                         fontSize = 10.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF16A34A),
+                        color = GreenBase,
                         modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                     )
                 }
@@ -453,7 +453,7 @@ fun VerifiedSadhaksSection(
                     color = if (isChipSelected) SaffronPrimary else Color.White,
                     border = BorderStroke(
                         1.dp,
-                        if (isChipSelected) SaffronPrimary else Color(0xFFE2E8F0)
+                        if (isChipSelected) SaffronPrimary else Neutral200
                     ),
                     modifier = Modifier
                         .clip(RoundedCornerShape(16.dp))
@@ -463,7 +463,7 @@ fun VerifiedSadhaksSection(
                         text = label,
                         fontSize = 12.sp,
                         fontWeight = if (isChipSelected) FontWeight.Bold else FontWeight.Medium,
-                        color = if (isChipSelected) Color.White else Color(0xFF475569),
+                        color = if (isChipSelected) Color.White else Neutral600,
                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
                     )
                 }
@@ -489,7 +489,7 @@ fun VerifiedSadhaksSection(
                     Text(
                         text = when(language) { "hi" -> "साधक लोड हो रहे हैं..."; "hinglish" -> "Loading Sadhaks..."; else -> "Loading Sadhaks..." },
                         fontSize = 13.sp,
-                        color = Color(0xFF64748B)
+                        color = Neutral500
                     )
                 }
             }
@@ -511,7 +511,7 @@ fun VerifiedSadhaksSection(
                     Icon(
                         imageVector = Icons.Filled.Person,
                         contentDescription = null,
-                        tint = Color(0xFF94A3B8),
+                        tint = Neutral400,
                         modifier = Modifier.size(34.dp)
                     )
                     Spacer(modifier = Modifier.height(6.dp))
@@ -519,7 +519,7 @@ fun VerifiedSadhaksSection(
                         text = when(language) { "hi" -> "इस श्रेणी में कोई साधक उपलब्ध नहीं है"; "hinglish" -> "No sadhaks in this category"; else -> "No sadhaks in this category" },
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Medium,
-                        color = Color(0xFF64748B),
+                        color = Neutral500,
                         textAlign = TextAlign.Center
                     )
                 }
@@ -560,13 +560,13 @@ fun VerifiedSadhaksSection(
                                 Surface(
                                     modifier = Modifier.size(54.dp),
                                     shape = CircleShape,
-                                    color = Color(0xFFFAFAFA),
+                                    color = SurfaceAlt,
                                     border = if (sadhak.isOnline) BorderStroke(2.dp, Saffron) else BorderStroke(1.dp, BorderLight)
                                 ) {
                                     Box(contentAlignment = Alignment.Center) {
                                         Text(
                                             text = if (language == "hi") sadhak.initialHi else sadhak.initialEn,
-                                            color = Color(0xFF000000),
+                                            color = InkPrimary,
                                             fontSize = 18.sp,
                                             fontWeight = FontWeight.Bold
                                         )
@@ -593,7 +593,7 @@ fun VerifiedSadhaksSection(
                                 text = if (language == "hi") sadhak.nameHi else sadhak.nameEn,
                                 fontSize = 14.5.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = Color(0xFF000000),
+                                color = InkPrimary,
                                 textAlign = TextAlign.Center,
                                 maxLines = 1
                             )
@@ -601,7 +601,7 @@ fun VerifiedSadhaksSection(
                             Text(
                                 text = if (language == "hi") sadhak.titleHi else sadhak.titleEn,
                                 fontSize = 11.5.sp,
-                                color = Color(0xFF737373),
+                                color = InkSoft,
                                 fontWeight = FontWeight.Medium,
                                 textAlign = TextAlign.Center,
                                 maxLines = 1
@@ -624,13 +624,13 @@ fun VerifiedSadhaksSection(
                                     text = sadhak.rating,
                                     fontSize = 12.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = Color(0xFF000000)
+                                    color = InkPrimary
                                 )
                                 Spacer(modifier = Modifier.width(4.dp))
                                 Text(
                                     text = "• ${if (language == "hi") sadhak.experienceHi else sadhak.experienceEn}",
                                     fontSize = 11.sp,
-                                    color = Color(0xFF737373),
+                                    color = InkSoft,
                                     maxLines = 1
                                 )
                             }
@@ -684,7 +684,7 @@ fun VerifiedSadhaksSection(
                                             .clickable { onCallClick(sadhak) },
                                         shape = RoundedCornerShape(999.dp),
                                         color = Color.White,
-                                        border = BorderStroke(1.dp, Color(0xFF000000))
+                                        border = BorderStroke(1.dp, InkPrimary)
                                     ) {
                                         Row(
                                             modifier = Modifier.fillMaxSize(),
@@ -694,7 +694,7 @@ fun VerifiedSadhaksSection(
                                             Icon(
                                                 imageVector = Icons.Outlined.Phone,
                                                 contentDescription = "Call",
-                                                tint = Color(0xFF000000),
+                                                tint = InkPrimary,
                                                 modifier = Modifier.size(14.dp)
                                             )
                                             Spacer(modifier = Modifier.width(4.dp))
@@ -702,7 +702,7 @@ fun VerifiedSadhaksSection(
                                                 text = when(language) { "hi" -> "कॉल"; else -> "Call" },
                                                 fontSize = 12.sp,
                                                 fontWeight = FontWeight.Bold,
-                                                color = Color(0xFF000000)
+                                                color = InkPrimary
                                             )
                                         }
                                     }
@@ -711,7 +711,7 @@ fun VerifiedSadhaksSection(
                                 Surface(
                                     modifier = Modifier.fillMaxWidth().height(36.dp),
                                     shape = RoundedCornerShape(999.dp),
-                                    color = Color(0xFFFAFAFA),
+                                    color = SurfaceAlt,
                                     border = BorderStroke(1.dp, BorderLight)
                                 ) {
                                     Box(contentAlignment = Alignment.Center) {
@@ -719,7 +719,7 @@ fun VerifiedSadhaksSection(
                                             text = if (language == "hi") "ऑफ़लाइन" else "Offline",
                                             fontSize = 11.5.sp,
                                             fontWeight = FontWeight.Medium,
-                                            color = Color(0xFFA8A8A8)
+                                            color = TextTertiary
                                         )
                                     }
                                 }
