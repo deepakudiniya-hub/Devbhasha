@@ -181,23 +181,23 @@ private fun ChatAstrologerListScreen(
                                 text = if (isHindi) "साधक चैट परामर्श" else "Chat with Astrologers",
                                 fontSize = 17.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = Color(0xFF1E293B)
+                                color = Neutral800
                             )
                         }
                         Text(
                             text = if (isHindi) "सर्वश्रेष्ठ सत्यापित ज्योतिषी से लाइव चैट करें • ₹20 मात्र"
                             else "Chat live with verified Vedic experts • Just ₹20",
                             fontSize = 11.5.sp,
-                            color = Color(0xFF64748B)
+                            color = Neutral500
                         )
                     }
 
                     // Online live count badge
                     val onlineLiveCount = sadhaks.count { it.isOnline }
                     Surface(
-                        color = Color(0xFFDCFCE7),
+                        color = GreenSoftBase,
                         shape = RoundedCornerShape(12.dp),
-                        border = BorderStroke(1.dp, Color(0xFF86EFAC))
+                        border = BorderStroke(1.dp, GreenLightBase)
                     ) {
                         Row(
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
@@ -207,12 +207,12 @@ private fun ChatAstrologerListScreen(
                                 modifier = Modifier
                                     .size(7.dp)
                                     .clip(CircleShape)
-                                    .background(Color(0xFF16A34A))
+                                    .background(GreenBase)
                             )
                             Spacer(modifier = Modifier.width(5.dp))
                             Text(
                                 text = if (isHindi) "$onlineLiveCount लाइव" else "$onlineLiveCount Live",
-                                color = Color(0xFF15803D),
+                                color = GreenDeepBase,
                                 fontSize = 11.sp,
                                 fontWeight = FontWeight.Bold
                             )
@@ -229,13 +229,13 @@ private fun ChatAstrologerListScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(20.dp))
-                        .background(Color(0xFFF8FAFC))
-                        .border(1.dp, Color(0xFFE2E8F0), RoundedCornerShape(20.dp)),
+                        .background(Neutral50)
+                        .border(1.dp, Neutral200, RoundedCornerShape(20.dp)),
                     placeholder = {
                         Text(
                             text = if (isHindi) "ज्योतिषी का नाम या विशेषता खोजें..." else "Search by name or skills...",
                             fontSize = 13.sp,
-                            color = Color(0xFF94A3B8)
+                            color = Neutral400
                         )
                     },
                     leadingIcon = {
@@ -252,7 +252,7 @@ private fun ChatAstrologerListScreen(
                                 Icon(
                                     imageVector = Icons.Outlined.Close,
                                     contentDescription = "Clear",
-                                    tint = Color(0xFF94A3B8),
+                                    tint = Neutral400,
                                     modifier = Modifier.size(16.dp)
                                 )
                             }
@@ -263,8 +263,8 @@ private fun ChatAstrologerListScreen(
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = Color.Transparent,
                         unfocusedBorderColor = Color.Transparent,
-                        focusedContainerColor = Color(0xFFF8FAFC),
-                        unfocusedContainerColor = Color(0xFFF8FAFC)
+                        focusedContainerColor = Neutral50,
+                        unfocusedContainerColor = Neutral50
                     )
                 )
 
@@ -279,10 +279,10 @@ private fun ChatAstrologerListScreen(
                         val isSelected = selectedCategory == key
                         Surface(
                             shape = RoundedCornerShape(16.dp),
-                            color = if (isSelected) SaffronPrimary else Color(0xFFF1F5F9),
+                            color = if (isSelected) SaffronPrimary else Neutral100,
                             border = BorderStroke(
                                 1.dp,
-                                if (isSelected) SaffronDeep else Color(0xFFE2E8F0)
+                                if (isSelected) SaffronDeep else Neutral200
                             ),
                             modifier = Modifier
                                 .clip(RoundedCornerShape(16.dp))
@@ -292,7 +292,7 @@ private fun ChatAstrologerListScreen(
                                 text = label,
                                 fontSize = 12.sp,
                                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                                color = if (isSelected) Color.White else Color(0xFF475569),
+                                color = if (isSelected) Color.White else Neutral600,
                                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
                             )
                         }
@@ -333,7 +333,7 @@ fun ChatAstrologerCard(
         shape = RoundedCornerShape(18.dp),
         color = Color.White,
         shadowElevation = 2.dp,
-        border = BorderStroke(1.dp, Color(0xFFE2E8F0)),
+        border = BorderStroke(1.dp, Neutral200),
         modifier = modifier.fillMaxWidth()
     ) {
         Column(modifier = Modifier.padding(14.dp)) {
@@ -349,7 +349,7 @@ fun ChatAstrologerCard(
                             .clip(CircleShape)
                             .background(
                                 Brush.linearGradient(
-                                    listOf(Color(0xFFFF8A00), Color(0xFFFF6B00))
+                                    listOf(SaffronGold, Saffron)
                                 )
                             ),
                         contentAlignment = Alignment.Center
@@ -375,7 +375,7 @@ fun ChatAstrologerCard(
                                 modifier = Modifier
                                     .fillMaxSize()
                                     .clip(CircleShape)
-                                    .background(Color(0xFF10B981))
+                                    .background(EmeraldBase)
                             )
                         }
                     }
@@ -393,10 +393,10 @@ fun ChatAstrologerCard(
                             text = if (isHindi) sadhak.nameHi else sadhak.nameEn,
                             fontWeight = FontWeight.Bold,
                             fontSize = 15.sp,
-                            color = Color(0xFF000000)
+                            color = InkPrimary
                         )
                         Surface(
-                            color = Color(0xFFFAFAFA),
+                            color = SurfaceAlt,
                             border = BorderStroke(1.dp, BorderLight),
                             shape = RoundedCornerShape(6.dp)
                         ) {
@@ -426,20 +426,20 @@ fun ChatAstrologerCard(
                         Text(
                             text = "💼 ${if (isHindi) sadhak.experienceHi else sadhak.experienceEn}",
                             fontSize = 11.5.sp,
-                            color = Color(0xFF64748B)
+                            color = Neutral500
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             text = "• 💬 हिन्दी, Eng",
                             fontSize = 11.5.sp,
-                            color = Color(0xFF64748B)
+                            color = Neutral500
                         )
                     }
                 }
             }
 
             Spacer(modifier = Modifier.height(10.dp))
-            HorizontalDivider(color = Color(0xFFF1F5F9))
+            HorizontalDivider(color = Neutral100)
             Spacer(modifier = Modifier.height(10.dp))
 
             // Bottom Action Row
@@ -459,14 +459,14 @@ fun ChatAstrologerCard(
                         Text(
                             text = if (isHindi) " /सत्र" else " /session",
                             fontSize = 11.sp,
-                            color = Color(0xFF64748B)
+                            color = Neutral500
                         )
                     }
                     Text(
                         text = if (isHindi) "🟢 तुरंत चैट उपलब्ध" else "🟢 Available Now",
                         fontSize = 10.5.sp,
                         fontWeight = FontWeight.SemiBold,
-                        color = Color(0xFF16A34A)
+                        color = GreenBase
                     )
                 }
 
@@ -477,13 +477,13 @@ fun ChatAstrologerCard(
                         modifier = Modifier
                             .size(38.dp)
                             .clip(RoundedCornerShape(12.dp))
-                            .background(Color(0xFFDCFCE7))
-                            .border(1.dp, Color(0xFF86EFAC), RoundedCornerShape(12.dp))
+                            .background(GreenSoftBase)
+                            .border(1.dp, GreenLightBase, RoundedCornerShape(12.dp))
                     ) {
                         Icon(
                             imageVector = Icons.Outlined.Phone,
                             contentDescription = "Call",
-                            tint = Color(0xFF15803D),
+                            tint = GreenDeepBase,
                             modifier = Modifier.size(18.dp)
                         )
                     }
@@ -602,7 +602,7 @@ fun LiveChatRoomScreen(
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Back",
-                            tint = Color(0xFF1E293B)
+                            tint = Neutral800
                         )
                     }
 
@@ -626,7 +626,7 @@ fun LiveChatRoomScreen(
                             modifier = Modifier
                                 .size(10.dp)
                                 .clip(CircleShape)
-                                .background(Color(0xFF10B981))
+                                .background(EmeraldBase)
                                 .align(Alignment.BottomEnd)
                                 .border(1.5.dp, Color.White, CircleShape)
                         )
@@ -639,7 +639,7 @@ fun LiveChatRoomScreen(
                             text = if (isHindi) sadhak.nameHi else sadhak.nameEn,
                             fontWeight = FontWeight.Bold,
                             fontSize = 15.sp,
-                            color = Color(0xFF1E293B),
+                            color = Neutral800,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
@@ -650,7 +650,7 @@ fun LiveChatRoomScreen(
                                 if (isHindi) "🟢 सक्रिय चैट • ₹20 समर्पित" else "🟢 Active Consultation"
                             },
                             fontSize = 11.sp,
-                            color = if (isAstrologerTyping) SaffronDeep else Color(0xFF16A34A),
+                            color = if (isAstrologerTyping) SaffronDeep else GreenBase,
                             fontWeight = FontWeight.Medium
                         )
                     }
@@ -661,12 +661,12 @@ fun LiveChatRoomScreen(
                         modifier = Modifier
                             .size(38.dp)
                             .clip(CircleShape)
-                            .background(Color(0xFFDCFCE7))
+                            .background(GreenSoftBase)
                     ) {
                         Icon(
                             imageVector = Icons.Outlined.Phone,
                             contentDescription = "Switch to Call",
-                            tint = Color(0xFF15803D),
+                            tint = GreenDeepBase,
                             modifier = Modifier.size(18.dp)
                         )
                     }
@@ -677,7 +677,7 @@ fun LiveChatRoomScreen(
                         modifier = Modifier
                             .size(38.dp)
                             .clip(CircleShape)
-                            .background(Color(0xFF000000))
+                            .background(InkPrimary)
                     ) {
                         Icon(
                             imageVector = Icons.Filled.Add,
@@ -696,7 +696,7 @@ fun LiveChatRoomScreen(
                     ) {
                         Text(
                             text = if (isHindi) "समाप्त" else "End",
-                            color = Color(0xFFEF4444),
+                            color = DangerRed,
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold
                         )
@@ -719,7 +719,7 @@ fun LiveChatRoomScreen(
                         items(quickQuestions) { q ->
                             Surface(
                                 shape = RoundedCornerShape(14.dp),
-                                color = Color(0xFFFAFAFA),
+                                color = SurfaceAlt,
                                 border = BorderStroke(1.dp, BorderLight),
                                 modifier = Modifier
                                     .clip(RoundedCornerShape(14.dp))
@@ -728,7 +728,7 @@ fun LiveChatRoomScreen(
                                 Text(
                                     text = q,
                                     fontSize = 11.5.sp,
-                                    color = Color(0xFF000000),
+                                    color = InkPrimary,
                                     fontWeight = FontWeight.Medium,
                                     modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
                                 )
@@ -754,12 +754,12 @@ fun LiveChatRoomScreen(
                             modifier = Modifier
                                 .size(40.dp)
                                 .clip(CircleShape)
-                                .background(Color(0xFFF1F5F9))
+                                .background(Neutral100)
                         ) {
                             Icon(
                                 imageVector = Icons.Outlined.AttachFile,
                                 contentDescription = "Attach Kundli",
-                                tint = Color(0xFF64748B),
+                                tint = Neutral500,
                                 modifier = Modifier.size(20.dp)
                             )
                         }
@@ -772,12 +772,12 @@ fun LiveChatRoomScreen(
                             modifier = Modifier
                                 .weight(1f)
                                 .clip(RoundedCornerShape(22.dp))
-                                .background(Color(0xFFF8FAFC)),
+                                .background(Neutral50),
                             placeholder = {
                                 Text(
                                     text = if (isHindi) "अपना प्रश्न या जन्म विवरण लिखें..." else "Type your question...",
                                     fontSize = 13.sp,
-                                    color = Color(0xFF94A3B8)
+                                    color = Neutral400
                                 )
                             },
                             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
@@ -786,9 +786,9 @@ fun LiveChatRoomScreen(
                             shape = RoundedCornerShape(22.dp),
                             colors = OutlinedTextFieldDefaults.colors(
                                 focusedBorderColor = SaffronPrimary,
-                                unfocusedBorderColor = Color(0xFFE2E8F0),
-                                focusedContainerColor = Color(0xFFF8FAFC),
-                                unfocusedContainerColor = Color(0xFFF8FAFC)
+                                unfocusedBorderColor = Neutral200,
+                                focusedContainerColor = Neutral50,
+                                unfocusedContainerColor = Neutral50
                             )
                         )
 
@@ -800,12 +800,12 @@ fun LiveChatRoomScreen(
                             modifier = Modifier
                                 .size(44.dp)
                                 .clip(CircleShape)
-                                .background(if (inputMessage.isNotBlank()) SaffronPrimary else Color(0xFFE2E8F0))
+                                .background(if (inputMessage.isNotBlank()) SaffronPrimary else Neutral200)
                         ) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.Send,
                                 contentDescription = "Send",
-                                tint = if (inputMessage.isNotBlank()) Color.White else Color(0xFF94A3B8),
+                                tint = if (inputMessage.isNotBlank()) Color.White else Neutral400,
                                 modifier = Modifier.size(18.dp)
                             )
                         }
@@ -822,7 +822,7 @@ fun LiveChatRoomScreen(
         ) {
             // Vedic Trust Header Banner
             Surface(
-                color = Color(0xFFFAFAFA),
+                color = SurfaceAlt,
                 border = BorderStroke(1.dp, BorderLight),
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -835,7 +835,7 @@ fun LiveChatRoomScreen(
                         text = if (isHindi) "🔒 100% गोपनीय व सात्विक परामर्श • प्रत्यक्ष वैदिक गणना आधारित"
                         else "🔒 100% Confidential & Authentic Vedic Guidance",
                         fontSize = 11.sp,
-                        color = Color(0xFF737373),
+                        color = InkSoft,
                         fontWeight = FontWeight.Medium
                     )
                 }
@@ -886,7 +886,7 @@ private fun ChatBubbleItem(
                 bottomEnd = if (isUser) 4.dp else 18.dp
             ),
             color = if (isUser) SaffronPrimary else Color.White,
-            border = if (isUser) null else BorderStroke(1.dp, Color(0xFFE2E8F0)),
+            border = if (isUser) null else BorderStroke(1.dp, Neutral200),
             shadowElevation = 1.dp,
             modifier = Modifier.widthIn(max = 290.dp)
         ) {
@@ -904,7 +904,7 @@ private fun ChatBubbleItem(
                 Text(
                     text = message.text,
                     fontSize = 13.5.sp,
-                    color = if (isUser) Color.White else Color(0xFF1E293B),
+                    color = if (isUser) Color.White else Neutral800,
                     lineHeight = 19.sp
                 )
 
@@ -913,7 +913,7 @@ private fun ChatBubbleItem(
                 Text(
                     text = message.formattedTime,
                     fontSize = 9.5.sp,
-                    color = if (isUser) Color.White.copy(alpha = 0.75f) else Color(0xFF94A3B8),
+                    color = if (isUser) Color.White.copy(alpha = 0.75f) else Neutral400,
                     textAlign = TextAlign.End,
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -927,7 +927,7 @@ private fun TypingIndicatorItem(sadhakName: String) {
     Surface(
         shape = RoundedCornerShape(16.dp),
         color = Color.White,
-        border = BorderStroke(1.dp, Color(0xFFE2E8F0)),
+        border = BorderStroke(1.dp, Neutral200),
         modifier = Modifier.padding(start = 4.dp)
     ) {
         Row(
