@@ -446,7 +446,7 @@ private fun GenericProblemScreenTemplate(
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Back",
-                            tint = Color(0xFF000000)
+                            tint = InkPrimary
                         )
                     }
                     Spacer(modifier = Modifier.width(6.dp))
@@ -455,7 +455,7 @@ private fun GenericProblemScreenTemplate(
                         fontFamily = FontFamily.Serif,
                         fontWeight = FontWeight.Bold,
                         fontSize = 18.sp,
-                        color = Color(0xFF000000)
+                        color = InkPrimary
                     )
                 }
             }
@@ -487,7 +487,7 @@ private fun GenericProblemScreenTemplate(
                             modifier = Modifier
                                 .size(50.dp)
                                 .clip(CircleShape)
-                                .background(Color(0xFFFAFAFA)),
+                                .background(SurfaceAlt),
                             contentAlignment = Alignment.Center
                         ) {
                             Text(text = heroEmoji, fontSize = 26.sp)
@@ -498,13 +498,13 @@ private fun GenericProblemScreenTemplate(
                                 fontFamily = FontFamily.Serif,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 16.5.sp,
-                                color = Color(0xFF000000)
+                                color = InkPrimary
                             )
                             Spacer(modifier = Modifier.height(2.dp))
                             Text(
                                 text = subtitleText,
                                 fontSize = 12.sp,
-                                color = Color(0xFF737373),
+                                color = InkSoft,
                                 lineHeight = 16.sp
                             )
                         }
@@ -518,7 +518,7 @@ private fun GenericProblemScreenTemplate(
                     text = if (currentLangCode == "hi") "समस्या का प्रकार चुनें:" else "Select Category:",
                     fontWeight = FontWeight.Bold,
                     fontSize = 14.sp,
-                    color = Color(0xFF000000)
+                    color = InkPrimary
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -526,8 +526,8 @@ private fun GenericProblemScreenTemplate(
                         val isSelected = cat.id == selectedCategory.id
                         Surface(
                             shape = RoundedCornerShape(999.dp),
-                            color = if (isSelected) Color(0xFF000000) else Color(0xFFFAFAFA),
-                            border = BorderStroke(1.dp, if (isSelected) Color(0xFF000000) else BorderLight),
+                            color = if (isSelected) InkPrimary else SurfaceAlt,
+                            border = BorderStroke(1.dp, if (isSelected) InkPrimary else BorderLight),
                             modifier = Modifier
                                 .clip(RoundedCornerShape(999.dp))
                                 .clickable { selectedCategory = cat }
@@ -542,7 +542,7 @@ private fun GenericProblemScreenTemplate(
                                     text = if (currentLangCode == "hi") cat.titleHi else cat.titleEn,
                                     fontSize = 12.5.sp,
                                     fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                                    color = if (isSelected) Color.White else Color(0xFF000000)
+                                    color = if (isSelected) Color.White else InkPrimary
                                 )
                             }
                         }
@@ -554,7 +554,7 @@ private fun GenericProblemScreenTemplate(
             item {
                 Surface(
                     shape = RoundedCornerShape(20.dp),
-                    color = Color(0xFFFAFAFA),
+                    color = SurfaceAlt,
                     border = BorderStroke(1.dp, BorderLight),
                     modifier = Modifier.fillMaxWidth()
                 ) {
@@ -570,12 +570,12 @@ private fun GenericProblemScreenTemplate(
                                     fontFamily = FontFamily.Serif,
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 17.sp,
-                                    color = Color(0xFF000000)
+                                    color = InkPrimary
                                 )
                                 Text(
                                     text = selectedCategory.description,
                                     fontSize = 11.5.sp,
-                                    color = Color(0xFF737373),
+                                    color = InkSoft,
                                     lineHeight = 15.sp
                                 )
                             }
@@ -604,7 +604,7 @@ private fun GenericProblemScreenTemplate(
                                 Text(
                                     text = remedy,
                                     fontSize = 12.sp,
-                                    color = Color(0xFF000000),
+                                    color = InkPrimary,
                                     lineHeight = 16.sp
                                 )
                             }
@@ -627,7 +627,7 @@ private fun GenericProblemScreenTemplate(
                             text = inputLabel,
                             fontWeight = FontWeight.Bold,
                             fontSize = 14.sp,
-                            color = Color(0xFF000000)
+                            color = InkPrimary
                         )
                         Spacer(modifier = Modifier.height(8.dp))
 
@@ -638,7 +638,7 @@ private fun GenericProblemScreenTemplate(
                                 Text(
                                     text = inputPlaceholder,
                                     fontSize = 13.sp,
-                                    color = Color(0xFFA8A8A8)
+                                    color = TextTertiary
                                 )
                             },
                             modifier = Modifier
@@ -646,10 +646,10 @@ private fun GenericProblemScreenTemplate(
                                 .height(95.dp),
                             shape = RoundedCornerShape(12.dp),
                             colors = OutlinedTextFieldDefaults.colors(
-                                focusedBorderColor = Color(0xFF000000),
+                                focusedBorderColor = InkPrimary,
                                 unfocusedBorderColor = BorderLight,
-                                focusedContainerColor = Color(0xFFFAFAFA),
-                                unfocusedContainerColor = Color(0xFFFAFAFA)
+                                focusedContainerColor = SurfaceAlt,
+                                unfocusedContainerColor = SurfaceAlt
                             )
                         )
 
@@ -662,7 +662,7 @@ private fun GenericProblemScreenTemplate(
                         ) {
                             Surface(
                                 shape = RoundedCornerShape(999.dp),
-                                color = if (isMicActive) Color(0xFFFAFAFA) else Color.White,
+                                color = if (isMicActive) SurfaceAlt else Color.White,
                                 border = BorderStroke(1.dp, if (isMicActive) Saffron else BorderLight),
                                 modifier = Modifier
                                     .clip(RoundedCornerShape(999.dp))
@@ -681,21 +681,21 @@ private fun GenericProblemScreenTemplate(
                                     Icon(
                                         imageVector = Icons.Default.Mic,
                                         contentDescription = "Mic",
-                                        tint = if (isMicActive) Saffron else Color(0xFF000000),
+                                        tint = if (isMicActive) Saffron else InkPrimary,
                                         modifier = Modifier.size(15.dp)
                                     )
                                     Text(
                                         text = if (isMicActive) "माइक चालू (बोलें)" else "माइक से बोलें",
                                         fontSize = 11.5.sp,
                                         fontWeight = FontWeight.SemiBold,
-                                        color = if (isMicActive) Saffron else Color(0xFF000000)
+                                        color = if (isMicActive) Saffron else InkPrimary
                                     )
                                 }
                             }
 
                             if (problemNote.isNotBlank()) {
                                 TextButton(onClick = { problemNote = "" }) {
-                                    Text("हटाएं ✕", fontSize = 11.5.sp, color = Color(0xFF737373))
+                                    Text("हटाएं ✕", fontSize = 11.5.sp, color = InkSoft)
                                 }
                             }
                         }
@@ -740,12 +740,12 @@ private fun GenericProblemScreenTemplate(
                                     fontFamily = FontFamily.Serif,
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 15.sp,
-                                    color = Color(0xFF000000)
+                                    color = InkPrimary
                                 )
                                 Text(
                                     text = if (currentLangCode == "hi") "गोपनीय चैट व सीधी वॉइस कॉल पर व्यक्तिगत मार्गदर्शन" else "Private chat & voice call guidance",
                                     fontSize = 11.5.sp,
-                                    color = Color(0xFF737373)
+                                    color = InkSoft
                                 )
                             }
                         }
@@ -775,7 +775,7 @@ private fun GenericProblemScreenTemplate(
                             // Instant Chat Button
                             Surface(
                                 shape = RoundedCornerShape(14.dp),
-                                color = Color(0xFF000000),
+                                color = InkPrimary,
                                 modifier = Modifier
                                     .weight(1f)
                                     .clip(RoundedCornerShape(14.dp))
