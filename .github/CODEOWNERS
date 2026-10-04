@@ -1,0 +1,10 @@
+# Default owner for everything.
+*                       @deepakudiniya-hub
+
+# Security-sensitive paths always require the owner's review.
+/functions/             @deepakudiniya-hub
+/firestore.rules        @deepakudiniya-hub
+/firebase.json          @deepakudiniya-hub
+/.env.example           @deepakudiniya-hub
+/.github/               @deepakudiniya-hub
+/app/src/main/java/com/example/utils/   @deepakudiniya-hub
