@@ -3,7 +3,7 @@ import java.io.FileOutputStream
 import java.util.Properties
 
 plugins {
-  id("org.jetbrains.kotlin.plugin.serialization") version "2.1.0"
+  id("org.jetbrains.kotlin.plugin.serialization") version "2.2.10"
   alias(libs.plugins.android.application)
   alias(libs.plugins.kotlin.compose)
   // alias(libs.plugins.google.devtools.ksp)
@@ -124,10 +124,9 @@ dependencies {
   // implementation(libs.androidx.room.ktx)
   // implementation(libs.androidx.room.runtime)
   // implementation(libs.coil.compose)
-  implementation("com.squareup.retrofit2:retrofit:2.11.0")
-  implementation("com.squareup.retrofit2:converter-kotlinx-serialization:2.11.0")
-  implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0")
-  implementation("com.squareup.okhttp3:okhttp:4.12.0")
+  // Retrofit / OkHttp now resolved from the version catalog only (single source of truth)
+  implementation(libs.converter.kotlinx.serialization)
+  implementation(libs.kotlinx.serialization.json)
   implementation(libs.converter.moshi)
   implementation(libs.converter.gson)
 
