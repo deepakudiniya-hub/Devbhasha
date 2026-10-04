@@ -251,7 +251,7 @@ fun UserProfileScreen(
                         // Tap to copy UID
                         Surface(
                             shape = RoundedCornerShape(20.dp),
-                            color = Color(0xFFF1F5F9),
+                            color = Neutral100,
                             modifier = Modifier.clickable {
                                 val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
                                 val clip = ClipData.newPlainText("Devbhasha UID", effectiveUserId)
@@ -267,13 +267,13 @@ fun UserProfileScreen(
                                     text = "UID: ${effectiveUserId.take(6)}...",
                                     fontSize = 10.5.sp,
                                     fontWeight = FontWeight.Medium,
-                                    color = Color(0xFF64748B)
+                                    color = Neutral500
                                 )
                                 Spacer(modifier = Modifier.width(4.dp))
                                 Icon(
                                     imageVector = Icons.Outlined.ContentCopy,
                                     contentDescription = "Copy UID",
-                                    tint = Color(0xFF64748B),
+                                    tint = Neutral500,
                                     modifier = Modifier.size(11.dp)
                                 )
                             }
@@ -292,7 +292,7 @@ fun UserProfileScreen(
                             modifier = Modifier
                                 .size(74.dp)
                                 .clip(CircleShape)
-                                .border(2.5.dp, Color(0xFFF59E0B), CircleShape)
+                                .border(2.5.dp, WarningAmberBase, CircleShape)
                                 .padding(3.dp)
                                 .clip(CircleShape)
                                 .background(currentAvatar.bgColor)
@@ -358,7 +358,7 @@ fun UserProfileScreen(
                                         text = phone,
                                         fontSize = 13.sp,
                                         fontWeight = FontWeight.Medium,
-                                        color = Color(0xFF334155)
+                                        color = Neutral700
                                     )
                                 }
                             } else {
@@ -375,7 +375,7 @@ fun UserProfileScreen(
                                         Icon(
                                             imageVector = Icons.Filled.Phone,
                                             contentDescription = null,
-                                            tint = Color(0xFFD97706),
+                                            tint = WarningAmberDeep,
                                             modifier = Modifier.size(11.dp)
                                         )
                                         Spacer(modifier = Modifier.width(4.dp))
@@ -400,7 +400,7 @@ fun UserProfileScreen(
                                             if (gotra.isNotBlank()) append("गोत्र: $gotra")
                                         },
                                         fontSize = 11.5.sp,
-                                        color = Color(0xFF64748B),
+                                        color = Neutral500,
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis
                                     )
@@ -428,7 +428,7 @@ fun UserProfileScreen(
                     }
 
                     Spacer(modifier = Modifier.height(14.dp))
-                    HorizontalDivider(color = Color(0xFFF1F5F9))
+                    HorizontalDivider(color = Neutral100)
                     Spacer(modifier = Modifier.height(12.dp))
 
                     // Dakshina & Sadhana Counter Strip
@@ -436,7 +436,7 @@ fun UserProfileScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(14.dp))
-                            .background(Color(0xFFFFF7ED))
+                            .background(SaffronSoft)
                             .border(1.dp, Color(0xFFFFEDD5), RoundedCornerShape(14.dp))
                             .padding(horizontal = 14.dp, vertical = 10.dp),
                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -479,7 +479,7 @@ fun UserProfileScreen(
                             Text(
                                 text = "परामर्श प्रश्न",
                                 fontSize = 11.sp,
-                                color = Color(0xFF64748B)
+                                color = Neutral500
                             )
                             Text(
                                 text = "${userQuestions.size}",
@@ -606,7 +606,7 @@ fun UserProfileScreen(
                         Button(
                             onClick = { showEditProfileDialog = true },
                             shape = RoundedCornerShape(10.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD97706)),
+                            colors = ButtonDefaults.buttonColors(containerColor = WarningAmberDeep),
                             contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
                         ) {
                             Text(
@@ -646,7 +646,7 @@ fun UserProfileScreen(
                                 modifier = Modifier
                                     .size(36.dp)
                                     .clip(CircleShape)
-                                    .background(Color(0xFFFFF7ED)),
+                                    .background(SaffronSoft),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(text = "📜", fontSize = 18.sp)
@@ -684,7 +684,7 @@ fun UserProfileScreen(
                     }
 
                     Spacer(modifier = Modifier.height(14.dp))
-                    HorizontalDivider(color = Color(0xFFF8FAFC))
+                    HorizontalDivider(color = Neutral50)
                     Spacer(modifier = Modifier.height(12.dp))
 
                     if (isLoadingQuestions) {
@@ -705,7 +705,7 @@ fun UserProfileScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clip(RoundedCornerShape(14.dp))
-                                .background(Color(0xFFFAFAFA))
+                                .background(SurfaceAlt)
                                 .padding(vertical = 20.dp, horizontal = 16.dp),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
@@ -715,13 +715,13 @@ fun UserProfileScreen(
                                 text = "अभी कोई परामर्श इतिहास उपलब्ध नहीं है",
                                 fontSize = 13.5.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = Color(0xFF475569)
+                                color = Neutral600
                             )
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(
                                 text = "कुंडली, गृह दोष, विवाह या करियर संबंधी प्रश्नों के लिए हमारे वैदिक साधकों से संपर्क करें।",
                                 fontSize = 12.sp,
-                                color = Color(0xFF94A3B8),
+                                color = Neutral400,
                                 textAlign = TextAlign.Center,
                                 lineHeight = 16.sp
                             )
@@ -761,7 +761,7 @@ fun UserProfileScreen(
                                                     text = "#${idx + 1}",
                                                     fontSize = 11.sp,
                                                     fontWeight = FontWeight.Bold,
-                                                    color = if (isAnswered) GreenPrimary else Color(0xFFD97706)
+                                                    color = if (isAnswered) GreenPrimary else WarningAmberDeep
                                                 )
                                                 Spacer(modifier = Modifier.width(6.dp))
                                                 Text(
@@ -776,7 +776,7 @@ fun UserProfileScreen(
 
                                             Surface(
                                                 shape = RoundedCornerShape(8.dp),
-                                                color = if (isAnswered) GreenPrimary.copy(alpha = 0.15f) else Color(0xFFF59E0B).copy(alpha = 0.15f)
+                                                color = if (isAnswered) GreenPrimary.copy(alpha = 0.15f) else WarningAmberBase.copy(alpha = 0.15f)
                                             ) {
                                                 Text(
                                                     text = if (isAnswered) "समाधान प्राप्त ✓" else "प्रतीक्षारत ⏳",
@@ -790,7 +790,7 @@ fun UserProfileScreen(
 
                                         if (isExpanded && answer.isNotBlank()) {
                                             Spacer(modifier = Modifier.height(8.dp))
-                                            HorizontalDivider(color = Color(0xFFDCFCE7))
+                                            HorizontalDivider(color = GreenSoftBase)
                                             Spacer(modifier = Modifier.height(8.dp))
                                             Text(
                                                 text = "साधक का समाधान:",
@@ -840,7 +840,7 @@ fun UserProfileScreen(
                                 modifier = Modifier
                                     .size(36.dp)
                                     .clip(CircleShape)
-                                    .background(Color(0xFFFFF7ED)),
+                                    .background(SaffronSoft),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(text = "📿", fontSize = 18.sp)
@@ -863,7 +863,7 @@ fun UserProfileScreen(
                     }
 
                     Spacer(modifier = Modifier.height(14.dp))
-                    HorizontalDivider(color = Color(0xFFF8FAFC))
+                    HorizontalDivider(color = Neutral50)
                     Spacer(modifier = Modifier.height(12.dp))
 
                     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -873,10 +873,10 @@ fun UserProfileScreen(
 
                             Surface(
                                 shape = RoundedCornerShape(14.dp),
-                                color = if (isSaved) Color(0xFFFFFDF8) else Color(0xFFFAFAFA),
+                                color = if (isSaved) Color(0xFFFFFDF8) else SurfaceAlt,
                                 border = BorderStroke(
                                     1.dp,
-                                    if (isSaved) Color(0xFFFED7AA) else Color(0xFFE2E8F0)
+                                    if (isSaved) Color(0xFFFED7AA) else Neutral200
                                 ),
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -904,7 +904,7 @@ fun UserProfileScreen(
                                                 Text(
                                                     text = mantra.deityHi,
                                                     fontSize = 11.sp,
-                                                    color = Color(0xFF64748B)
+                                                    color = Neutral500
                                                 )
                                             }
                                         }
@@ -929,7 +929,7 @@ fun UserProfileScreen(
                                             Icon(
                                                 imageVector = if (isSaved) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder,
                                                 contentDescription = "Save Mantra",
-                                                tint = if (isSaved) SaffronPrimary else Color(0xFF94A3B8),
+                                                tint = if (isSaved) SaffronPrimary else Neutral400,
                                                 modifier = Modifier.size(20.dp)
                                             )
                                         }
@@ -947,7 +947,7 @@ fun UserProfileScreen(
                                                 modifier = Modifier
                                                     .fillMaxWidth()
                                                     .clip(RoundedCornerShape(8.dp))
-                                                    .background(Color(0xFFFFF7ED))
+                                                    .background(SaffronSoft)
                                                     .padding(10.dp)
                                             ) {
                                                 Text(
@@ -965,7 +965,7 @@ fun UserProfileScreen(
                                             Text(
                                                 text = "सरल अर्थ: ${mantra.meaningHi}",
                                                 fontSize = 11.5.sp,
-                                                color = Color(0xFF475569),
+                                                color = Neutral600,
                                                 lineHeight = 16.sp
                                             )
                                             Spacer(modifier = Modifier.height(4.dp))
@@ -1005,7 +1005,7 @@ fun UserProfileScreen(
                             modifier = Modifier
                                 .size(36.dp)
                                 .clip(CircleShape)
-                                .background(Color(0xFFFFF7ED)),
+                                .background(SaffronSoft),
                             contentAlignment = Alignment.Center
                         ) {
                             Text(text = "⚙️", fontSize = 18.sp)
@@ -1027,7 +1027,7 @@ fun UserProfileScreen(
                     }
 
                     Spacer(modifier = Modifier.height(14.dp))
-                    HorizontalDivider(color = Color(0xFFF8FAFC))
+                    HorizontalDivider(color = Neutral50)
                     Spacer(modifier = Modifier.height(6.dp))
 
                     // Row 1: Daily Panchang & Muhurat Notifications
@@ -1080,7 +1080,7 @@ fun UserProfileScreen(
                         )
                     }
 
-                    HorizontalDivider(color = Color(0xFFF1F5F9))
+                    HorizontalDivider(color = Neutral100)
 
                     // Row 2: Help & Astrological Support
                     Row(
@@ -1116,12 +1116,12 @@ fun UserProfileScreen(
                         Icon(
                             imageVector = Icons.Filled.ChevronRight,
                             contentDescription = null,
-                            tint = Color(0xFF94A3B8),
+                            tint = Neutral400,
                             modifier = Modifier.size(20.dp)
                         )
                     }
 
-                    HorizontalDivider(color = Color(0xFFF1F5F9))
+                    HorizontalDivider(color = Neutral100)
 
                     // Row 3: Terms & Privacy Policy
                     Row(
@@ -1157,7 +1157,7 @@ fun UserProfileScreen(
                         Icon(
                             imageVector = Icons.Filled.ChevronRight,
                             contentDescription = null,
-                            tint = Color(0xFF94A3B8),
+                            tint = Neutral400,
                             modifier = Modifier.size(20.dp)
                         )
                     }
@@ -1177,8 +1177,8 @@ fun UserProfileScreen(
                         .height(48.dp)
                         .testTag("logout_button"),
                     shape = RoundedCornerShape(14.dp),
-                    border = BorderStroke(1.2.dp, Color(0xFFEF4444)),
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFFEF4444))
+                    border = BorderStroke(1.2.dp, DangerRed),
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = DangerRed)
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Outlined.Logout,
@@ -1495,7 +1495,7 @@ fun UserProfileScreen(
                                                 .background(option.bgColor)
                                                 .border(
                                                     width = if (isSelected) 2.5.dp else 0.dp,
-                                                    color = if (isSelected) Color(0xFFF59E0B) else Color.Transparent,
+                                                    color = if (isSelected) WarningAmberBase else Color.Transparent,
                                                     shape = CircleShape
                                                 ),
                                             contentAlignment = Alignment.Center
@@ -1594,13 +1594,13 @@ fun UserProfileScreen(
                     Text(
                         text = "देवभाषा वैदिक सहायता केंद्र में आपका स्वागत है। किसी भी तकनीकी सहायता, वॉलेट रिचार्ज या परामर्श प्रश्न हेतु संपर्क करें:",
                         fontSize = 12.5.sp,
-                        color = Color(0xFF475569),
+                        color = Neutral600,
                         lineHeight = 17.sp
                     )
 
                     Surface(
                         shape = RoundedCornerShape(12.dp),
-                        color = Color(0xFFFFF7ED),
+                        color = SaffronSoft,
                         border = BorderStroke(1.dp, Color(0xFFFED7AA))
                     ) {
                         Column(modifier = Modifier.padding(12.dp)) {
@@ -1669,19 +1669,19 @@ fun UserProfileScreen(
                     Text(
                         text = "1. सात्विक एवं वैदिक परंपरा: देवभाषा ऐप पर सभी परामर्श भारतीय वैदिक ज्योतिष, कर्मकांड एवं सनातन परंपरा पर आधारित हैं।",
                         fontSize = 12.sp,
-                        color = Color(0xFF334155),
+                        color = Neutral700,
                         lineHeight = 16.sp
                     )
                     Text(
                         text = "2. डेटा गोपनीयता: आपके जन्म विवरण (जन्म समय, स्थान, जन्मतिथि) का उपयोग केवल कुंडली एवं ग्रह विचार हेतु पूर्णतः सुरक्षित रखा जाता है।",
                         fontSize = 12.sp,
-                        color = Color(0xFF334155),
+                        color = Neutral700,
                         lineHeight = 16.sp
                     )
                     Text(
                         text = "3. वॉलेट दक्षिणा: वॉलेट में जोड़ी गई राशि का उपयोग साधकों से परामर्श एवं दक्षिणा हेतु किया जाता है।",
                         fontSize = 12.sp,
-                        color = Color(0xFF334155),
+                        color = Neutral700,
                         lineHeight = 16.sp
                     )
                 }
@@ -1715,7 +1715,7 @@ fun UserProfileScreen(
                 Text(
                     text = "क्या आप सचमुच अपने साधक खाते से बाहर निकलना चाहते हैं?",
                     fontSize = 13.5.sp,
-                    color = Color(0xFF475569)
+                    color = Neutral600
                 )
             },
             confirmButton = {
@@ -1724,7 +1724,7 @@ fun UserProfileScreen(
                         showLogoutConfirmDialog = false
                         onLogoutClick?.invoke()
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFEF4444))
+                    colors = ButtonDefaults.buttonColors(containerColor = DangerRed)
                 ) {
                     Text("हाँ, लॉगआउट करें", color = Color.White, fontWeight = FontWeight.Bold)
                 }
