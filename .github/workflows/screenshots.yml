@@ -38,15 +38,40 @@ jobs:
         with:
           gradle-version: "9.3.1"
 
+      # Real config comes from the secret. If it is absent we drop in a
+      # placeholder so the build can run — the screenshot tests render pure UI
+      # and never touch Firebase.
       - name: Provide google-services.json
         env:
           GOOGLE_SERVICES_JSON_B64: ${{ secrets.GOOGLE_SERVICES_JSON_B64 }}
         run: |
-          if [ -z "$GOOGLE_SERVICES_JSON_B64" ]; then
-            echo "::error::Repository secret GOOGLE_SERVICES_JSON_B64 is not set."
-            exit 1
+          if [ -n "$GOOGLE_SERVICES_JSON_B64" ]; then
+            echo "$GOOGLE_SERVICES_JSON_B64" | base64 -d > app/google-services.json
+            echo "Using real google-services.json from secret."
+          else
+            echo "::warning::GOOGLE_SERVICES_JSON_B64 not set — using a placeholder."
+            cat > app/google-services.json <<'JSON'
+          {
+            "project_info": {
+              "project_number": "000000000000",
+              "project_id": "devbhasha-ci-placeholder",
+              "storage_bucket": "devbhasha-ci-placeholder.appspot.com"
+            },
+            "client": [
+              {
+                "client_info": {
+                  "mobilesdk_app_id": "1:000000000000:android:0000000000000000000000",
+                  "android_client_info": { "package_name": "com.aistudio.devbhasha.kxmpzq" }
+                },
+                "oauth_client": [],
+                "api_key": [ { "current_key": "AIzaSyDUMMYPLACEHOLDER000000000000000000" } ],
+                "services": { "appinvite_service": { "other_platform_oauth_client": [] } }
+              }
+            ],
+            "configuration_version": "1"
+          }
+          JSON
           fi
-          echo "$GOOGLE_SERVICES_JSON_B64" | base64 -d > app/google-services.json
 
       - name: Provide .env
         env:
