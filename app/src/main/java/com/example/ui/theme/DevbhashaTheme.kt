@@ -2,6 +2,7 @@ package com.example.ui.theme
 
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
@@ -108,7 +109,23 @@ private val DevbhashaColorScheme = lightColorScheme(
     onSurfaceVariant = InkSecondary,
     outline = Border
 )
-// ... (rest of the file remains same, keeping the AppTypography defined earlier)
+
+// Dark scheme — the app was light-only (no darkColorScheme existed). Mirrors
+// the light scheme's role mapping (saffron accent, near-black surfaces, light
+// text). Kept OPT-IN via DevbhashaTheme(darkTheme = true) so it changes nothing
+// yet: most screens still paint literal white backgrounds and would clash until
+// the per-screen hardcoded-colour migration lands.
+private val DevbhashaDarkColorScheme = darkColorScheme(
+    primary = Saffron,
+    onPrimary = Color.White,
+    background = Color(0xFF0F0F0F),
+    onBackground = Color(0xFFF5F5F5),
+    surface = Color(0xFF161616),
+    onSurface = Color(0xFFF5F5F5),
+    surfaceVariant = Color(0xFF1E1E1E),
+    onSurfaceVariant = Color(0xFFB0B0B0),
+    outline = Color(0xFF2A2A2A)
+)
 
 private val AppTypography = Typography(
     bodyMedium = TextStyle(
@@ -127,10 +144,11 @@ private val AppTypography = Typography(
 
 @Composable
 fun DevbhashaTheme(
+    darkTheme: Boolean = false,
     content: @Composable () -> Unit
 ) {
     MaterialTheme(
-        colorScheme = DevbhashaColorScheme,
+        colorScheme = if (darkTheme) DevbhashaDarkColorScheme else DevbhashaColorScheme,
         typography = AppTypography,
         content = content
     )

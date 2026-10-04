@@ -186,10 +186,13 @@ fun HomeJournalSearchBar(
         else -> "en"
     }
 
+    // Kept short so it fits the single-line search pill without ellipsis. The
+    // previous long string ("...शब्द या तारीख (उदा. शिव, 28 Sep, कल)...") was
+    // clipped mid-word on narrow screens.
     val placeholderText = when (currentLangCode) {
-        "hi" -> "डायरी में खोजें — शब्द या तारीख (उदा. शिव, 28 Sep, कल)..."
-        "hgl" -> "Journal search karein — keyword ya date (eg. Shiv, 28 Sep)..."
-        else -> "Search journal by keyword or date (e.g. Shiva, 28 Sep)..."
+        "hi" -> "डायरी में खोजें…"
+        "hgl" -> "Journal mein khojein…"
+        else -> "Search journal…"
     }
 
     // Function to launch Android DatePickerDialog
@@ -240,9 +243,9 @@ fun HomeJournalSearchBar(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 14.dp, vertical = 10.dp),
+                    .padding(horizontal = 12.dp, vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 // Search Icon
                 Box(
@@ -329,71 +332,91 @@ fun HomeJournalSearchBar(
 
                 // Clear Query Button ('✕')
                 if (query.isNotEmpty()) {
+                    // 48dp touch target (was 28dp — below the 48dp minimum).
                     IconButton(
                         onClick = {
                             onQueryChange("")
                             focusManager.clearFocus()
                         },
-                        modifier = Modifier.size(28.dp)
+                        modifier = Modifier.size(48.dp)
                     ) {
                         Icon(
                             imageVector = Icons.Filled.Clear,
                             contentDescription = "Clear",
                             tint = InkSoft,
-                            modifier = Modifier.size(16.dp)
+                            modifier = Modifier.size(18.dp)
                         )
                     }
                 }
 
                 // Filter Toggle Icon Button
+                // 48dp touch target; the visual pill stays 32dp inside it.
                 IconButton(
                     onClick = { showFilters = !showFilters },
-                    modifier = Modifier
-                        .size(32.dp)
-                        .clip(CircleShape)
-                        .background(if (showFilters || activeFilter != JournalFilterType.ALL) Terra.copy(alpha = 0.15f) else Color(0xFFF1F5F9))
+                    modifier = Modifier.size(48.dp)
                 ) {
-                    Icon(
-                        imageVector = Icons.Outlined.Tune,
-                        contentDescription = "Toggle Filters",
-                        tint = if (showFilters || activeFilter != JournalFilterType.ALL) Terra else InkSoft,
-                        modifier = Modifier.size(16.dp)
-                    )
+                    Box(
+                        modifier = Modifier
+                            .size(32.dp)
+                            .clip(CircleShape)
+                            .background(if (showFilters || activeFilter != JournalFilterType.ALL) Terra.copy(alpha = 0.15f) else Color(0xFFF1F5F9)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.Tune,
+                            contentDescription = "Toggle Filters",
+                            tint = if (showFilters || activeFilter != JournalFilterType.ALL) Terra else InkSoft,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
                 }
 
                 // Date Picker Calendar Button
+                // 48dp touch target; the visual pill stays 32dp inside it.
                 IconButton(
                     onClick = { openDatePicker() },
-                    modifier = Modifier
-                        .size(32.dp)
-                        .clip(CircleShape)
-                        .background(if (customDateMillis != null) Terra.copy(alpha = 0.15f) else Color(0xFFF1F5F9))
+                    modifier = Modifier.size(48.dp)
                 ) {
-                    Icon(
-                        imageVector = Icons.Outlined.CalendarMonth,
-                        contentDescription = "Pick Date",
-                        tint = if (customDateMillis != null) Terra else InkSoft,
-                        modifier = Modifier.size(17.dp)
-                    )
+                    Box(
+                        modifier = Modifier
+                            .size(32.dp)
+                            .clip(CircleShape)
+                            .background(if (customDateMillis != null) Terra.copy(alpha = 0.15f) else Color(0xFFF1F5F9)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.CalendarMonth,
+                            contentDescription = "Pick Date",
+                            tint = if (customDateMillis != null) Terra else InkSoft,
+                            modifier = Modifier.size(17.dp)
+                        )
+                    }
                 }
 
-                // Voice / Journal Quick Shortcut
-                Surface(
-                    shape = CircleShape,
-                    color = Terra,
-                    shadowElevation = 1.dp,
+                // Voice / Journal Quick Shortcut — 48dp touch target (was 32dp);
+                // the visual circle stays 32dp inside it.
+                Box(
                     modifier = Modifier
-                        .size(32.dp)
-                        .clip(CircleShape)
-                        .clickable { onOpenJournalClick() }
+                        .size(48.dp)
+                        .clickable { onOpenJournalClick() },
+                    contentAlignment = Alignment.Center
                 ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Icon(
-                            imageVector = Icons.Outlined.AutoStories,
-                            contentDescription = "Open Journal",
-                            tint = Color.White,
-                            modifier = Modifier.size(15.dp)
-                        )
+                    Surface(
+                        shape = CircleShape,
+                        color = Terra,
+                        shadowElevation = 1.dp,
+                        modifier = Modifier
+                            .size(32.dp)
+                            .clip(CircleShape)
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(
+                                imageVector = Icons.Outlined.AutoStories,
+                                contentDescription = "Open Journal",
+                                tint = Color.White,
+                                modifier = Modifier.size(15.dp)
+                            )
+                        }
                     }
                 }
             }
