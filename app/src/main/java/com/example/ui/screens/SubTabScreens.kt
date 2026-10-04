@@ -30,6 +30,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.data.api.PanchangDay
+import com.example.data.api.PanchangService
 import com.example.ui.components.DevLogoIcon
 import com.example.ui.models.SadhakItem
 import com.example.ui.theme.*
@@ -395,6 +397,11 @@ fun RemedyScreen(
     var malaCount by remember { mutableIntStateOf(0) }
     var malaLaps by remember { mutableIntStateOf(0) }
 
+    // Live daily Panchang from the free VedicSpace API. Null-safe: the card
+    // keeps its static values if the network call fails or is offline.
+    var panchang by remember { mutableStateOf<PanchangDay?>(null) }
+    LaunchedEffect(Unit) { panchang = PanchangService.today() }
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -435,7 +442,7 @@ fun RemedyScreen(
                                 color = Color(0xFF000000)
                             )
                             Text(
-                                text = "विक्रम संवत् 2083 • आश्विन मास",
+                                text = panchang?.summaryHi ?: "विक्रम संवत् 2083 • आश्विन मास",
                                 fontSize = 12.sp,
                                 color = Saffron
                             )
@@ -471,7 +478,7 @@ fun RemedyScreen(
                 ) {
                     PanchangDetailItem(
                         label = if (isHindi) "तिथि" else "Tithi",
-                        value = "शुक्ल पक्ष एकादशी",
+                        value = panchang?.tithiHi ?: "शुक्ल पक्ष एकादशी",
                         isHighlight = false
                     )
                     PanchangDetailItem(
