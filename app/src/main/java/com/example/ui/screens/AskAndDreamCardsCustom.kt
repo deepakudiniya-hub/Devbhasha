@@ -1,5 +1,6 @@
 package com.example.ui.screens
 
+import com.example.ui.theme.*
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -46,7 +47,7 @@ fun AskAndDreamCards(
                 text = "पंडित जी से सीधा संवाद ('पूछा')",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF000000)
+                color = InkPrimary
             )
             
             Text(
@@ -73,7 +74,7 @@ fun AskAndDreamCards(
                 shape = RoundedCornerShape(12.dp),
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = MaterialTheme.colorScheme.primary,
-                    unfocusedBorderColor = Color(0xFFCBD5E1)
+                    unfocusedBorderColor = Neutral300
                 )
             )
 
@@ -126,7 +127,7 @@ fun AskAndDreamCards(
                         Icon(
                             imageVector = Icons.Default.CheckCircle,
                             contentDescription = null,
-                            tint = Color(0xFF10B981),
+                            tint = EmeraldBase,
                             modifier = Modifier.size(16.dp)
                         )
                         Spacer(modifier = Modifier.width(6.dp))
