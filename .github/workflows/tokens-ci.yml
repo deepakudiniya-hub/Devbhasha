@@ -1,0 +1,50 @@
+name: Design Tokens CI
+
+# Keeps the generated Kotlin in sync with design/tokens.json.
+
+on:
+  pull_request:
+    paths:
+      - "design/**"
+      - "app/src/main/java/com/example/ui/theme/DevTokens.kt"
+  push:
+    branches: [main]
+    paths:
+      - "design/**"
+      - "app/src/main/java/com/example/ui/theme/DevTokens.kt"
+  workflow_dispatch:
+
+concurrency:
+  group: tokens-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  tokens:
+    name: Tokens in sync
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Regenerate Kotlin from tokens
+        run: python3 design/generate_kotlin.py
+
+      - name: Fail if DevTokens.kt is stale
+        run: |
+          if ! git diff --quiet -- app/src/main/java/com/example/ui/theme/DevTokens.kt; then
+            echo "::error::DevTokens.kt is out of sync with design/tokens.json."
+            echo "Run 'python3 design/generate_kotlin.py' and commit the result."
+            git --no-pager diff -- app/src/main/java/com/example/ui/theme/DevTokens.kt
+            exit 1
+          fi
+          echo "Design tokens are in sync."
