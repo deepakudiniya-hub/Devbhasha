@@ -1,5 +1,6 @@
 package com.example.ui.models
 
+import com.example.ui.theme.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import java.text.SimpleDateFormat
@@ -39,9 +40,9 @@ data class CircleCategoryItem(
     val titleEn: String,
     val symbol: String = "🪔",
     val icon: ImageVector? = null,
-    val primaryColor: Color = Color(0xFFFF6B00),
-    val softBgColor: Color = Color(0xFFFAFAFA),
-    val borderColor: Color = Color(0xFFEFEFEF)
+    val primaryColor: Color = Saffron,
+    val softBgColor: Color = SurfaceAlt,
+    val borderColor: Color = BorderLight
 )
 
 val DEFAULT_CIRCLE_CATEGORIES = listOf(
@@ -50,18 +51,18 @@ val DEFAULT_CIRCLE_CATEGORIES = listOf(
         titleHi = "दैनिक राशिफल",
         titleEn = "Horoscope",
         symbol = "🌟",
-        primaryColor = Color(0xFFFF6B00),
-        softBgColor = Color(0xFFFAFAFA),
-        borderColor = Color(0xFFEFEFEF)
+        primaryColor = Saffron,
+        softBgColor = SurfaceAlt,
+        borderColor = BorderLight
     ),
     CircleCategoryItem(
         id = "family_problems",
         titleHi = "पारिवारिक समस्या",
         titleEn = "Family Problems",
         symbol = "🏡",
-        primaryColor = Color(0xFFFF6B00),
-        softBgColor = Color(0xFFFAFAFA),
-        borderColor = Color(0xFFEFEFEF)
+        primaryColor = Saffron,
+        softBgColor = SurfaceAlt,
+        borderColor = BorderLight
     ),
     CircleCategoryItem(
         id = "kundli_matching",
@@ -69,7 +70,7 @@ val DEFAULT_CIRCLE_CATEGORIES = listOf(
         titleEn = "Matching",
         symbol = "💍",
         primaryColor = Color(0xFFE11D48),
-        softBgColor = Color(0xFFFEE2E2),
+        softBgColor = DangerSoft,
         borderColor = Color(0xFFFECDD3)
     ),
     CircleCategoryItem(
@@ -86,8 +87,8 @@ val DEFAULT_CIRCLE_CATEGORIES = listOf(
         titleHi = "साधक कॉल",
         titleEn = "Call",
         symbol = "📞",
-        primaryColor = Color(0xFF16A34A),
-        softBgColor = Color(0xFFDCFCE7),
+        primaryColor = GreenBase,
+        softBgColor = GreenSoftBase,
         borderColor = Color(0xFFBBF7D0)
     ),
     CircleCategoryItem(
@@ -95,9 +96,9 @@ val DEFAULT_CIRCLE_CATEGORIES = listOf(
         titleHi = "पूजा-पाठ",
         titleEn = "Pooja",
         symbol = "🪔",
-        primaryColor = Color(0xFFFF6B00),
-        softBgColor = Color(0xFFFAFAFA),
-        borderColor = Color(0xFFEFEFEF)
+        primaryColor = Saffron,
+        softBgColor = SurfaceAlt,
+        borderColor = BorderLight
     ),
     CircleCategoryItem(
         id = "dream",
@@ -105,7 +106,7 @@ val DEFAULT_CIRCLE_CATEGORIES = listOf(
         titleEn = "Dreams",
         symbol = "🔮",
         primaryColor = Color(0xFF9333EA),
-        softBgColor = Color(0xFFF3E8FF),
+        softBgColor = AccentVioletSoft,
         borderColor = Color(0xFFE9D5FF)
     ),
     CircleCategoryItem(
@@ -113,8 +114,8 @@ val DEFAULT_CIRCLE_CATEGORIES = listOf(
         titleHi = "वास्तु",
         titleEn = "Vastu",
         symbol = "🏛️",
-        primaryColor = Color(0xFF2563EB),
-        softBgColor = Color(0xFFEFF6FF),
+        primaryColor = AccentBlue,
+        softBgColor = AccentBlueSoft,
         borderColor = Color(0xFFBFDBFE)
     ),
     CircleCategoryItem(
@@ -122,9 +123,9 @@ val DEFAULT_CIRCLE_CATEGORIES = listOf(
         titleHi = "मंत्र जप",
         titleEn = "Mantra Jap",
         symbol = "📿",
-        primaryColor = Color(0xFFFF6B00),
-        softBgColor = Color(0xFFFAFAFA),
-        borderColor = Color(0xFFEFEFEF)
+        primaryColor = Saffron,
+        softBgColor = SurfaceAlt,
+        borderColor = BorderLight
     )
 )
 
@@ -398,20 +399,20 @@ val AVATAR_PACKAGES = listOf(
 
 val ALL_AVATAR_OPTIONS = listOf(
     // पैकेज 1: सनातन प्रतीक (Sacred Symbols)
-    AvatarOption("om", "symbols", "ॐ (प्रणव)", "Om", "ॐ", Color(0xFFFF6B00)),
-    AvatarOption("deepak", "symbols", "दीपक (ज्योति)", "Deepak", "🪔", Color(0xFFFF6B00)),
+    AvatarOption("om", "symbols", "ॐ (प्रणव)", "Om", "ॐ", Saffron),
+    AvatarOption("deepak", "symbols", "दीपक (ज्योति)", "Deepak", "🪔", Saffron),
     AvatarOption("kamal", "symbols", "कमल पुष्प", "Lotus", "🪷", Color(0xFFDB2777)),
     AvatarOption("shankh", "symbols", "शंख", "Shankh", "🐚", Color(0xFF0284C7)),
-    AvatarOption("surya", "symbols", "सूर्य देव", "Surya", "☀️", Color(0xFFFF6B00)),
+    AvatarOption("surya", "symbols", "सूर्य देव", "Surya", "☀️", Saffron),
     AvatarOption("trishul", "symbols", "त्रिशूल", "Trishul", "🔱", Color(0xFF9333EA)),
 
     // पैकेज 2: साधक एवं भक्त (Seekers & Devotees)
     AvatarOption("sadhak_med", "seekers", "ध्यानस्थ साधक", "Sadhak", "🧘", Color(0xFF059669)),
-    AvatarOption("bhakt_namaste", "seekers", "भक्त (नमन)", "Devotee", "🙏", Color(0xFFFF6B00)),
-    AvatarOption("jap_mala", "seekers", "जप माला", "Jap Mala", "📿", Color(0xFF000000)),
+    AvatarOption("bhakt_namaste", "seekers", "भक्त (नमन)", "Devotee", "🙏", Saffron),
+    AvatarOption("jap_mala", "seekers", "जप माला", "Jap Mala", "📿", InkPrimary),
     AvatarOption("vedic_student", "seekers", "वैदिक शिष्य", "Vedic Seeker", "📖", Color(0xFF4338CA)),
-    AvatarOption("rishi", "seekers", "ऋषि / मुनि", "Rishi", "🌿", Color(0xFF15803D)),
-    AvatarOption("kalash", "seekers", "मंगल कलश", "Kalash", "🏺", Color(0xFFFF6B00))
+    AvatarOption("rishi", "seekers", "ऋषि / मुनि", "Rishi", "🌿", GreenDeepBase),
+    AvatarOption("kalash", "seekers", "मंगल कलश", "Kalash", "🏺", Saffron)
 )
 
 fun getAvatarById(id: String): AvatarOption {
