@@ -45,6 +45,7 @@ credentials = "1.5.0"
 googleid = "1.1.1"
 razorpay = "1.6.38"
 kotlinxSerializationJson = "1.8.0"
+crashlytics = "3.0.8"
 
 [libraries]
 razorpay-checkout = { group = "com.razorpay", name = "checkout", version.ref = "razorpay" }
@@ -106,6 +107,8 @@ firebase-auth = { group = "com.google.firebase", name = "firebase-auth" }
 firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore" }
 firebase-ai = { group = "com.google.firebase", name = "firebase-ai" }
 firebase-functions = { group = "com.google.firebase", name = "firebase-functions" }
+firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging" }
+firebase-crashlytics = { group = "com.google.firebase", name = "firebase-crashlytics" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
@@ -114,3 +117,4 @@ google-devtools-ksp = { id = "com.google.devtools.ksp", version.ref = "googleDev
 roborazzi = { id = "io.github.takahirom.roborazzi", version.ref = "roborazzi" }
 secrets = { id = "com.google.android.libraries.mapsplatform.secrets-gradle-plugin", version.ref = "secretsGradlePlugin" }
 google-services = { id = "com.google.gms.google-services", version.ref = "googleServices" }
+crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "crashlytics" }
