@@ -10,6 +10,7 @@ plugins {
   alias(libs.plugins.roborazzi)
   alias(libs.plugins.secrets)
   alias(libs.plugins.google.services)
+  alias(libs.plugins.crashlytics)
 }
 
 // Automated Version Management via version.properties
@@ -154,6 +155,8 @@ dependencies {
   implementation(libs.firebase.firestore)
   implementation(libs.firebase.ai)
   implementation(libs.firebase.functions)
+  implementation(libs.firebase.messaging)
+  implementation(libs.firebase.crashlytics)
   testImplementation(libs.androidx.compose.ui.test.junit4)
   testImplementation(libs.androidx.core)
   testImplementation(libs.androidx.junit)
