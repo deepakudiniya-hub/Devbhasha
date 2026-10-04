@@ -39,6 +39,7 @@ import com.example.utils.PaymentResultEvent
 import com.example.utils.RazorpayPaymentManager
 import com.example.utils.UserManager
 import com.example.utils.UserSession
+import com.example.utils.WalletRepository
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -65,7 +66,12 @@ fun HomeScreen(
         )
     }
     var userEmail by remember { mutableStateOf("") }
-    var walletBalance by remember { mutableDoubleStateOf(userSession.getWalletBalance()) }
+    // Server-authoritative wallet — this is a display mirror only.
+    var walletBalance by remember { mutableDoubleStateOf(0.0) }
+    DisposableEffect(targetUserDocId) {
+        val reg = WalletRepository.observeBalance(targetUserDocId) { walletBalance = it }
+        onDispose { reg.remove() }
+    }
     var freeMins by remember { mutableIntStateOf(0) }
     var freeDreamUsed by remember { mutableStateOf(false) }
     var isOfferClaimed by remember { mutableStateOf(false) }
@@ -234,9 +240,12 @@ fun HomeScreen(
                                 paymentMode = "razorpay",
                                 paymentId = event.transactionId
                             )
-                            val newBal = (walletBalance - 99.0).coerceAtLeast(0.0)
-                            walletBalance = newBal
-                            userSession.setWalletBalance(newBal)
+                            // Charge server-side (idempotent by payment id).
+                            WalletRepository.spend(
+                                amountRupees = 99.0,
+                                purpose = "dream_matlab",
+                                ref = "dream_${event.transactionId}"
+                            ) { }
                             when (submitRes) {
                                 is DreamSubmitResult.Success -> {
                                     showToast("पेमेंट सफल! सपना साधक '${submitRes.sadhakName}' को भेज दिया गया ✨")
@@ -271,9 +280,12 @@ fun HomeScreen(
                 freeMins -= 1
                 showToast("Used 1 free minute with ${sadhak.nameEn}")
             } else {
-                val newBal = (walletBalance - 20.0).coerceAtLeast(0.0)
-                walletBalance = newBal
-                userSession.setWalletBalance(newBal)
+                // Charge server-side; the mirror updates via observeBalance.
+                WalletRepository.spend(
+                    amountRupees = 20.0,
+                    purpose = "consultation",
+                    ref = "consult_${sadhak.id}_${System.currentTimeMillis()}"
+                ) { }
             }
 
             if (type == "chat") {

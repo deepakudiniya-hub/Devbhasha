@@ -38,6 +38,7 @@ import com.example.utils.DreamSubmitResult
 import com.example.utils.DreamSubmitter
 import com.example.utils.RazorpayPaymentManager
 import com.example.utils.UserSession
+import com.example.utils.WalletRepository
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
@@ -578,8 +579,9 @@ fun DreamMeaningBottomSheet(
                     }
                 }
             } else if (walletBalance >= 99.0) {
-                // Wallet deduction
-                userSession.setWalletBalance(userSession.getWalletBalance() - 99.0)
+                // Wallet deduction — server-side and idempotent.
+                val chargeRef = "dream_wallet_${System.currentTimeMillis()}"
+                WalletRepository.spend(99.0, "dream_matlab", chargeRef) { }
                 val res = DreamSubmitter.submitDreamToRandomSadhak(
                     userId = effectiveUserId,
                     userName = effectiveUserName,
@@ -610,11 +612,11 @@ fun DreamMeaningBottomSheet(
                         Toast.makeText(context, msg, Toast.LENGTH_LONG).show()
                     }
                     is DreamSubmitResult.NoVerifiedSadhak -> {
-                        userSession.setWalletBalance(userSession.getWalletBalance() + 99.0)
+                        WalletRepository.refund(99.0, "dream_matlab_refund", "${chargeRef}_refund") { }
                         Toast.makeText(context, res.message, Toast.LENGTH_LONG).show()
                     }
                     is DreamSubmitResult.Error -> {
-                        userSession.setWalletBalance(userSession.getWalletBalance() + 99.0)
+                        WalletRepository.refund(99.0, "dream_matlab_refund", "${chargeRef}_refund") { }
                         Toast.makeText(context, "त्रुटि: ${res.message}", Toast.LENGTH_LONG).show()
                     }
                 }

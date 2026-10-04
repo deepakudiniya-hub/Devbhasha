@@ -16,3 +16,11 @@
 local.properties
 .env
 debug.keystore
+
+# Cloud Functions
+functions/node_modules/
+functions/.env
+functions/lib/
+.firebase/
+firebase-debug.log
+*-debug.log

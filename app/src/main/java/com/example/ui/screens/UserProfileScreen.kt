@@ -46,6 +46,7 @@ import com.example.ui.models.ALL_AVATAR_OPTIONS
 import com.example.ui.models.getAvatarById
 import com.example.ui.theme.*
 import com.example.utils.UserSession
+import com.example.utils.WalletRepository
 
 // Preset Vedic Sacred Mantras for the "Saved Mantras" section
 data class VedicMantraItem(
@@ -159,7 +160,11 @@ fun UserProfileScreen(
     var birthPlace by remember { mutableStateOf("") }
     var gotra by remember { mutableStateOf("") }
     var avatarId by remember { mutableStateOf("om") }
-    var walletBalance by remember { mutableDoubleStateOf(userSession.getWalletBalance()) }
+    var walletBalance by remember { mutableDoubleStateOf(0.0) }
+    DisposableEffect(effectiveUserId) {
+        val reg = WalletRepository.observeBalance(effectiveUserId) { walletBalance = it }
+        onDispose { reg.remove() }
+    }
     var savedMantraIds by remember { mutableStateOf(setOf("mantra_mahamrityunjaya", "mantra_gayatri")) }
 
     // Consultations state

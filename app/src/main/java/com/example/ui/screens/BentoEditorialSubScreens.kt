@@ -9,6 +9,7 @@ import android.app.Activity
 import com.example.utils.RazorpayPaymentManager
 import com.example.utils.DreamSubmitter
 import com.example.utils.DreamSubmitResult
+import com.example.utils.WalletRepository
 import kotlinx.coroutines.launch
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.draw.alpha
@@ -1021,6 +1022,7 @@ fun BentoEditorialDreamsScreen(
                                         }
                                     } else if (walletBalance >= 99.0) {
                                         coroutineScope.launch {
+                                            val chargeRef = "dream_wallet_${System.currentTimeMillis()}"
                                             val res = DreamSubmitter.submitDreamToRandomSadhak(
                                                 userId = userId,
                                                 userName = userName,
@@ -1029,8 +1031,7 @@ fun BentoEditorialDreamsScreen(
                                                 amount = 99.0,
                                                 paymentMode = "wallet"
                                             )
-                                            val sess = com.example.utils.UserSession(context)
-                                            sess.setWalletBalance(sess.getWalletBalance() - 99.0)
+                                            WalletRepository.spend(99.0, "dream_matlab", chargeRef) { }
                                             dreamText = ""
                                             isListeningVoice = false
                                             when (res) {
@@ -1038,11 +1039,11 @@ fun BentoEditorialDreamsScreen(
                                                     Toast.makeText(context, "सपना सुरक्षित हुआ — साधक '${res.sadhakName}' को सौंपा गया ✨", Toast.LENGTH_LONG).show()
                                                 }
                                                 is DreamSubmitResult.NoVerifiedSadhak -> {
-                                                    sess.setWalletBalance(sess.getWalletBalance() + 99.0)
+                                                    WalletRepository.refund(99.0, "dream_matlab_refund", "${chargeRef}_refund") { }
                                                     Toast.makeText(context, res.message, Toast.LENGTH_LONG).show()
                                                 }
                                                 is DreamSubmitResult.Error -> {
-                                                    sess.setWalletBalance(sess.getWalletBalance() + 99.0)
+                                                    WalletRepository.refund(99.0, "dream_matlab_refund", "${chargeRef}_refund") { }
                                                     Toast.makeText(context, "सपना सुरक्षित हुआ — साधक को भेजा गया", Toast.LENGTH_LONG).show()
                                                 }
                                             }

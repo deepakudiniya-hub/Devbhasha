@@ -7,12 +7,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.example.utils.UserSession
+import com.example.utils.WalletRepository
 
 @Composable
 fun WalletScreen(userId: String) {
     val context = LocalContext.current
     val userSession = remember { UserSession(context) }
-    var walletBalance by remember { mutableDoubleStateOf(userSession.getWalletBalance()) }
+    var walletBalance by remember { mutableDoubleStateOf(0.0) }
+    DisposableEffect(userId) {
+        val reg = WalletRepository.observeBalance(userId) { walletBalance = it }
+        onDispose { reg.remove() }
+    }
     var isLoading by remember { mutableStateOf(false) }
 
     Column(

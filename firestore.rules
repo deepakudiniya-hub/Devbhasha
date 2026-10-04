@@ -1,0 +1,59 @@
+rules_version = '2';
+
+// Devbhasha Firestore security rules.
+// The client is untrusted. Money fields are server-writable only (the Admin
+// SDK in Cloud Functions bypasses these rules; the app never can).
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() { return request.auth != null; }
+    function isSelf(uid) { return isSignedIn() && request.auth.uid == uid; }
+
+    // Users: owner may read; owner may update profile fields but NEVER the
+    // server-owned wallet balance.
+    match /users/{uid} {
+      allow read: if isSelf(uid);
+      allow create: if isSelf(uid)
+                    && !request.resource.data.keys().hasAny(['walletBalance']);
+      allow update: if isSelf(uid)
+                    && !request.resource.data.diff(resource.data)
+                        .affectedKeys().hasAny(['walletBalance']);
+      allow delete: if false;
+    }
+
+    // Sadhaks: readable to signed-in users; verification/status is server/ops
+    // only, never client-writable.
+    match /sadhaks/{id} {
+      allow read: if isSignedIn();
+      allow write: if false;
+    }
+
+    // Questions: a user owns their own questions; sadhak answers come via server.
+    match /questions/{id} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn();
+      allow update, delete: if false;
+    }
+
+    // Payment records and ledger are server-written; a user may read only their
+    // own payment documents.
+    match /payments/{id} {
+      allow read: if isSignedIn() && resource.data.uid == request.auth.uid;
+      allow write: if false;
+    }
+    match /paymentOrders/{id} {
+      allow read: if isSignedIn() && resource.data.uid == request.auth.uid;
+      allow write: if false;
+    }
+    match /walletLedger/{id} {
+      allow read: if isSignedIn() && resource.data.uid == request.auth.uid;
+      allow write: if false;
+    }
+
+    // Everything else: deny by default.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

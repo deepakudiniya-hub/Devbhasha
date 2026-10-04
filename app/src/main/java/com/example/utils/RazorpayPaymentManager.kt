@@ -3,7 +3,6 @@ package com.example.utils
 import android.app.Activity
 import android.content.Context
 import android.util.Log
-import com.example.BuildConfig
 import android.widget.Toast
 import com.razorpay.Checkout
 import com.razorpay.PaymentData
@@ -25,14 +24,18 @@ sealed class PaymentResultEvent {
     ) : PaymentResultEvent()
 }
 
+/**
+ * Razorpay checkout, tied to a **server-created order**.
+ *
+ * SECURITY: the wallet balance is never touched here. On success we ask the
+ * server to verify the payment signature and credit the wallet
+ * ([WalletRepository.verifyAndCredit]); the balance is only updated once the
+ * server confirms it. The Razorpay key SECRET never reaches the app.
+ */
 object RazorpayPaymentManager {
     private const val TAG = "RazorpayPaymentManager"
 
-    // Razorpay API key comes from config (.env / BuildConfig), not hardcoded.
-    private val RAZORPAY_KEY = BuildConfig.RAZORPAY_KEY
-    private val DEFAULT_RAZORPAY_TEST_KEY = RAZORPAY_KEY
-
-    // Session states for ongoing checkout
+    // Session states for an ongoing checkout
     var pendingAmount: Double = 0.0
     var pendingUserId: String = ""
     var pendingUserName: String = ""
@@ -44,11 +47,14 @@ object RazorpayPaymentManager {
     val paymentEvents = _paymentEvents.asSharedFlow()
 
     fun init(context: Context) {
-        // Razorpay automatically loads WebView on-demand when startRechargePayment() is called.
+        // Razorpay loads its WebView on demand when checkout opens.
     }
 
     /**
-     * Launch Razorpay Checkout for wallet recharge
+     * Launch Razorpay Checkout for a wallet recharge.
+     *
+     * Asks the server for an order id first, then opens checkout against it.
+     * Returns true if checkout was started (order created and sheet opened).
      */
     fun startRechargePayment(
         activity: Activity,
@@ -57,7 +63,6 @@ object RazorpayPaymentManager {
         userName: String,
         userPhone: String = "",
         userEmail: String = "user@bhasha.app",
-        apiKey: String = DEFAULT_RAZORPAY_TEST_KEY,
         purpose: String = "wallet_recharge",
         dreamText: String = ""
     ): Boolean {
@@ -73,25 +78,51 @@ object RazorpayPaymentManager {
         pendingPurpose = purpose
         pendingDreamText = dreamText
 
-        val checkout = Checkout()
-        checkout.setKeyID(apiKey)
+        // Create the order server-side; open checkout only once we have an id.
+        WalletRepository.createOrder(amount) { result ->
+            result.onSuccess { (orderId, keyId) ->
+                activity.runOnUiThread {
+                    openCheckout(activity, orderId, keyId, amount, userPhone, userEmail)
+                }
+            }.onFailure { e ->
+                Log.e(TAG, "Failed to create Razorpay order", e)
+                activity.runOnUiThread {
+                    Toast.makeText(
+                        activity,
+                        "पेमेंट शुरू नहीं हो सका: ${e.localizedMessage}",
+                        Toast.LENGTH_LONG
+                    ).show()
+                    _paymentEvents.tryEmit(
+                        PaymentResultEvent.Error(amount, -1, e.localizedMessage ?: "Order failed")
+                    )
+                }
+            }
+        }
+        return true
+    }
 
+    private fun openCheckout(
+        activity: Activity,
+        orderId: String,
+        keyId: String,
+        amount: Double,
+        userPhone: String,
+        userEmail: String
+    ) {
+        val checkout = Checkout()
+        checkout.setKeyID(keyId)
         try {
             val options = JSONObject()
             options.put("name", "भाषा (Bhasha)")
             options.put("description", "वॉलेट दक्षिणा रिचार्ज (+₹${amount.toInt()})")
             options.put("currency", "INR")
-            // Amount in smallest currency unit (paise)
-            options.put("amount", (amount * 100).toLong())
+            // Amount is defined by the server order; do not send it from here.
+            options.put("order_id", orderId)
             options.put("theme.color", "#E65100")
 
             val prefill = JSONObject()
-            if (userPhone.isNotBlank()) {
-                prefill.put("contact", userPhone)
-            }
-            if (userEmail.isNotBlank()) {
-                prefill.put("email", userEmail)
-            }
+            if (userPhone.isNotBlank()) prefill.put("contact", userPhone)
+            if (userEmail.isNotBlank()) prefill.put("email", userEmail)
             options.put("prefill", prefill)
 
             val retryObj = JSONObject()
@@ -100,16 +131,19 @@ object RazorpayPaymentManager {
             options.put("retry", retryObj)
 
             checkout.open(activity, options)
-            return true
         } catch (e: Exception) {
             Log.e(TAG, "Error opening Razorpay checkout: ${e.message}", e)
-            Toast.makeText(activity, "पेमेंट गेटवे प्रारंभ करने में त्रुटि: ${e.localizedMessage}", Toast.LENGTH_LONG).show()
-            return false
+            Toast.makeText(
+                activity,
+                "पेमेंट गेटवे प्रारंभ करने में त्रुटि: ${e.localizedMessage}",
+                Toast.LENGTH_LONG
+            ).show()
         }
     }
 
     /**
-     * Handle payment success callback from Razorpay
+     * Handle the payment success callback from Razorpay.
+     * Credits the wallet ONLY after server-side verification.
      */
     fun onPaymentSuccess(
         activity: Context,
@@ -117,30 +151,40 @@ object RazorpayPaymentManager {
         paymentData: PaymentData?
     ) {
         val amount = pendingAmount
-        val userId = pendingUserId
-        val txnId = paymentId ?: paymentData?.paymentId ?: "RZP_${System.currentTimeMillis()}"
+        val orderId = paymentData?.orderId
+        val pid = paymentId ?: paymentData?.paymentId
+        val signature = paymentData?.signature
 
-        Log.d(TAG, "Payment Success: id=$txnId, amount=$amount, user=$userId")
-
-        // Update local wallet balance in UserSession
-        val userSession = UserSession(activity)
-        val currentBalance = userSession.getWalletBalance()
-        userSession.setWalletBalance(currentBalance + amount)
-
-        val successMsg = "₹${amount.toInt()} का भुगतान सफल रहा! वॉलेट बैलेंस अपडेट हो गया।"
-        Toast.makeText(activity, successMsg, Toast.LENGTH_LONG).show()
-
-        _paymentEvents.tryEmit(
-            PaymentResultEvent.Success(
-                amount = amount,
-                transactionId = txnId,
-                message = successMsg
+        if (orderId.isNullOrBlank() || pid.isNullOrBlank() || signature.isNullOrBlank()) {
+            // Never credit without a verifiable payment.
+            Log.e(TAG, "Missing order/payment/signature — cannot verify")
+            _paymentEvents.tryEmit(
+                PaymentResultEvent.Error(amount, -2, "Payment could not be verified")
             )
-        )
+            return
+        }
+
+        WalletRepository.verifyAndCredit(orderId, pid, signature) { result ->
+            result.onSuccess { newBalance ->
+                Log.d(TAG, "Payment verified. txn=$pid newBalance=$newBalance")
+                val msg = "₹${amount.toInt()} का भुगतान सफल रहा! वॉलेट बैलेंस अपडेट हो गया।"
+                Toast.makeText(activity, msg, Toast.LENGTH_LONG).show()
+                _paymentEvents.tryEmit(
+                    PaymentResultEvent.Success(amount, pid, msg)
+                )
+            }.onFailure { e ->
+                Log.e(TAG, "Payment verification failed", e)
+                val msg = "भुगतान सत्यापन विफल: ${e.localizedMessage}"
+                Toast.makeText(activity, msg, Toast.LENGTH_LONG).show()
+                _paymentEvents.tryEmit(
+                    PaymentResultEvent.Error(amount, -3, msg)
+                )
+            }
+        }
     }
 
     /**
-     * Handle payment error/cancellation callback from Razorpay
+     * Handle payment error/cancellation callback from Razorpay.
      */
     fun onPaymentError(
         activity: Context,
@@ -150,16 +194,10 @@ object RazorpayPaymentManager {
     ) {
         val amount = pendingAmount
         val errorMsg = response ?: "उपयोगकर्ता द्वारा भुगतान रद्द किया गया या नेटवर्क समस्या"
-
         val userFriendlyMsg = "भुगतान विफल रहा (Payment Failed): $errorMsg"
         Toast.makeText(activity, userFriendlyMsg, Toast.LENGTH_LONG).show()
-
         _paymentEvents.tryEmit(
-            PaymentResultEvent.Error(
-                amount = amount,
-                errorCode = errorCode,
-                errorMessage = userFriendlyMsg
-            )
+            PaymentResultEvent.Error(amount, errorCode, userFriendlyMsg)
         )
     }
 }

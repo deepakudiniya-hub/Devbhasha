@@ -1,0 +1,14 @@
+{
+  "name": "devbhasha-functions",
+  "description": "Devbhasha Cloud Functions — server-authoritative wallet & Razorpay verification",
+  "main": "index.js",
+  "private": true,
+  "engines": {
+    "node": "20"
+  },
+  "dependencies": {
+    "firebase-admin": "^12.5.0",
+    "firebase-functions": "^5.1.0",
+    "razorpay": "^2.9.4"
+  }
+}

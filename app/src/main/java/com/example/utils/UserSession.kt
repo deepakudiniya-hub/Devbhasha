@@ -70,12 +70,17 @@ class UserSession(context: Context) {
         return getLanguage() == "hi"
     }
 
-    fun getWalletBalance(): Double {
-        return prefs.getFloat("wallet_balance", 100.0f).toDouble()
-    }
+    // DEPRECATED — the wallet is server-authoritative now (see WalletRepository
+    // and functions/index.js). The balance lives in Firestore
+    // (`users/{uid}.walletBalance`, in paise) and is written only by Cloud
+    // Functions. The device must never own or mutate real money.
+    @Deprecated("Balance is server-owned; use WalletRepository.observeBalance()")
+    fun getWalletBalance(): Double = 0.0
 
+    @Deprecated("Balance is server-owned; the app must never set it.")
+    @Suppress("UNUSED_PARAMETER")
     fun setWalletBalance(balance: Double) {
-        prefs.edit().putFloat("wallet_balance", balance.toFloat()).apply()
+        // no-op by design — money is never mutated on the device
     }
 
     // लॉग आउट करने के लिए
