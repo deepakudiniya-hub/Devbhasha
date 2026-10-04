@@ -178,7 +178,7 @@ fun BentoFamilyProblemsScreen(
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Back",
-                            tint = Color(0xFF000000)
+                            tint = InkPrimary
                         )
                     }
                     Spacer(modifier = Modifier.width(6.dp))
@@ -187,7 +187,7 @@ fun BentoFamilyProblemsScreen(
                         fontFamily = FontFamily.Serif,
                         fontWeight = FontWeight.Bold,
                         fontSize = 18.sp,
-                        color = Color(0xFF000000)
+                        color = InkPrimary
                     )
                 }
             }
@@ -209,7 +209,7 @@ fun BentoFamilyProblemsScreen(
                         fontFamily = FontFamily.Serif,
                         fontSize = 23.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF000000)
+                        color = InkPrimary
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
@@ -218,7 +218,7 @@ fun BentoFamilyProblemsScreen(
                         else
                             "Find remedies and consult verified sadhaks for household discord, relationships, children and peace.",
                         fontSize = 12.5.sp,
-                        color = Color(0xFF737373),
+                        color = InkSoft,
                         lineHeight = 17.sp
                     )
                 }
@@ -230,7 +230,7 @@ fun BentoFamilyProblemsScreen(
                     text = if (currentLangCode == "hi") "समस्या की श्रेणी चुनें:" else "Select Problem Category:",
                     fontWeight = FontWeight.Bold,
                     fontSize = 14.sp,
-                    color = Color(0xFF000000)
+                    color = InkPrimary
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 LazyRow(
@@ -241,8 +241,8 @@ fun BentoFamilyProblemsScreen(
                         val isSelected = cat.id == selectedCategory.id
                         Surface(
                             shape = RoundedCornerShape(999.dp),
-                            color = if (isSelected) Color(0xFF000000) else Color.White,
-                            border = BorderStroke(1.dp, if (isSelected) Color(0xFF000000) else BorderLight),
+                            color = if (isSelected) InkPrimary else Color.White,
+                            border = BorderStroke(1.dp, if (isSelected) InkPrimary else BorderLight),
                             modifier = Modifier
                                 .clip(RoundedCornerShape(999.dp))
                                 .clickable {
@@ -262,7 +262,7 @@ fun BentoFamilyProblemsScreen(
                                     text = if (currentLangCode == "hi") cat.titleHi else cat.titleEn,
                                     fontSize = 12.sp,
                                     fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                                    color = if (isSelected) Color.White else Color(0xFF737373)
+                                    color = if (isSelected) Color.White else InkSoft
                                 )
                             }
                         }
@@ -274,7 +274,7 @@ fun BentoFamilyProblemsScreen(
             item {
                 Surface(
                     shape = RoundedCornerShape(20.dp),
-                    color = Color(0xFFFAFAFA),
+                    color = SurfaceAlt,
                     border = BorderStroke(1.dp, BorderLight),
                     modifier = Modifier.fillMaxWidth()
                 ) {
@@ -290,12 +290,12 @@ fun BentoFamilyProblemsScreen(
                                     fontFamily = FontFamily.Serif,
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 17.sp,
-                                    color = Color(0xFF000000)
+                                    color = InkPrimary
                                 )
                                 Text(
                                     text = selectedCategory.description,
                                     fontSize = 11.5.sp,
-                                    color = Color(0xFF737373),
+                                    color = InkSoft,
                                     lineHeight = 15.sp
                                 )
                             }
@@ -324,7 +324,7 @@ fun BentoFamilyProblemsScreen(
                                 Text(
                                     text = remedy,
                                     fontSize = 12.sp,
-                                    color = Color(0xFF000000),
+                                    color = InkPrimary,
                                     lineHeight = 16.sp
                                 )
                             }
@@ -347,7 +347,7 @@ fun BentoFamilyProblemsScreen(
                             text = if (currentLangCode == "hi") "अपनी पारिवारिक समस्या का विवरण लिखें:" else "Describe Your Problem:",
                             fontWeight = FontWeight.Bold,
                             fontSize = 14.sp,
-                            color = Color(0xFF000000)
+                            color = InkPrimary
                         )
                         Spacer(modifier = Modifier.height(8.dp))
 
@@ -361,7 +361,7 @@ fun BentoFamilyProblemsScreen(
                                     else
                                         "e.g. Constant arguments, lack of peace at home...",
                                     fontSize = 13.sp,
-                                    color = Color(0xFFA8A8A8)
+                                    color = TextTertiary
                                 )
                             },
                             modifier = Modifier
@@ -369,10 +369,10 @@ fun BentoFamilyProblemsScreen(
                                 .height(95.dp),
                             shape = RoundedCornerShape(12.dp),
                             colors = OutlinedTextFieldDefaults.colors(
-                                focusedBorderColor = Color(0xFF000000),
+                                focusedBorderColor = InkPrimary,
                                 unfocusedBorderColor = BorderLight,
-                                focusedContainerColor = Color(0xFFFAFAFA),
-                                unfocusedContainerColor = Color(0xFFFAFAFA)
+                                focusedContainerColor = SurfaceAlt,
+                                unfocusedContainerColor = SurfaceAlt
                             )
                         )
 
@@ -404,21 +404,21 @@ fun BentoFamilyProblemsScreen(
                                     Icon(
                                         imageVector = Icons.Default.Mic,
                                         contentDescription = "Mic",
-                                        tint = if (isMicActive) Saffron else Color(0xFF000000),
+                                        tint = if (isMicActive) Saffron else InkPrimary,
                                         modifier = Modifier.size(15.dp)
                                     )
                                     Text(
                                         text = if (isMicActive) "माइक चालू (बोलें)" else "माइक से बोलें",
                                         fontSize = 11.5.sp,
                                         fontWeight = FontWeight.SemiBold,
-                                        color = if (isMicActive) Saffron else Color(0xFF000000)
+                                        color = if (isMicActive) Saffron else InkPrimary
                                     )
                                 }
                             }
 
                             if (problemNote.isNotBlank()) {
                                 TextButton(onClick = { problemNote = "" }) {
-                                    Text(text = "साफ़ करें", color = Color(0xFF737373), fontSize = 11.sp)
+                                    Text(text = "साफ़ करें", color = InkSoft, fontSize = 11.sp)
                                 }
                             }
                         }
@@ -441,7 +441,7 @@ fun BentoFamilyProblemsScreen(
                             fontFamily = FontFamily.Serif,
                             fontWeight = FontWeight.Bold,
                             fontSize = 16.sp,
-                            color = Color(0xFF000000)
+                            color = InkPrimary
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
@@ -450,7 +450,7 @@ fun BentoFamilyProblemsScreen(
                             else
                                 "Connect with experienced spiritual mentors via chat or voice call for direct solutions.",
                             fontSize = 11.5.sp,
-                            color = Color(0xFF737373)
+                            color = InkSoft
                         )
 
                         Spacer(modifier = Modifier.height(14.dp))
@@ -503,7 +503,7 @@ fun BentoFamilyProblemsScreen(
                             Surface(
                                 shape = RoundedCornerShape(999.dp),
                                 color = Color.White,
-                                border = BorderStroke(1.2.dp, Color(0xFF000000)),
+                                border = BorderStroke(1.2.dp, InkPrimary),
                                 modifier = Modifier
                                     .weight(1f)
                                     .height(48.dp)
@@ -522,7 +522,7 @@ fun BentoFamilyProblemsScreen(
                                     Icon(
                                         imageVector = Icons.Outlined.Phone,
                                         contentDescription = "Call",
-                                        tint = Color(0xFF000000),
+                                        tint = InkPrimary,
                                         modifier = Modifier.size(16.dp)
                                     )
                                     Spacer(modifier = Modifier.width(6.dp))
@@ -530,7 +530,7 @@ fun BentoFamilyProblemsScreen(
                                         text = if (currentLangCode == "hi") "कॉल परामर्श" else "Call Consult",
                                         fontSize = 13.sp,
                                         fontWeight = FontWeight.Bold,
-                                        color = Color(0xFF000000)
+                                        color = InkPrimary
                                     )
                                 }
                             }
