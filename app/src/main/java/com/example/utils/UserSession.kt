@@ -1,90 +1,132 @@
-package com.example.utils
+package com.example
 
-import android.content.Context
-import android.content.SharedPreferences
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.Crossfade
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Scaffold
+import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import com.example.ui.screens.HomeScreen
+import com.example.ui.screens.LoginScreen
+import com.example.ui.screens.SplashScreen
+import com.example.ui.theme.DevbhashaTheme
+import com.example.utils.RazorpayPaymentManager
+import com.example.utils.UserSession
+import com.google.firebase.FirebaseApp
+import com.razorpay.PaymentData
+import com.razorpay.PaymentResultWithDataListener
 
-class UserSession(context: Context) {
-    private val prefs: SharedPreferences = 
-        context.getSharedPreferences("devbhasha_user_prefs", Context.MODE_PRIVATE)
+enum class AppScreen {
+    SPLASH,
+    LOGIN,
+    HOME
+}
 
-    // यूज़र का नाम, लॉगिन स्टेट और आईडी सेव करने के लिए
-    fun saveUserSession(userName: String, isLoggedIn: Boolean, userId: String, phoneNumber: String = "") {
-        prefs.edit()
-            .putString("user_name", userName)
-            .putBoolean("is_logged_in", isLoggedIn)
-            .putString("user_id", userId)
-            .putString("phone_number", phoneNumber)
-            .apply()
-    }
+class MainActivity : ComponentActivity(), PaymentResultWithDataListener {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        FirebaseApp.initializeApp(this)
+        enableEdgeToEdge()
+        // Preload Razorpay Checkout
+        RazorpayPaymentManager.init(this)
 
-    // सेव किया हुआ नाम प्राप्त करने के लिए
-    fun getUserName(): String {
-        val saved = prefs.getString("user_name", "")?.trim() ?: ""
-        if (saved.isNotBlank() && 
-            !saved.equals("null", ignoreCase = true) && 
-            !saved.contains("Facebook", ignoreCase = true) && 
-            saved != "साधक") {
-            return saved
+        setContent {
+            DevbhashaTheme {
+                val context = LocalContext.current
+                val userSession = remember { UserSession(context) }
+
+                var currentUserName by remember { mutableStateOf(userSession.getUserName()) }
+                var currentUserId by remember { mutableStateOf(userSession.getUserId()) }
+
+                // App starts at Splash, then routes to HOME if logged in, else LOGIN
+                var currentScreen by remember { mutableStateOf(AppScreen.SPLASH) }
+
+                Crossfade(targetState = currentScreen, label = "screen_transition") { screen ->
+                    when (screen) {
+                        AppScreen.SPLASH -> {
+                            SplashScreen(
+                                onTimeout = {
+                                    val loggedIn = userSession.isLoggedIn()
+                                    val uid = userSession.getUserId()
+                                    if (loggedIn && uid.isNotBlank()) {
+                                        currentUserName = userSession.getUserName()
+                                        currentUserId = uid
+                                        currentScreen = AppScreen.HOME
+                                    } else {
+                                        currentScreen = AppScreen.LOGIN
+                                    }
+                                }
+                            )
+                        }
+
+                        AppScreen.LOGIN -> {
+                            Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                                LoginScreen(
+                                    onLoginSuccess = { uid, name, phone ->
+                                        userSession.saveUserSession(
+                                            userName = name,
+                                            isLoggedIn = true,
+                                            userId = uid,
+                                            phoneNumber = phone
+                                        )
+                                        currentUserName = name
+                                        currentUserId = uid
+                                        currentScreen = AppScreen.HOME
+                                    },
+                                    onSkip = {
+                                        val generatedUid = userSession.getUserId()
+                                        userSession.saveUserSession(
+                                            userName = "Guest Sadhak",
+                                            isLoggedIn = true,
+                                            userId = generatedUid,
+                                            phoneNumber = ""
+                                        )
+                                        currentUserName = "Guest Sadhak"
+                                        currentUserId = generatedUid
+                                        currentScreen = AppScreen.HOME
+                                    },
+                                    modifier = Modifier.padding(innerPadding)
+                                )
+                            }
+                        }
+
+                        AppScreen.HOME -> {
+                            HomeScreen(
+                                userName = currentUserName,
+                                userId = currentUserId,
+                                onLogoutClick = {
+                                    userSession.clearSession()
+                                    currentUserId = ""
+                                    currentUserName = "साधक"
+                                    currentScreen = AppScreen.LOGIN
+                                }
+                            )
+                        }
+                    }
+                }
+            }
         }
-        return "दीपक जी"
     }
 
-    // सेव की गई यूज़र आईडी प्राप्त करने के लिए
-    fun getUserId(): String {
-        val saved = prefs.getString("user_id", "") ?: ""
-        if (saved.isNotBlank()) return saved
-        val newId = "user_" + (100000..999999).random()
-        prefs.edit().putString("user_id", newId).apply()
-        return newId
+    override fun onPaymentSuccess(razorpayPaymentId: String?, paymentData: PaymentData?) {
+        RazorpayPaymentManager.onPaymentSuccess(
+            activity = this,
+            paymentId = razorpayPaymentId,
+            paymentData = paymentData
+        )
     }
 
-    // फ़ोन नंबर प्राप्त करने के लिए
-    fun getPhoneNumber(): String {
-        val saved = prefs.getString("phone_number", "") ?: ""
-        return if (saved.isNotBlank() && saved != "9876543210") saved else ""
-    }
-
-    // क्या यूज़र लॉग इन है?
-    fun isLoggedIn(): Boolean {
-        return prefs.getBoolean("is_logged_in", false)
-    }
-
-    // Supported languages: "en", "hi", "hgl"
-    fun getLanguage(): String {
-        return prefs.getString("user_language", "hi") ?: "hi"
-    }
-
-    fun setLanguage(lang: String) {
-        prefs.edit().putString("user_language", lang).apply()
-        val uid = getUserId()
-        if (uid.isNotBlank()) {
-            UserManager.updateLanguagePreference(uid, lang)
-        }
-    }
-
-    fun syncLanguage(uid: String, onComplete: (() -> Unit)? = null) {
-        onComplete?.invoke()
-    }
-
-    fun isHindi(): Boolean {
-        return getLanguage() == "hi"
-    }
-
-    // DEPRECATED — the wallet is server-authoritative now (see WalletRepository
-    // and functions/index.js). The balance lives in Firestore
-    // (`users/{uid}.walletBalance`, in paise) and is written only by Cloud
-    // Functions. The device must never own or mutate real money.
-    @Deprecated("Balance is server-owned; use WalletRepository.observeBalance()")
-    fun getWalletBalance(): Double = 0.0
-
-    @Deprecated("Balance is server-owned; the app must never set it.")
-    @Suppress("UNUSED_PARAMETER")
-    fun setWalletBalance(balance: Double) {
-        // no-op by design — money is never mutated on the device
-    }
-
-    // लॉग आउट करने के लिए
-    fun clearSession() {
-        prefs.edit().clear().apply()
+    override fun onPaymentError(errorCode: Int, response: String?, paymentData: PaymentData?) {
+        RazorpayPaymentManager.onPaymentError(
+            activity = this,
+            errorCode = errorCode,
+            response = response,
+            paymentData = paymentData
+        )
     }
 }
