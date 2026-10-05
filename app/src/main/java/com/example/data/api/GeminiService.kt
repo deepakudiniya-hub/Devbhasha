@@ -1,42 +1,40 @@
 package com.example.data.api
 
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
-import retrofit2.http.Body
-import retrofit2.http.POST
+import android.util.Log
+import com.google.firebase.functions.FirebaseFunctions
 
-// 1. डेटा मॉडल जो सर्वर को डेटा भेजने और पाने के लिए काम आएंगे
-data class GeminiRequest(val prompt: String)
-data class GeminiResponse(val result: String)
-
-// 2. Retrofit इंटरफ़ेस जो सीधे आपके नए सुरक्षित सर्वर से बात करेगा
-interface GeminiApi {
-    @POST("askGeminiServer")
-    suspend fun askGemini(@Body request: GeminiRequest): GeminiResponse
-}
-
-// 3. आपकी मुख्य क्लास (GeminiService)
+/**
+ * Firebase-native Gemini content generation.
+ * Calls the Cloud Function "askGemini" which uses the Gemini SDK server-side.
+ * This avoids shipping API keys in the app and keeps sensitive logic on the server.
+ */
 class GeminiService {
+    private val functions: FirebaseFunctions = FirebaseFunctions.getInstance()
+    private const val TAG = "GeminiService"
 
-    private val api: GeminiApi
-
-    init {
-        // यहाँ हमने आपका बिल्कुल नया लाइव सर्वर लिंक जोड़ दिया है
-        val retrofit = Retrofit.Builder()
-            .baseUrl("https://cloudfunctions.net")
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-
-        api = retrofit.create(GeminiApi::class.java)
-    }
-
-    // ऐप में जहाँ से भी आप जेमिनी को कॉल करते थे, बस इस फ़ंक्शन को कॉल करना है
     suspend fun generateContent(userPrompt: String): String {
         return try {
-            val response = api.askGemini(GeminiRequest(userPrompt))
-            response.result // सर्वर से आया हुआ जवाब
+            val data = mapOf(
+                "prompt" to userPrompt
+            )
+            val result = functions
+                .getHttpsCallable("askGemini")
+                .call(data)
+                .await()
+            
+            @Suppress("UNCHECKED_CAST")
+            val resultData = result.data as? Map<String, Any>
+            val response = resultData?.get("result") as? String
+            
+            if (response.isNullOrBlank()) {
+                Log.w(TAG, "Empty response from askGemini")
+                "त्रुटि: सर्वर से कोई प्रतिक्रिया नहीं"
+            } else {
+                response
+            }
         } catch (e: Exception) {
-            "त्रुटि: ${e.localizedMessage}"
+            Log.e(TAG, "Failed to generate content", e)
+            "त्रुटि: ${e.localizedMessage ?: "Content generation failed"}"
         }
     }
 }
