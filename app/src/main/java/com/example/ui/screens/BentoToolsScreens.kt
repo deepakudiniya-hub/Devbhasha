@@ -20,6 +20,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.outlined.Chat
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
@@ -484,7 +485,7 @@ fun BentoFamilyProblemsScreen(
                                     horizontalArrangement = Arrangement.Center
                                 ) {
                                     Icon(
-                                        imageVector = Icons.Outlined.Chat,
+                                        imageVector = Icons.AutoMirrored.Outlined.Chat,
                                         contentDescription = "Chat",
                                         tint = Color.White,
                                         modifier = Modifier.size(16.dp)

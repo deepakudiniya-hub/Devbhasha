@@ -160,9 +160,12 @@ fun UserProfileScreen(
     var birthPlace by remember { mutableStateOf("") }
     var gotra by remember { mutableStateOf("") }
     var avatarId by remember { mutableStateOf("om") }
-    var walletBalance by remember { mutableDoubleStateOf(0.0) }
+    var walletBalance by remember { mutableDoubleStateOf(userSession.getCachedWalletBalance()) }
     DisposableEffect(effectiveUserId) {
-        val reg = WalletRepository.observeBalance(effectiveUserId) { walletBalance = it }
+        val reg = WalletRepository.observeBalance(effectiveUserId) {
+            walletBalance = it
+            userSession.setCachedWalletBalance(it)
+        }
         onDispose { reg.remove() }
     }
     var savedMantraIds by remember { mutableStateOf(setOf("mantra_mahamrityunjaya", "mantra_gayatri")) }

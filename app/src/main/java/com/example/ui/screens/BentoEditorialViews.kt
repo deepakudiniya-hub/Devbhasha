@@ -18,6 +18,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.automirrored.outlined.Chat
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
@@ -147,6 +148,44 @@ fun BentoEditorialMasthead(
                     contentDescription = "Add money",
                     tint = Color.White,
                     modifier = Modifier.size(13.dp)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun BentoEditorialRecommendationPanel(
+    userName: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        shape = RoundedCornerShape(16.dp),
+        color = Color(0xFFF3E8FF), // Soft Indigo
+        border = BorderStroke(1.dp, Color(0xFFDDD6FE)),
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .clip(RoundedCornerShape(16.dp))
+            .clickable { onClick() }
+    ) {
+        Row(
+            modifier = Modifier.padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(text = "🔮", fontSize = 20.sp)
+            Spacer(modifier = Modifier.width(12.dp))
+            Column {
+                Text(
+                    text = "Good Morning $userName!",
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF4C1D95)
+                )
+                Text(
+                    text = "Try Ananya's Top Pick ritual",
+                    fontSize = 12.sp,
+                    color = Color(0xFF6D28D9)
                 )
             }
         }
@@ -321,8 +360,8 @@ fun BentoEditorialPanchangHeadline(
                     val waveLength = 16f
                     val waveHeight = 3.5f
                     while (x < size.width) {
-                        path.relativeQuadraticBezierTo(waveLength / 4, -waveHeight, waveLength / 2, 0f)
-                        path.relativeQuadraticBezierTo(waveLength / 4, waveHeight, waveLength / 2, 0f)
+                        path.relativeQuadraticTo(waveLength / 4, -waveHeight, waveLength / 2, 0f)
+                        path.relativeQuadraticTo(waveLength / 4, waveHeight, waveLength / 2, 0f)
                         x += waveLength
                     }
                     drawPath(
@@ -427,6 +466,7 @@ fun BentoEditorialPanchangHeadline(
  */
 @Composable
 fun BentoEditorialToolsGrid(
+    currentView: String,
     onPoochhoClick: () -> Unit,
     onDreamsClick: () -> Unit,
     onKundliClick: () -> Unit,
@@ -489,7 +529,7 @@ fun BentoEditorialToolsGrid(
                                     "hgl" -> "Poocha"
                                     else -> "Poocha"
                                 },
-                                fontFamily = FontFamily.Serif,
+                                fontFamily = FontFamily.SansSerif,
                                 fontSize = 16.5.sp,
                                 fontWeight = FontWeight.SemiBold,
                                 color = Color(0xFF000000)
@@ -497,9 +537,9 @@ fun BentoEditorialToolsGrid(
                             Spacer(modifier = Modifier.height(2.dp))
                             Text(
                                 text = when (currentLangCode) {
-                                    "hi" -> "समस्या का समाधान\nचैट व कॉल परामर्श"
-                                    "hgl" -> "Share your problem\nChat & call consult"
-                                    else -> "Share your problem\nChat & call consult"
+                                    "hi" -> "चैट व कॉल द्वारा\nपरामर्श प्राप्त करें"
+                                    "hgl" -> "Consult through\nchat and call"
+                                    else -> "Get consultation via\nchat and call"
                                 },
                                 fontSize = 11.sp,
                                 lineHeight = 14.sp,
@@ -526,8 +566,8 @@ fun BentoEditorialToolsGrid(
                 Box(modifier = Modifier.fillMaxSize().padding(14.dp)) {
                     Text(
                         text = "02",
-                        fontFamily = FontFamily.Serif,
-                        fontStyle = FontStyle.Italic,
+                        fontFamily = FontFamily.SansSerif,
+                        fontStyle = FontStyle.Normal,
                         fontSize = 13.sp,
                         color = Saffron,
                         modifier = Modifier.align(Alignment.TopEnd)
@@ -541,20 +581,16 @@ fun BentoEditorialToolsGrid(
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
                                 text = "Dreams",
-                                fontFamily = FontFamily.Serif,
+                                fontFamily = FontFamily.SansSerif,
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.SemiBold,
                                 color = Color(0xFF000000)
                             )
                             Spacer(modifier = Modifier.height(2.dp))
                             Text(
-                                text = when (currentLangCode) {
-                                    "hi" -> "सपनों का अर्थ\nInterpret messages"
-                                    "hgl" -> "Interpret\nmessages"
-                                    else -> "Interpret\nmessages"
-                                },
-                                fontSize = 11.sp,
-                                lineHeight = 14.sp,
+                                text = "Decode your subconscious\n& align with divine wisdom",
+                                fontSize = 10.sp,
+                                lineHeight = 13.sp,
                                 color = Color(0xFF737373)
                             )
                         }
@@ -619,52 +655,68 @@ fun BentoEditorialToolsGrid(
         Spacer(modifier = Modifier.height(4.dp))
 
         // Horizontal Row for Problem Cards (All 5 visible)
-        Row(
+        LazyRow(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 2.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            contentPadding = PaddingValues(horizontal = 16.dp)
         ) {
-            BentoProblemCategoryCard(
-                title = if (currentLangCode == "hi") "पारिवारिक समस्या" else "Family Problems",
-                subtitle = if (currentLangCode == "hi") "गृह क्लेश व शांति उपाय" else "Harmony & Peace",
-                emoji = "👨‍👩‍👧‍👦",
-                badge = if (currentLangCode == "hi") "समाधान" else "Remedies",
-                onClick = onKundliClick,
-                modifier = Modifier.weight(1f)
-            )
-            BentoProblemCategoryCard(
-                title = if (currentLangCode == "hi") "स्वास्थ्य समस्या" else "Health Issues",
-                subtitle = if (currentLangCode == "hi") "रोग निवारण व आरोग्य" else "Health & Healing",
-                emoji = "🩺",
-                badge = if (currentLangCode == "hi") "आरोग्य" else "Healing",
-                onClick = onTarotClick,
-                modifier = Modifier.weight(1f)
-            )
-            BentoProblemCategoryCard(
-                title = if (currentLangCode == "hi") "धन समस्या" else "Money Problem",
-                subtitle = if (currentLangCode == "hi") "कर्ज मुक्ति व लाभ" else "Wealth & Debts",
-                emoji = "💰",
-                badge = if (currentLangCode == "hi") "समृद्धि" else "Wealth",
-                onClick = onMatchClick,
-                modifier = Modifier.weight(1f)
-            )
-            BentoProblemCategoryCard(
-                title = if (currentLangCode == "hi") "नकारात्मकता" else "Negativity",
-                subtitle = if (currentLangCode == "hi") "बुरी नज़र व बाधा" else "Evil Eye Relief",
-                emoji = "🧿",
-                badge = if (currentLangCode == "hi") "सुरक्षा" else "Shield",
-                onClick = onHabitsClick,
-                modifier = Modifier.weight(1f)
-            )
-            BentoProblemCategoryCard(
-                title = if (currentLangCode == "hi") "पितृ दोष" else "Pitr Dosh",
-                subtitle = if (currentLangCode == "hi") "पूर्वज शांति व तर्पण" else "Tarpan & Blessings",
-                emoji = "🪔",
-                badge = if (currentLangCode == "hi") "तर्पण" else "Tarpan",
-                onClick = onTimerClick,
-                modifier = Modifier.weight(1f)
-            )
+            item {
+                BentoProblemCategoryCard(
+                    title = if (currentLangCode == "hi") "पारिवारिक समस्या" else "Family",
+                    subtitle = if (currentLangCode == "hi") "शांति उपाय" else "Harmony",
+                    emoji = "👨‍👩‍👧‍👦",
+                    badge = if (currentLangCode == "hi") "समाधान" else "Remedies",
+                    isSelected = currentView == "kundli",
+                    onClick = onKundliClick,
+                    modifier = Modifier.width(120.dp)
+                )
+            }
+            item {
+                BentoProblemCategoryCard(
+                    title = if (currentLangCode == "hi") "स्वास्थ्य समस्या" else "Health",
+                    subtitle = if (currentLangCode == "hi") "रोग निवारण" else "Healing",
+                    emoji = "🩺",
+                    badge = if (currentLangCode == "hi") "आरोग्य" else "Healing",
+                    isSelected = currentView == "tarot",
+                    onClick = onTarotClick,
+                    modifier = Modifier.width(120.dp)
+                )
+            }
+            item {
+                BentoProblemCategoryCard(
+                    title = if (currentLangCode == "hi") "धन समस्या" else "Money",
+                    subtitle = if (currentLangCode == "hi") "कर्ज मुक्ति" else "Wealth",
+                    emoji = "💰",
+                    badge = if (currentLangCode == "hi") "समृद्धि" else "Wealth",
+                    isSelected = currentView == "match",
+                    onClick = onMatchClick,
+                    modifier = Modifier.width(120.dp)
+                )
+            }
+            item {
+                BentoProblemCategoryCard(
+                    title = if (currentLangCode == "hi") "नकारात्मकता" else "Negativity",
+                    subtitle = if (currentLangCode == "hi") "बुरी नज़र" else "Shield",
+                    emoji = "🧿",
+                    badge = if (currentLangCode == "hi") "सुरक्षा" else "Shield",
+                    isSelected = currentView == "habits",
+                    onClick = onHabitsClick,
+                    modifier = Modifier.width(120.dp)
+                )
+            }
+            item {
+                BentoProblemCategoryCard(
+                    title = if (currentLangCode == "hi") "पितृ दोष" else "Pitr Dosh",
+                    subtitle = if (currentLangCode == "hi") "पूर्वज शांति" else "Blessings",
+                    emoji = "🪔",
+                    badge = if (currentLangCode == "hi") "तर्पण" else "Tarpan",
+                    isSelected = currentView == "timer",
+                    onClick = onTimerClick,
+                    modifier = Modifier.width(120.dp)
+                )
+            }
         }
     }
 }
@@ -891,31 +943,41 @@ private fun BentoProblemCategoryCard(
     subtitle: String,
     emoji: String,
     badge: String,
+    isSelected: Boolean = false,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Surface(
-        shape = CircleShape,
-        color = Color.White,
-        border = BorderStroke(1.dp, BorderLight),
-        shadowElevation = 1.5.dp,
+        shape = RoundedCornerShape(24.dp),
+        color = if (isSelected) Color(0xFF4C1D95) else Color.White, // Deep Purple for selected
+        border = if (isSelected) null else BorderStroke(1.dp, BorderLight),
+        shadowElevation = if (isSelected) 4.dp else 1.5.dp,
         modifier = modifier
-            .size(140.dp) // Maintain consistent size
-            .clip(CircleShape)
+            .size(140.dp)
+            .clip(RoundedCornerShape(24.dp))
             .clickable { onClick() }
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(20.dp), // Increased padding for circular layout
+                .padding(20.dp),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Surface(
                 shape = CircleShape,
-                color = Color(0xFFFAFAFA),
-                border = BorderStroke(1.dp, BorderLight),
-                modifier = Modifier.size(40.dp)
+                color = if (isSelected) Color(0xFF6D28D9) else Color(0xFFFAFAFA),
+                border = if (isSelected) null else BorderStroke(1.dp, BorderLight),
+                modifier = Modifier.size(40.dp).drawBehind {
+                    // Subtle Golden Shimmer Effect
+                    val strokeWidth = 2.dp.toPx()
+                    drawCircle(
+                        brush = Brush.radialGradient(
+                            listOf(Color(0xFFFFD700).copy(alpha = 0.3f), Color.Transparent),
+                            radius = size.width
+                        )
+                    )
+                }
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     Text(text = emoji, fontSize = 20.sp)
@@ -926,19 +988,21 @@ private fun BentoProblemCategoryCard(
 
             Text(
                 text = title,
-                fontFamily = FontFamily.Serif,
-                fontSize = 12.sp, 
+                fontFamily = FontFamily.SansSerif,
+                fontSize = 11.sp, // Reduced font size
                 fontWeight = FontWeight.Bold,
-                color = Color.Black,
-                maxLines = 1,
+                color = if (isSelected) Color.White else Color(0xFF1F2937), // Better contrast
+                maxLines = 1, // Single line
+                overflow = TextOverflow.Ellipsis,
                 textAlign = TextAlign.Center
             )
-            Spacer(modifier = Modifier.height(2.dp))
+            Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = subtitle,
                 fontSize = 10.sp, 
-                color = Color(0xFF404040), 
-                maxLines = 2,
+                color = if (isSelected) Color(0xFFDDD6FE) else Color(0xFF6B7280), // Better contrast
+                maxLines = 1, // Single line
+                overflow = TextOverflow.Ellipsis,
                 textAlign = TextAlign.Center
             )
         }
@@ -1032,17 +1096,15 @@ fun BentoEditorialExpertsSection(
                 onActionClick = onSeeAllClick
             )
         } else {
-            // Featured Expert Card (Dark Ink #241C10 with Gold Rubber Stamp)
+            // Featured Expert Card (Elevated Style)
             val featuredSadhak = sadhaks.first()
 
-            Surface(
+            ElevatedCard(
                 shape = RoundedCornerShape(28.dp),
-                color = Color.White,
-                border = BorderStroke(1.dp, Color(0xFFF1F1F1)),
-                shadowElevation = 8.dp,
+                colors = CardDefaults.elevatedCardColors(containerColor = Color.White),
+                elevation = CardDefaults.elevatedCardElevation(defaultElevation = 6.dp),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(28.dp))
                     .clickable { onChatClick(featuredSadhak) }
             ) {
                 Row(
@@ -1274,13 +1336,13 @@ fun BentoEditorialExpertRow(
                 Icon(
                     imageVector = Icons.Filled.Star,
                     contentDescription = null,
-                    tint = Terra,
-                    modifier = Modifier.size(11.dp)
+                    tint = Color(0xFFF59E0B), // Material 3 Amber
+                    modifier = Modifier.size(14.dp)
                 )
                 Spacer(modifier = Modifier.width(2.dp))
                 Text(
                     text = sadhak.rating,
-                    fontSize = 11.sp,
+                    fontSize = 12.sp,
                     fontWeight = FontWeight.Bold,
                     color = Ink
                 )
@@ -1356,142 +1418,42 @@ fun BentoEditorialDock(
         else -> "en"
     }
 
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 6.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+    NavigationBar(
+        modifier = modifier.fillMaxWidth(),
+        containerColor = Color.White,
+        tonalElevation = 8.dp
     ) {
-        Surface(
-            shape = RoundedCornerShape(32.dp),
-            color = Color.White,
-            border = BorderStroke(1.dp, Color(0xFFEFEFEF)),
-            shadowElevation = 12.dp,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 24.dp)
-                .padding(bottom = 12.dp)
-        ) {
-            Row(
-                modifier = Modifier.padding(10.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                DockPillItem(
-                    label = when (currentLangCode) {
-                        "hi" -> "आज"
-                        "hgl" -> "Aaj"
-                        else -> "Today"
-                    },
-                    icon = Icons.Outlined.Home,
-                    isSelected = currentTab == "today",
-                    onClick = { onTabSelect("today") },
-                    modifier = Modifier.weight(1f)
-                )
-
-                DockPillItem(
-                    label = when (currentLangCode) {
-                        "hi" -> "साधक"
-                        "hgl" -> "Sadhak"
-                        else -> "Sadhak"
-                    },
-                    icon = Icons.AutoMirrored.Outlined.Chat,
-                    isSelected = currentTab == "sadhak",
-                    showDot = hasUnreadSadhak,
-                    onClick = { onTabSelect("sadhak") },
-                    modifier = Modifier.weight(1f)
-                )
-
-                DockPillItem(
-                    label = when (currentLangCode) {
-                        "hi" -> "उपाय"
-                        "hgl" -> "Upay"
-                        else -> "Remedy"
-                    },
-                    icon = Icons.Outlined.ShoppingBag,
-                    isSelected = currentTab == "remedy",
-                    onClick = { onTabSelect("remedy") },
-                    modifier = Modifier.weight(1f)
-                )
-
-                DockPillItem(
-                    label = when (currentLangCode) {
-                        "hi" -> "प्रोफ़ाइल"
-                        "hgl" -> "Profile"
-                        else -> "Profile"
-                    },
-                    icon = Icons.Outlined.Person,
-                    isSelected = currentTab == "profile",
-                    onClick = { onTabSelect("profile") },
-                    modifier = Modifier.weight(1f)
-                )
-            }
-        }
-
-        // Subtle bottom home indicator gesture bar
-        Spacer(modifier = Modifier.height(6.dp))
-        Box(
-            modifier = Modifier
-                .width(96.dp)
-                .height(4.dp)
-                .clip(RoundedCornerShape(2.dp))
-                .background(BorderMedium)
+        val tabs = listOf(
+            Triple("today", if (currentLangCode == "hi") "आज" else "Today", Icons.Outlined.Home),
+            Triple("sadhak", if (currentLangCode == "hi") "साधक" else "Sadhak", Icons.AutoMirrored.Outlined.Chat),
+            Triple("remedy", if (currentLangCode == "hi") "उपाय" else "Remedy", Icons.Outlined.ShoppingBag),
+            Triple("profile", if (currentLangCode == "hi") "प्रोफ़ाइल" else "Profile", Icons.Outlined.Person)
         )
-    }
-}
 
-@Composable
-private fun DockPillItem(
-    label: String,
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
-    isSelected: Boolean,
-    showDot: Boolean = false,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Surface(
-        shape = RoundedCornerShape(999.dp),
-        color = if (isSelected) GrayNavPill else Color.Transparent,
-        border = null,
-        modifier = modifier
-            .clip(RoundedCornerShape(999.dp))
-            .clickable { onClick() }
-    ) {
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier.padding(vertical = 8.dp)
-        ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = label,
-                    tint = if (isSelected) Color(0xFF000000) else Color(0xFF737373),
-                    modifier = Modifier.size(20.dp)
-                )
-                Spacer(modifier = Modifier.height(3.dp))
-                Text(
-                    text = label,
-                    fontSize = 10.5.sp,
-                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                    color = if (isSelected) Color(0xFF000000) else Color(0xFF737373),
-                    letterSpacing = 0.3.sp
-                )
+        tabs.forEach { (tab, label, icon) ->
+            val selectedIcon = when(tab) {
+                "today" -> Icons.Filled.Home
+                "sadhak" -> Icons.AutoMirrored.Filled.Chat
+                "remedy" -> Icons.Filled.ShoppingBag
+                else -> Icons.Filled.Person
             }
-
-            if (showDot && !isSelected) {
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .padding(end = 12.dp, top = 2.dp)
-                        .size(7.dp)
-                        .clip(CircleShape)
-                        .background(Saffron)
-                        .border(1.dp, Color.White, CircleShape)
+            NavigationBarItem(
+                selected = currentTab == tab,
+                onClick = { onTabSelect(tab) },
+                icon = {
+                    Icon(
+                        imageVector = if (currentTab == tab) selectedIcon else icon,
+                        contentDescription = label
+                    )
+                },
+                label = { Text(label) },
+                colors = NavigationBarItemDefaults.colors(
+                    indicatorColor = GoogleBlue.copy(alpha = 0.2f),
+                    selectedIconColor = GoogleBlue,
+                    selectedTextColor = GoogleBlue
                 )
-            }
+            )
         }
     }
 }
+

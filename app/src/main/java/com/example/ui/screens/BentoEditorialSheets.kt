@@ -21,6 +21,7 @@ import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Mic
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
@@ -169,6 +170,7 @@ fun BentoEditorialProfileSheet(
     onOrdersClick: () -> Unit,
     onLanguageChange: (String) -> Unit,
     onHelpClick: () -> Unit,
+    onSwitchToProvider: (() -> Unit)? = null,
     onLogoutClick: () -> Unit
 ) {
     val isEn = language == "en"
@@ -207,20 +209,38 @@ fun BentoEditorialProfileSheet(
                 horizontalArrangement = Arrangement.spacedBy(14.dp),
                 modifier = Modifier.padding(bottom = 14.dp)
             ) {
-                Surface(
-                    shape = CircleShape,
-                    color = Ink,
-                    border = BorderStroke(2.dp, Terra),
-                    modifier = Modifier.size(52.dp)
-                ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Text(
-                            text = userName.split(" ").mapNotNull { it.firstOrNull()?.toString() }.joinToString("").ifEmpty { "दे" },
-                            fontFamily = FontFamily.Serif,
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.White
-                        )
+                Box {
+                    Surface(
+                        shape = CircleShape,
+                        color = Color(0xFFFFF7ED), // Light orange background
+                        border = BorderStroke(1.dp, Color(0xFFFFE0B2)),
+                        modifier = Modifier.size(52.dp)
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Text(
+                                text = userName.split(" ").mapNotNull { it.firstOrNull()?.toString() }.joinToString("").ifEmpty { "दे" },
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF1F2937) // Dark text
+                            )
+                        }
+                    }
+                    // Small edit icon badge at the corner
+                    Surface(
+                        shape = CircleShape,
+                        color = Color(0xFF1F2937),
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .size(18.dp)
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(
+                                imageVector = Icons.Outlined.Edit,
+                                contentDescription = "Edit avatar",
+                                tint = Color.White,
+                                modifier = Modifier.size(10.dp)
+                            )
+                        }
                     }
                 }
 
@@ -250,7 +270,7 @@ fun BentoEditorialProfileSheet(
                 ProfileStatBox(label = if (isHi) "खाता स्थिति" else "MEMBERSHIP", value = if (isHi) "सक्रिय" else "Active", modifier = Modifier.weight(1f))
             }
 
-            Spacer(modifier = Modifier.height(14.dp))
+            Spacer(modifier = Modifier.height(24.dp)) // Increased vertical spacing
 
             // Settings Rows
             Surface(
@@ -270,38 +290,38 @@ fun BentoEditorialProfileSheet(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
+                            .height(56.dp)
                             .clickable { showLanguageOptions = !showLanguageOptions }
-                            .padding(horizontal = 14.dp, vertical = 11.dp),
+                            .padding(horizontal = 14.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Surface(
-                            shape = RoundedCornerShape(9.dp),
-                            color = PaperDeep,
-                            border = BorderStroke(1.dp, EditorialLine),
+                            shape = CircleShape, // Circular tonal background
+                            color = Color(0xFFF3F4F6),
                             modifier = Modifier.size(30.dp)
                         ) {
                             Box(contentAlignment = Alignment.Center) {
                                 Icon(
                                     imageVector = Icons.Outlined.Language,
                                     contentDescription = null,
-                                    tint = Ink,
+                                    tint = Color(0xFF1F2937),
                                     modifier = Modifier.size(15.dp)
                                 )
                             }
                         }
                         Spacer(modifier = Modifier.width(12.dp))
                         Text(
-                            text = "Language",
-                            fontSize = 12.5.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            color = Ink,
+                            text = langLabel,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = Color(0xFF1F2937),
                             modifier = Modifier.weight(1f)
                         )
                         Icon(
                             imageVector = if (showLanguageOptions) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
                             contentDescription = null,
-                            tint = InkSoft,
-                            modifier = Modifier.size(16.dp)
+                            tint = Color(0xFF9CA3AF),
+                            modifier = Modifier.size(20.dp)
                         )
                     }
                     // Toggle Buttons
@@ -334,9 +354,94 @@ fun BentoEditorialProfileSheet(
                     }
                     HorizontalDivider(color = EditorialLine)
                     ProfileMenuRow(icon = Icons.AutoMirrored.Outlined.HelpOutline, title = if (isHi) "सहायता एवं समर्थन" else "Help & support", onClick = onHelpClick)
-                    HorizontalDivider(color = EditorialLine)
-                    ProfileMenuRow(icon = Icons.AutoMirrored.Outlined.Logout, title = if (isHi) "लॉग आउट" else "Log out", isDestructive = true, onClick = onLogoutClick)
                 }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Switch to Provider / Astrologer Dashboard
+            if (onSwitchToProvider != null) {
+                Surface(
+                    shape = RoundedCornerShape(14.dp),
+                    color = Color(0xFFFFFBEB), // Soft warm amber
+                    border = BorderStroke(1.dp, Color(0xFFFDE68A)),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(14.dp))
+                        .clickable { onSwitchToProvider() }
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 13.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            Surface(
+                                shape = CircleShape,
+                                color = Saffron,
+                                modifier = Modifier.size(36.dp)
+                            ) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    Icon(
+                                        imageVector = Icons.Filled.Star,
+                                        contentDescription = null,
+                                        tint = Color.White,
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                }
+                            }
+                            Column {
+                                Text(
+                                    text = if (isHi) "परामर्शदाता मोड (Provider)" else "Switch to Provider Dashboard",
+                                    fontSize = 13.5.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color(0xFF92400E)
+                                )
+                                Text(
+                                    text = if (isHi) "ज्योतिषी एवं साधक प्रबंधन पैनल" else "Astrologer & consultation management",
+                                    fontSize = 11.sp,
+                                    color = Color(0xFFB45309)
+                                )
+                            }
+                        }
+                        Icon(
+                            imageVector = Icons.Filled.ChevronRight,
+                            contentDescription = null,
+                            tint = Color(0xFFB45309),
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(14.dp))
+            }
+
+            // Log Out Button (Distinct, full-width pill-shaped outlined button with soft red/orange border)
+            OutlinedButton(
+                onClick = onLogoutClick,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(52.dp),
+                shape = RoundedCornerShape(999.dp),
+                border = BorderStroke(1.5.dp, Color(0xFFF87171)), // Soft red border
+                colors = ButtonDefaults.outlinedButtonColors(
+                    contentColor = Color(0xFFEF4444)
+                )
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Outlined.Logout,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = if (isHi) "लॉग आउट" else "Log out",
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Bold
+                )
             }
         }
     }
@@ -348,29 +453,46 @@ private fun ProfileStatBox(
     value: String,
     modifier: Modifier = Modifier
 ) {
+    val isActive = value == "Active" || value == "सक्रिय"
     Surface(
         shape = RoundedCornerShape(12.dp),
-        color = PaperCard,
-        border = BorderStroke(1.dp, EditorialLine),
+        color = Color(0xFFF3F4F6), // Soft grey background
         modifier = modifier
     ) {
         Column(
-            modifier = Modifier.padding(vertical = 9.dp, horizontal = 6.dp),
+            modifier = Modifier.padding(vertical = 12.dp, horizontal = 12.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(
-                text = value,
-                fontFamily = FontFamily.Serif,
-                fontSize = 15.sp,
-                fontWeight = FontWeight.Bold,
-                color = Ink
-            )
+            if (isActive) {
+                Surface(
+                    shape = RoundedCornerShape(999.dp),
+                    color = Color(0xFFDCFCE7), // Soft green background
+                    modifier = Modifier.padding(vertical = 2.dp)
+                ) {
+                    Text(
+                        text = value,
+                        fontFamily = FontFamily.SansSerif,
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF16A34A), // Green text
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                    )
+                }
+            } else {
+                Text(
+                    text = value,
+                    fontFamily = FontFamily.SansSerif,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF1F2937)
+                )
+            }
             Spacer(modifier = Modifier.height(2.dp))
             Text(
                 text = label,
-                fontSize = 8.5.sp,
-                letterSpacing = 0.8.sp,
-                color = InkSoft,
+                fontSize = 10.sp,
+                letterSpacing = 0.5.sp,
+                color = Color(0xFF4B5563), // High contrast
                 fontWeight = FontWeight.SemiBold
             )
         }
@@ -387,22 +509,22 @@ private fun ProfileMenuRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .height(56.dp)
             .clickable { onClick() }
-            .padding(horizontal = 14.dp, vertical = 11.dp),
+            .padding(horizontal = 14.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Surface(
-            shape = RoundedCornerShape(9.dp),
-            color = PaperDeep,
-            border = BorderStroke(1.dp, EditorialLine),
+            shape = CircleShape, // Circular tonal background
+            color = Color(0xFFF3F4F6),
             modifier = Modifier.size(30.dp)
         ) {
             Box(contentAlignment = Alignment.Center) {
                 Icon(
                     imageVector = icon,
                     contentDescription = null,
-                    tint = if (isDestructive) Terra else Ink,
+                    tint = if (isDestructive) Color(0xFFEF4444) else Color(0xFF1F2937),
                     modifier = Modifier.size(15.dp)
                 )
             }
@@ -410,20 +532,23 @@ private fun ProfileMenuRow(
 
         Text(
             text = title,
-            fontSize = 12.5.sp,
-            fontWeight = FontWeight.SemiBold,
-            color = if (isDestructive) Terra else Ink,
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Medium,
+            color = if (isDestructive) Color(0xFFEF4444) else Color(0xFF1F2937),
             modifier = Modifier.weight(1f)
         )
 
-        Icon(
-            imageVector = Icons.Filled.ChevronRight,
-            contentDescription = null,
-            tint = InkFaint,
-            modifier = Modifier.size(16.dp)
-        )
+        if (!isDestructive) {
+            Icon(
+                imageVector = Icons.Filled.ChevronRight,
+                contentDescription = null,
+                tint = Color(0xFF9CA3AF),
+                modifier = Modifier.size(20.dp)
+            )
+        }
     }
 }
+
 
 /**
  * 3. Book a Pro Bottom Sheet

@@ -9,12 +9,29 @@ class UserSession(context: Context) {
 
     // यूज़र का नाम, लॉगिन स्टेट और आईडी सेव करने के लिए
     fun saveUserSession(userName: String, isLoggedIn: Boolean, userId: String, phoneNumber: String = "") {
+        saveUserSessionWithRole(userName, isLoggedIn, userId, phoneNumber, "user")
+    }
+
+    fun saveUserSessionWithRole(userName: String, isLoggedIn: Boolean, userId: String, phoneNumber: String = "", role: String = "user") {
         prefs.edit()
             .putString("user_name", userName)
             .putBoolean("is_logged_in", isLoggedIn)
             .putString("user_id", userId)
             .putString("phone_number", phoneNumber)
+            .putString("user_role", role)
             .apply()
+    }
+
+    fun getUserRole(): String {
+        return prefs.getString("user_role", "user") ?: "user"
+    }
+
+    fun setUserRole(role: String) {
+        prefs.edit().putString("user_role", role).apply()
+    }
+
+    fun isProvider(): Boolean {
+        return getUserRole().equals("provider", ignoreCase = true)
     }
 
     // सेव किया हुआ नाम प्राप्त करने के लिए
@@ -75,12 +92,20 @@ class UserSession(context: Context) {
     // (`users/{uid}.walletBalance`, in paise) and is written only by Cloud
     // Functions. The device must never own or mutate real money.
     @Deprecated("Balance is server-owned; use WalletRepository.observeBalance()")
-    fun getWalletBalance(): Double = 0.0
+    fun getWalletBalance(): Double = getCachedWalletBalance()
 
     @Deprecated("Balance is server-owned; the app must never set it.")
     @Suppress("UNUSED_PARAMETER")
     fun setWalletBalance(balance: Double) {
         // no-op by design — money is never mutated on the device
+    }
+
+    fun getCachedWalletBalance(): Double {
+        return prefs.getFloat("cached_wallet_balance", 100.0f).toDouble()
+    }
+
+    fun setCachedWalletBalance(balance: Double) {
+        prefs.edit().putFloat("cached_wallet_balance", balance.toFloat()).apply()
     }
 
     // लॉग आउट करने के लिए

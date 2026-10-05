@@ -22,7 +22,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
@@ -51,6 +53,7 @@ fun HomeScreen(
     userId: String = "",
     currentUserId: String = userId,
     onLogoutClick: () -> Unit = {},
+    onSwitchToProvider: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -67,9 +70,12 @@ fun HomeScreen(
     }
     var userEmail by remember { mutableStateOf("") }
     // Server-authoritative wallet — this is a display mirror only.
-    var walletBalance by remember { mutableDoubleStateOf(0.0) }
+    var walletBalance by remember { mutableDoubleStateOf(userSession.getCachedWalletBalance()) }
     DisposableEffect(targetUserDocId) {
-        val reg = WalletRepository.observeBalance(targetUserDocId) { walletBalance = it }
+        val reg = WalletRepository.observeBalance(targetUserDocId) {
+            walletBalance = it
+            userSession.setCachedWalletBalance(it)
+        }
         onDispose { reg.remove() }
     }
     var freeMins by remember { mutableIntStateOf(0) }
@@ -509,14 +515,15 @@ fun HomeScreen(
     // Main Scaffold in Bento Editorial Design
     Scaffold(
         modifier = modifier.fillMaxSize(),
-        containerColor = PaperBg,
+        containerColor = Color(0xFFFAFAFA), // Unified background
         topBar = {
             if (currentView == "today") {
                 Surface(
-                    color = PaperBg,
+                    color = Color(0xFFFAFAFA), // Matches Scaffold
                     modifier = Modifier.statusBarsPadding()
                 ) {
-                    BentoEditorialMasthead(
+                    Column {
+                        BentoEditorialMasthead(
                             balanceAmount = walletBalance,
                             language = language,
                             isHindi = isHindi,
@@ -553,18 +560,19 @@ fun HomeScreen(
                             },
                             onBalanceClick = { currentView = "wallet" }
                         )
+                        // Personalized Recommendation Panel
+                        BentoEditorialRecommendationPanel(
+                            userName = userDisplayName,
+                            onClick = { showToast("Top ritual selected ✨") }
+                        )
+                    }
                 }
             }
         },
         bottomBar = {
             if (currentView in listOf("today", "sadhak", "remedy")) {
                 BentoEditorialDock(
-                    currentTab = when (currentView) {
-                        "today" -> "today"
-                        "sadhak" -> "sadhak"
-                        "remedy" -> "remedy"
-                        else -> "today"
-                    },
+                    currentTab = currentView,
                     onTabSelect = { tab ->
                         HapticFeedbackHelper.playClick(haptic)
                         if (tab == "profile") {
@@ -586,6 +594,7 @@ fun HomeScreen(
                 .padding(innerPadding)
         ) {
             AnimatedContent(
+                // ... (existing content)
                 targetState = currentView,
                 transitionSpec = {
                     (fadeIn() + slideInVertically(initialOffsetY = { 50 }))
@@ -685,6 +694,7 @@ fun HomeScreen(
                             // 4. Grouped Tools Grid (Poochho, Dreams, and Circular Quick Tools)
                             Spacer(modifier = Modifier.height(14.dp))
                             BentoEditorialToolsGrid(
+                                currentView = currentView,
                                 onPoochhoClick = { showPoochhoSheet = true },
                                 onDreamsClick = { showDreamsModalSheet = true },
                                 onKundliClick = { currentView = "kundli" },
@@ -969,6 +979,10 @@ fun HomeScreen(
                 }
                 showToast(helpMsg)
                 showProfileSheet = false
+            },
+            onSwitchToProvider = {
+                showProfileSheet = false
+                onSwitchToProvider()
             },
             onLogoutClick = {
                 showProfileSheet = false

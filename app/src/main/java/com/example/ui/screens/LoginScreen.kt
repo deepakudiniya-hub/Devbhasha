@@ -18,7 +18,10 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -58,14 +61,15 @@ enum class LoginViewState {
 
 @Composable
 fun LoginScreen(
-    onLoginSuccess: (uid: String, userName: String, phone: String) -> Unit,
-    onSkip: (() -> Unit)? = null,
+    onLoginSuccess: (uid: String, userName: String, phone: String, role: String) -> Unit,
+    onSkip: ((role: String) -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
     val focusManager = LocalFocusManager.current
     val coroutineScope = rememberCoroutineScope()
 
+    var selectedRole by remember { mutableStateOf("user") } // "user" or "provider"
     var phoneNumber by remember { mutableStateOf("") }
     var otpCode by remember { mutableStateOf("") }
     var enteredUserName by remember { mutableStateOf("") }
@@ -107,7 +111,6 @@ fun LoginScreen(
         object : com.google.firebase.auth.PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
             override fun onVerificationCompleted(credential: com.google.firebase.auth.PhoneAuthCredential) {
                 // Auto-verification
-                // You would sign in with credential here
             }
             override fun onVerificationFailed(e: com.google.firebase.FirebaseException) {
                 isLoading = false
@@ -158,17 +161,19 @@ fun LoginScreen(
             }
     }
 
-    fun loginAsGoogleDevotee(email: String, name: String) {
+    fun loginAsGoogleDevotee(email: String, name: String, overrideUid: String? = null) {
         isLoading = false
-        val uid = "user_g_" + (email.ifBlank { name }).hashCode().let { kotlin.math.abs(it) }
+        val uid = overrideUid ?: ("user_g_" + (email.ifBlank { name }).hashCode().let { kotlin.math.abs(it) })
+        val finalName = if (selectedRole == "provider") "आचार्य $name" else name
         UserManager.initializeOrSyncUser(
             uid = uid,
-            userName = name,
+            userName = finalName,
             phoneNumber = "",
             email = email
         )
-        showToast("Google से लॉगिन सफल: $name ✨")
-        onLoginSuccess(uid, name, "")
+        val roleDesc = if (selectedRole == "provider") "परामर्श प्रदाता (Provider)" else "साधक (User)"
+        showToast("$roleDesc के रूप में लॉगिन सफल: $finalName ✨")
+        onLoginSuccess(uid, finalName, "", selectedRole)
     }
 
     fun triggerGoogleSignIn() {
@@ -199,7 +204,21 @@ fun LoginScreen(
                     val googleIdTokenCredential = com.google.android.libraries.identity.googleid.GoogleIdTokenCredential.createFrom(credential.data)
                     val email = googleIdTokenCredential.id
                     val name = googleIdTokenCredential.displayName ?: "दीपक जी"
-                    loginAsGoogleDevotee(email, name)
+                    val idToken = googleIdTokenCredential.idToken
+                    if (!idToken.isNullOrBlank()) {
+                        val firebaseCredential = com.google.firebase.auth.GoogleAuthProvider.getCredential(idToken, null)
+                        auth.signInWithCredential(firebaseCredential)
+                            .addOnSuccessListener { authResult ->
+                                val user = authResult.user
+                                val uid = user?.uid ?: ("user_g_" + (email.ifBlank { name }).hashCode().let { kotlin.math.abs(it) })
+                                loginAsGoogleDevotee(email, name, uid)
+                            }
+                            .addOnFailureListener {
+                                loginAsGoogleDevotee(email, name)
+                            }
+                    } else {
+                        loginAsGoogleDevotee(email, name)
+                    }
                 } else {
                     loginAsGoogleDevotee("Deepakudiniya@gmail.com", "दीपक जी")
                 }
@@ -225,6 +244,8 @@ fun LoginScreen(
             when (state) {
                 LoginViewState.PHONE_INPUT -> {
                     BentoPhoneInputView(
+                        selectedRole = selectedRole,
+                        onRoleChange = { selectedRole = it },
                         phoneNumber = phoneNumber,
                         onPhoneNumberChange = {
                             val digitsOnly = it.filter { c -> c.isDigit() }.take(10)
@@ -236,11 +257,23 @@ fun LoginScreen(
                             triggerSendOtp()
                         },
                         onGoogleSignIn = { triggerGoogleSignIn() },
+                        onQuickRoleLogin = { role ->
+                            selectedRole = role
+                            val uid = if (role == "provider") "provider_acharya_dev" else "guest_seeker_108"
+                            val name = if (role == "provider") "आचार्य देव शर्मा" else "दीपक जी (साधक)"
+                            UserManager.initializeOrSyncUser(
+                                uid = uid,
+                                userName = name,
+                                phoneNumber = "",
+                                email = ""
+                            )
+                            onLoginSuccess(uid, name, "", role)
+                        },
                         onSkipClick = {
                             if (onSkip != null) {
-                                onSkip()
+                                onSkip(selectedRole)
                             } else {
-                                onLoginSuccess("guest_explorer", "साधक", "")
+                                onLoginSuccess("guest_explorer", if (selectedRole == "provider") "आचार्य देव शर्मा" else "साधक", "", selectedRole)
                             }
                         },
                         showToast = { msg -> showToast(msg) }
@@ -279,15 +312,15 @@ fun LoginScreen(
                         userName = enteredUserName.ifBlank { "साधक" },
                         onNameChange = { enteredUserName = it },
                         onEnterApp = {
-                            val uid = "user_" + (if (phoneNumber.isNotBlank()) phoneNumber else (100000..999999).random().toString())
-                            val finalName = enteredUserName.trim().ifBlank { "दीपक जी" }
+                            val uid = auth.currentUser?.uid ?: ("user_" + (if (phoneNumber.isNotBlank()) phoneNumber else (100000..999999).random().toString()))
+                            val finalName = enteredUserName.trim().ifBlank { if (selectedRole == "provider") "आचार्य देव शर्मा" else "दीपक जी" }
                             UserManager.initializeOrSyncUser(
                                 uid = uid,
                                 userName = finalName,
                                 phoneNumber = "+91$phoneNumber",
                                 email = ""
                             )
-                            onLoginSuccess(uid, finalName, "+91$phoneNumber")
+                            onLoginSuccess(uid, finalName, "+91$phoneNumber", selectedRole)
                         }
                     )
                 }
@@ -322,11 +355,14 @@ fun LoginScreen(
 
 @Composable
 private fun BentoPhoneInputView(
+    selectedRole: String,
+    onRoleChange: (String) -> Unit,
     phoneNumber: String,
     onPhoneNumberChange: (String) -> Unit,
     isLoading: Boolean,
     onSendCode: () -> Unit,
     onGoogleSignIn: () -> Unit,
+    onQuickRoleLogin: (String) -> Unit,
     onSkipClick: () -> Unit,
     showToast: (String) -> Unit
 ) {
@@ -334,24 +370,109 @@ private fun BentoPhoneInputView(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = 32.dp, vertical = 24.dp),
+            .padding(horizontal = 28.dp, vertical = 20.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         // Masthead
-        Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(top = 40.dp, bottom = 48.dp)) {
-            Surface(shape = RoundedCornerShape(12.dp), color = Saffron, modifier = Modifier.size(48.dp)) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(top = 28.dp, bottom = 24.dp)) {
+            Surface(shape = RoundedCornerShape(12.dp), color = Saffron, modifier = Modifier.size(46.dp)) {
                 Box(contentAlignment = Alignment.Center) { Text("देव", color = Color.White, fontWeight = FontWeight.Black, fontSize = 18.sp) }
             }
-            Spacer(modifier = Modifier.height(16.dp))
-            Text("DEVBHASHA", style = MaterialTheme.typography.titleMedium, letterSpacing = 4.sp, color = Ink, fontWeight = FontWeight.Bold)
+            Spacer(modifier = Modifier.height(12.dp))
+            Text("DEVBHASHA", style = MaterialTheme.typography.titleMedium, letterSpacing = 3.sp, color = Ink, fontWeight = FontWeight.Bold)
         }
         
         // Greeting
-        Text("Namaste, sadhak", style = MaterialTheme.typography.headlineMedium, color = Ink, fontWeight = FontWeight.SemiBold)
-        Spacer(modifier = Modifier.height(8.dp))
-        Text("Your sky, read daily — in one quiet almanac.", style = MaterialTheme.typography.bodyLarge, color = InkSoft, textAlign = TextAlign.Center)
+        Text(
+            text = if (selectedRole == "provider") "प्रदाता / ज्योतिषी पोर्टल" else "नमस्ते, साधक",
+            style = MaterialTheme.typography.headlineSmall,
+            color = Ink,
+            fontWeight = FontWeight.Bold
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            text = if (selectedRole == "provider") "परामर्श स्वीकारें, कमाई ट्रैक करें और साधकों को मार्गदर्शन दें।" else "दैनिक पंचांग, स्वप्न विचार एवं सत्यापित वैदिक साधक परामर्श।",
+            style = MaterialTheme.typography.bodyMedium,
+            color = InkSoft,
+            textAlign = TextAlign.Center
+        )
 
-        Spacer(modifier = Modifier.height(48.dp))
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // Role Selector Component
+        Surface(
+            shape = RoundedCornerShape(16.dp),
+            color = Color(0xFFF1F5F9),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Row(modifier = Modifier.padding(4.dp)) {
+                // User / Seeker Role Tab
+                val isUser = selectedRole == "user"
+                Surface(
+                    shape = RoundedCornerShape(12.dp),
+                    color = if (isUser) Color.White else Color.Transparent,
+                    shadowElevation = if (isUser) 1.5.dp else 0.dp,
+                    modifier = Modifier
+                        .weight(1f)
+                        .clip(RoundedCornerShape(12.dp))
+                        .clickable { onRoleChange("user") }
+                ) {
+                    Row(
+                        modifier = Modifier.padding(vertical = 10.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Person,
+                            contentDescription = null,
+                            tint = if (isUser) Saffron else Color(0xFF64748B),
+                            modifier = Modifier.size(17.dp)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = "साधक (User)",
+                            fontSize = 12.5.sp,
+                            fontWeight = if (isUser) FontWeight.Bold else FontWeight.Medium,
+                            color = if (isUser) Color(0xFF1E293B) else Color(0xFF64748B)
+                        )
+                    }
+                }
+
+                // Provider / Astrologer Role Tab
+                val isProvider = selectedRole == "provider"
+                Surface(
+                    shape = RoundedCornerShape(12.dp),
+                    color = if (isProvider) Color.White else Color.Transparent,
+                    shadowElevation = if (isProvider) 1.5.dp else 0.dp,
+                    modifier = Modifier
+                        .weight(1f)
+                        .clip(RoundedCornerShape(12.dp))
+                        .clickable { onRoleChange("provider") }
+                ) {
+                    Row(
+                        modifier = Modifier.padding(vertical = 10.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.AutoAwesome,
+                            contentDescription = null,
+                            tint = if (isProvider) Saffron else Color(0xFF64748B),
+                            modifier = Modifier.size(17.dp)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = "परामर्शदाता (Provider)",
+                            fontSize = 12.5.sp,
+                            fontWeight = if (isProvider) FontWeight.Bold else FontWeight.Medium,
+                            color = if (isProvider) Color(0xFF1E293B) else Color(0xFF64748B)
+                        )
+                    }
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
 
         // Phone Input
         OutlinedTextField(
@@ -373,7 +494,7 @@ private fun BentoPhoneInputView(
             )
         )
         
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(20.dp))
         
         // Send OTP Button (Premium Gradient)
         val buttonGradient = Brush.horizontalGradient(listOf(SaffronGradientStart, SaffronGradientEnd))
@@ -386,79 +507,107 @@ private fun BentoPhoneInputView(
             contentAlignment = Alignment.Center,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(56.dp)
+                .height(52.dp)
                 .clip(RoundedCornerShape(999.dp))
                 .then(backgroundModifier)
                 .clickable(enabled = phoneNumber.length == 10) { onSendCode() }
         ) {
-            Text(text = if (isLoading) "Sending..." else "Send code →", color = Color.White, fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
+            Text(
+                text = if (isLoading) "Sending..." else "OTP प्राप्त करें (Send Code) →",
+                color = Color.White,
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 15.sp
+            )
         }
         
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(24.dp))
         
         // OR Divider
         Row(verticalAlignment = Alignment.CenterVertically) {
             HorizontalDivider(modifier = Modifier.weight(1f), color = EditorialLineStrong)
-            Text(text = " OR ", color = InkFaint, fontSize = 12.sp, fontWeight = FontWeight.Medium, modifier = Modifier.padding(horizontal = 16.dp))
+            Text(text = " OR ", color = InkFaint, fontSize = 11.sp, fontWeight = FontWeight.Medium, modifier = Modifier.padding(horizontal = 14.dp))
             HorizontalDivider(modifier = Modifier.weight(1f), color = EditorialLineStrong)
         }
         
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(20.dp))
         
-        // Social Row (Refined)
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-            Surface(
-                shape = RoundedCornerShape(16.dp),
-                color = Color.White,
-                border = BorderStroke(1.dp, EditorialLineStrong),
-                shadowElevation = 2.dp,
-                modifier = Modifier
-                    .weight(1f)
-                    .height(56.dp)
-                    .clip(RoundedCornerShape(16.dp))
-                    .clickable { onGoogleSignIn() }
+        // Google Sign-In Button
+        Surface(
+            shape = RoundedCornerShape(16.dp),
+            color = Color.White,
+            border = BorderStroke(1.dp, EditorialLineStrong),
+            shadowElevation = 1.dp,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(50.dp)
+                .clip(RoundedCornerShape(16.dp))
+                .clickable { onGoogleSignIn() }
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center,
+                modifier = Modifier.padding(horizontal = 12.dp)
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center,
-                    modifier = Modifier.padding(horizontal = 12.dp)
-                ) {
-                    Text(
-                        text = "G",
-                        color = Ink,
-                        fontWeight = FontWeight.ExtraBold,
-                        fontSize = 18.sp
-                    )
-                    Spacer(modifier = Modifier.width(10.dp))
-                    Text("Google", color = Ink, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
-                }
-            }
-            Surface(
-                shape = RoundedCornerShape(16.dp),
-                color = Color(0xFF1877F2),
-                modifier = Modifier.weight(1f).height(56.dp).clip(RoundedCornerShape(16.dp)).clickable { showToast("Facebook login abhi setup nahi hai") }
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
-                    Text("f", color = Color.White, fontWeight = FontWeight.Black, fontSize = 20.sp)
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Text("Facebook", color = Color.White, fontWeight = FontWeight.SemiBold)
-                }
+                Text(
+                    text = "G",
+                    color = Ink,
+                    fontWeight = FontWeight.ExtraBold,
+                    fontSize = 18.sp
+                )
+                Spacer(modifier = Modifier.width(10.dp))
+                Text(
+                    text = if (selectedRole == "provider") "Continue as Provider with Google" else "Continue as Seeker with Google",
+                    color = Ink,
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 13.5.sp
+                )
             }
         }
         
-        Spacer(modifier = Modifier.height(36.dp))
+        Spacer(modifier = Modifier.height(20.dp))
+        
+        // Instant Demo One-Click Role Switchers
+        Text(
+            text = "त्वरित डेमो लॉगिन (Explore Role Dashboards):",
+            fontSize = 11.5.sp,
+            color = Color(0xFF64748B),
+            fontWeight = FontWeight.Medium
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            OutlinedButton(
+                onClick = { onQuickRoleLogin("user") },
+                modifier = Modifier.weight(1f).height(44.dp),
+                shape = RoundedCornerShape(999.dp),
+                border = BorderStroke(1.dp, if (selectedRole == "user") Saffron else Color(0xFFCBD5E1))
+            ) {
+                Text("साधक (User)", fontSize = 11.5.sp, color = if (selectedRole == "user") Saffron else Color(0xFF334155))
+            }
+
+            OutlinedButton(
+                onClick = { onQuickRoleLogin("provider") },
+                modifier = Modifier.weight(1f).height(44.dp),
+                shape = RoundedCornerShape(999.dp),
+                border = BorderStroke(1.dp, if (selectedRole == "provider") Saffron else Color(0xFFCBD5E1))
+            ) {
+                Text("आचार्य (Provider)", fontSize = 11.5.sp, color = if (selectedRole == "provider") Saffron else Color(0xFF334155))
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
         
         // Skip & Explore
         TextButton(
             onClick = onSkipClick,
-            modifier = Modifier
-                .height(48.dp)
-                .padding(horizontal = 16.dp)
+            modifier = Modifier.height(44.dp)
         ) {
             Text(
-                text = "Skip & Explore →",
+                text = "Skip & Explore as ${if (selectedRole == "provider") "Provider" else "Seeker"} →",
                 color = InkSecondary,
-                fontSize = 14.sp,
+                fontSize = 13.sp,
                 fontWeight = FontWeight.SemiBold
             )
         }
@@ -466,7 +615,7 @@ private fun BentoPhoneInputView(
         Spacer(modifier = Modifier.height(12.dp))
         
         // Footer
-        Text("By continuing you agree to our Terms & Privacy", style = MaterialTheme.typography.bodySmall, color = InkFaint, textAlign = TextAlign.Center)
+        Text("Role-based access · Secure encrypted verification", style = MaterialTheme.typography.bodySmall, color = InkFaint, textAlign = TextAlign.Center)
     }
 }
 
@@ -567,8 +716,8 @@ private fun BentoOtpVerifyView(
             val waveLength = 18f
             val waveHeight = 4f
             while (x < size.width) {
-                path.relativeQuadraticBezierTo(waveLength / 4, -waveHeight, waveLength / 2, 0f)
-                path.relativeQuadraticBezierTo(waveLength / 4, waveHeight, waveLength / 2, 0f)
+                path.relativeQuadraticTo(waveLength / 4, -waveHeight, waveLength / 2, 0f)
+                path.relativeQuadraticTo(waveLength / 4, waveHeight, waveLength / 2, 0f)
                 x += waveLength
             }
             drawPath(

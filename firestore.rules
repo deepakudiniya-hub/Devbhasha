@@ -51,6 +51,14 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // Chats and consultation messages
+    match /chats/{chatId} {
+      allow read, write: if isSignedIn();
+      match /messages/{messageId} {
+        allow read, write: if isSignedIn();
+      }
+    }
+
     // Everything else: deny by default.
     match /{document=**} {
       allow read, write: if false;

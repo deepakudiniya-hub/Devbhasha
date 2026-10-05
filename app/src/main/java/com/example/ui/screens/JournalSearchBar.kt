@@ -226,39 +226,28 @@ fun HomeJournalSearchBar(
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 6.dp)
     ) {
-        // Main Search Bar Pill (#FAFAFA fill, rounded-xl, black text, 1px #EFEFEF border)
+        // Main Search Bar Pill
         Surface(
-            shape = RoundedCornerShape(18.dp),
-            color = Color(0xFFFAFAFA),
-            border = BorderStroke(
-                width = 1.dp,
-                color = if (query.isNotBlank() || customDateMillis != null || activeFilter != JournalFilterType.ALL) Color(0xFF000000) else Color(0xFFEFEFEF)
-            ),
+            shape = RoundedCornerShape(999.dp),
+            color = Color(0xFFF0F4F8), // Soft M3 container color
+            border = null, // Remove outline
             shadowElevation = 0.dp,
             modifier = Modifier.fillMaxWidth()
         ) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 14.dp, vertical = 10.dp),
+                    .padding(horizontal = 14.dp, vertical = 12.dp), // Adjust vertical padding
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 // Search Icon
-                Box(
-                    modifier = Modifier
-                        .size(30.dp)
-                        .clip(CircleShape)
-                        .background(Color(0xFFF0F0F0)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Outlined.Search,
-                        contentDescription = "Search",
-                        tint = Color(0xFF000000),
-                        modifier = Modifier.size(17.dp)
-                    )
-                }
+                Icon(
+                    imageVector = Icons.Outlined.Search,
+                    contentDescription = "Search",
+                    tint = TextSecondary,
+                    modifier = Modifier.size(20.dp)
+                )
 
                 // Text Field Area
                 Box(
@@ -270,9 +259,8 @@ fun HomeJournalSearchBar(
                     if (query.isEmpty() && customDateMillis == null) {
                         Text(
                             text = placeholderText,
-                            color = InkFaint,
-                            fontSize = 13.sp,
-                            fontStyle = FontStyle.Normal,
+                            color = TextSecondary,
+                            fontSize = 14.sp,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
@@ -283,12 +271,11 @@ fun HomeJournalSearchBar(
                         onValueChange = onQueryChange,
                         singleLine = true,
                         textStyle = TextStyle(
-                            color = Ink,
-                            fontSize = 13.5.sp,
-                            fontWeight = FontWeight.Medium,
-                            fontFamily = FontFamily.Default
+                            color = TextPrimary,
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Medium
                         ),
-                        cursorBrush = SolidColor(Terra),
+                        cursorBrush = SolidColor(GoogleBlue),
                         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
                         keyboardActions = KeyboardActions(onSearch = {
                             focusManager.clearFocus()

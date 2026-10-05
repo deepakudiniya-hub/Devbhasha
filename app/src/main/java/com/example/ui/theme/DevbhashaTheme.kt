@@ -1,16 +1,24 @@
 package com.example.ui.theme
 
+import android.os.Build
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.dynamicDarkColorScheme
+import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.R
 
 // ==========================================
 // PURE WHITE + BLACK + SAFFRON DESIGN SYSTEM
@@ -25,12 +33,12 @@ val BgSecondary = Color(0xFFFAFAFA)
 val BgCard = Color(0xFFFFFFFF)
 
 // Text:
-// --text-primary: #000000 (headings, names, prices)
-// --text-secondary: #737373 (subtitles, expertise, bio, timestamps)
-// --text-tertiary: #A8A8A8 (placeholders, disabled)
-val TextPrimary = Color(0xFF000000)
-val TextSecondary = Color(0xFF737373)
-val TextTertiary = Color(0xFFA8A8A8)
+// --text-primary: #1F2937 (headings, names, prices)
+// --text-secondary: #49454F (subtitles, expertise, bio, timestamps)
+// --text-tertiary: #5F6368 (placeholders, disabled)
+val TextPrimary = Color(0xFF1F2937)
+val TextSecondary = Color(0xFF49454F)
+val TextTertiary = Color(0xFF5F6368)
 
 // Accent (ONLY FOR CTA):
 // Strict Pure Saffron Accent (#FF6B00) - No beige, no gold
@@ -93,44 +101,89 @@ val GlassBackground = Color.White
 val GlassBorder = Color(0xFFEFEFEF)
 
 // Shapes
-val ShapeCard = RoundedCornerShape(24.dp)
-val ShapePill = RoundedCornerShape(999.dp)
+val ShapeCard = RoundedCornerShape(16.dp)
+val ShapeDialog = RoundedCornerShape(28.dp)
+val ShapePill = RoundedCornerShape(9999.dp)
 val ShapeChip = RoundedCornerShape(12.dp)
 
+val GoogleBlue = Color(0xFF4285F4)
+val BackgroundColor = Color(0xFFFFFFFF)
+val SurfaceColor = Color(0xFFFFFFFF)
+val BorderColor = Color(0xFFE0E0E0)
+val TextColor = Color(0xFF202124) // Google-like dark text
+
 private val DevbhashaColorScheme = lightColorScheme(
-    primary = Saffron, // Using new Saffron accent
+    primary = GoogleBlue,
     onPrimary = Color.White,
-    background = Background,
-    onBackground = InkPrimary,
-    surface = CardBg,
-    onSurface = InkPrimary,
-    surfaceVariant = PageBg,
-    onSurfaceVariant = InkSecondary,
-    outline = Border
+    background = BackgroundColor,
+    onBackground = TextColor,
+    surface = SurfaceColor,
+    onSurface = TextColor,
+    surfaceVariant = Color(0xFFF8F9FA),
+    onSurfaceVariant = TextColor,
+    outline = BorderColor
+)
+
+private val DarkColorScheme = darkColorScheme(
+    primary = GoogleBlue,
+    onPrimary = Color.Black,
+    background = Color.Black,
+    onBackground = Color.White,
+    surface = Color(0xFF1E1E1E),
+    onSurface = Color.White,
+    outline = Color(0xFF444444)
 )
 // ... (rest of the file remains same, keeping the AppTypography defined earlier)
 
+val RobotoFontFamily = FontFamily(
+    Font(R.font.noto_sans_devanagari, FontWeight.Normal),
+)
+
 private val AppTypography = Typography(
-    bodyMedium = TextStyle(
-        fontFamily = FontFamily.Default,
-        fontSize = 14.sp,
-        fontWeight = FontWeight.Normal,
-        color = InkPrimary
+    displayLarge = TextStyle(
+        fontFamily = FontFamily.SansSerif,
+        fontSize = 57.sp,
+        fontWeight = FontWeight.Light,
+        letterSpacing = (-0.25).sp,
+        color = TextColor
     ),
     titleLarge = TextStyle(
-        fontFamily = FontFamily.Default,
+        fontFamily = FontFamily.SansSerif,
         fontSize = 22.sp,
-        fontWeight = FontWeight.Bold,
-        color = InkPrimary
+        fontWeight = FontWeight.Medium,
+        color = TextColor
+    ),
+    bodyMedium = TextStyle(
+        fontFamily = FontFamily.SansSerif,
+        fontSize = 16.sp,
+        fontWeight = FontWeight.Normal,
+        lineHeight = 24.sp,
+        color = TextColor
+    ),
+    labelLarge = TextStyle(
+        fontFamily = FontFamily.SansSerif,
+        fontSize = 14.sp,
+        fontWeight = FontWeight.Medium,
+        color = TextColor
     )
 )
 
 @Composable
 fun DevbhashaTheme(
+    darkTheme: Boolean = isSystemInDarkTheme(),
+    dynamicColor: Boolean = true,
     content: @Composable () -> Unit
 ) {
+    val colorScheme = when {
+        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
+            val context = LocalContext.current
+            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+        }
+        darkTheme -> DarkColorScheme
+        else -> DevbhashaColorScheme
+    }
     MaterialTheme(
-        colorScheme = DevbhashaColorScheme,
+        colorScheme = colorScheme,
         typography = AppTypography,
         content = content
     )

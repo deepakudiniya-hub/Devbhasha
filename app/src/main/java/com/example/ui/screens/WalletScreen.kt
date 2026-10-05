@@ -13,9 +13,12 @@ import com.example.utils.WalletRepository
 fun WalletScreen(userId: String) {
     val context = LocalContext.current
     val userSession = remember { UserSession(context) }
-    var walletBalance by remember { mutableDoubleStateOf(0.0) }
+    var walletBalance by remember { mutableDoubleStateOf(userSession.getCachedWalletBalance()) }
     DisposableEffect(userId) {
-        val reg = WalletRepository.observeBalance(userId) { walletBalance = it }
+        val reg = WalletRepository.observeBalance(userId) {
+            walletBalance = it
+            userSession.setCachedWalletBalance(it)
+        }
         onDispose { reg.remove() }
     }
     var isLoading by remember { mutableStateOf(false) }
