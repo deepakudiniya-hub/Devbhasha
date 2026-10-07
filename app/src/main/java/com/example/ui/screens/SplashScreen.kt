@@ -85,41 +85,24 @@ fun SplashScreen(
                     .alpha(alpha.value),
                 contentAlignment = Alignment.Center
             ) {
-                // Outer subtle ambient glow
-                Box(
-                    modifier = Modifier
-                        .size(130.dp)
-                        .background(
-                            brush = Brush.radialGradient(
-                                colors = listOf(
-                                    Terra.copy(alpha = 0.2f),
-                                    Color.Transparent
-                                ),
-                                center = Offset(65f, 65f),
-                                radius = 65f
-                            ),
-                            shape = CircleShape
-                        )
-                )
-
-                // Brand Sacred Logo (Dev Squircle)
+                // Official Sacred Logo (Dev Squircle)
                 DevLogoIcon(
-                    size = 110.dp,
-                    elevation = 12.dp,
+                    size = 96.dp,
+                    elevation = 8.dp,
                     showGlow = false
                 )
             }
 
-            Spacer(modifier = Modifier.height(22.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
-            // App Name / Brand Title: DEV
+            // App Name / Brand Title: देव भाषा
             Text(
-                text = "DEV",
-                fontFamily = FontFamily.Serif,
-                fontSize = 36.sp,
+                text = "देव भाषा",
+                fontFamily = AppFontFamily,
+                fontSize = 32.sp,
                 fontWeight = FontWeight.Bold,
-                color = Ink,
-                letterSpacing = 2.sp,
+                color = Color(0xFF2B2B2B),
+                letterSpacing = 1.sp,
                 modifier = Modifier.alpha(alpha.value)
             )
 
@@ -127,10 +110,11 @@ fun SplashScreen(
 
             // Subtitle / Tagline
             Text(
-                text = "Almanac · Verified Sadhaks · Guidance",
-                fontSize = 13.5.sp,
+                text = "वैदिक साधक • स्वप्न विचार • सीधा समाधान",
+                fontFamily = AppFontFamily,
+                fontSize = 14.sp,
                 fontWeight = FontWeight.Medium,
-                color = InkSoft,
+                color = Color(0xFF6E6E6E),
                 letterSpacing = 0.4.sp,
                 modifier = Modifier.alpha(alpha.value)
             )
@@ -160,7 +144,7 @@ fun SplashScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
-                text = "ESTD · 2024 · VERIFIED JYOTISH",
+                text = "ESTD · 2024 · VERIFIED VEDIC SADHAK",
                 fontSize = 11.sp,
                 color = InkFaint,
                 fontWeight = FontWeight.SemiBold,

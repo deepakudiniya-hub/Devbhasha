@@ -17,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
@@ -35,7 +36,7 @@ import com.example.ui.theme.SaffronSoftBg
 
 /**
  * Premium, spiritually refined Original Brand Logo component.
- * Uses the authentic satvik vector drawable and pristine Devanagari 'भा' / Sacred Jyoti design.
+ * Uses the official #F97316 orange rounded squircle with white bold 'देव'.
  */
 @Composable
 fun DevLogoIcon(
@@ -45,49 +46,26 @@ fun DevLogoIcon(
     elevation: Dp = 2.dp,
     useDevanagariChar: Boolean = true
 ) {
-    val cornerRadius = size * 0.24f
-
     Box(
         modifier = modifier.size(size),
         contentAlignment = Alignment.Center
     ) {
-        // Main squircle container with crisp golden rim (no distracting glow)
-        Surface(
-            modifier = Modifier
-                .size(size)
-                .shadow(
-                    elevation = elevation,
-                    shape = RoundedCornerShape(cornerRadius)
-                ),
-            shape = RoundedCornerShape(cornerRadius),
-            border = BorderStroke(
-                width = 1.dp,
-                brush = Brush.linearGradient(
-                    colors = listOf(
-                        Color(0xFFFF8A00),
-                        Color(0xFFFF6B00)
-                    )
-                )
-            ),
-            color = Color.Transparent
-        ) {
-            Image(
-                painter = painterResource(id = R.drawable.ic_devbhasha_logo),
-                contentDescription = "लोगो - सनातन आध्यात्मिक मंच",
-                modifier = Modifier.fillMaxSize()
-            )
-        }
+        Image(
+            painter = painterResource(id = R.drawable.dev_logo),
+            contentDescription = "लोगो - देव भाषा",
+            modifier = Modifier.fillMaxSize()
+        )
     }
 }
 
 /**
- * Brand Lockup for App Bar & Top Headers (Icon + "भाषा" Title + Tagline)
+ * Brand Lockup for App Bar & Top Headers (36x36 Icon + "देव भाषा" Title + Tagline)
  */
 @Composable
 fun DevBrandLockup(
     modifier: Modifier = Modifier,
     isHindi: Boolean = true,
-    iconSize: Dp = 38.dp
+    iconSize: Dp = 36.dp
 ) {
     Row(
         modifier = modifier,
@@ -95,29 +73,56 @@ fun DevBrandLockup(
     ) {
         DevLogoIcon(
             size = iconSize,
-            elevation = 3.dp,
+            elevation = 2.dp,
             showGlow = false
         )
 
         Spacer(modifier = Modifier.width(10.dp))
 
         Column(verticalArrangement = Arrangement.Center) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    text = if (isHindi) "भाषा" else "Bhasha",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.ExtraBold,
-                    color = Color(0xFF000000),
-                    letterSpacing = 0.5.sp
-                )
-            }
             Text(
-                text = if (isHindi) "वैदिक आध्यात्मिक मार्गदर्शन" else "Spiritual Guidance & Solutions",
+                text = if (isHindi) "देव भाषा" else "Dev Bhasha",
+                fontSize = 17.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF2B2B2B),
+                letterSpacing = 0.3.sp
+            )
+            Text(
+                text = if (isHindi) "वैदिक पंचांग • स्वप्न विचार • परामर्श" else "Vedic Almanac & Guidance",
                 fontSize = 11.sp,
                 fontWeight = FontWeight.Medium,
-                color = Color(0xFF64748B)
+                color = Color(0xFF6E6E6E)
             )
         }
+    }
+}
+
+/**
+ * Small Watermark Logo for Share Cards (rashifal, muhurat, shlok)
+ * Size: 24dp, 80% opacity in bottom corner
+ */
+@Composable
+fun DevWatermarkLogo(
+    modifier: Modifier = Modifier
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        modifier = modifier
+    ) {
+        Image(
+            painter = painterResource(id = R.drawable.dev_logo),
+            contentDescription = "देव भाषा",
+            modifier = Modifier
+                .size(24.dp)
+                .clip(RoundedCornerShape(5.dp))
+        )
+        Text(
+            text = "देव भाषा",
+            fontSize = 10.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color(0xFF2B2B2B).copy(alpha = 0.80f)
+        )
     }
 }
 
@@ -152,7 +157,7 @@ fun DevBrandBanner(
             Spacer(modifier = Modifier.height(12.dp))
 
             Text(
-                text = if (isHindi) "भाषा" else "Bhasha",
+                text = if (isHindi) "देव भाषा" else "Dev Bhasha",
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color(0xFF1E293B)
@@ -193,5 +198,38 @@ fun DevBrandBanner(
                 )
             }
         }
+    }
+}
+
+/**
+ * Compact animated 'देव' Logo Loading Indicator (for pull-to-refresh, cards, and transitions)
+ */
+@Composable
+fun DevLogoLoadingIndicator(
+    modifier: Modifier = Modifier,
+    size: Dp = 32.dp
+) {
+    val infiniteTransition = rememberInfiniteTransition(label = "dev_pulse")
+    val scale = infiniteTransition.animateFloat(
+        initialValue = 0.90f,
+        targetValue = 1.08f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(800, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "scale"
+    )
+
+    Box(
+        modifier = modifier
+            .size(size)
+            .scale(scale.value),
+        contentAlignment = Alignment.Center
+    ) {
+        DevLogoIcon(
+            size = size,
+            elevation = 2.dp,
+            showGlow = false
+        )
     }
 }

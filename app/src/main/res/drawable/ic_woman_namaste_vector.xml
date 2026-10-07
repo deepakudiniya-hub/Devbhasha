@@ -1,0 +1,192 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="200dp"
+    android:height="200dp"
+    android:viewportWidth="200"
+    android:viewportHeight="200">
+
+    <!-- Golden spiritual halo background -->
+    <path
+        android:pathData="M100,20 A80,80 0 1,0 100,180 A80,80 0 1,0 100,20 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:centerX="100"
+                android:centerY="90"
+                android:gradientRadius="75"
+                android:type="radial">
+                <item android:color="#FFF9E6" android:offset="0.0" />
+                <item android:color="#FEEBC8" android:offset="0.5" />
+                <item android:color="#00FDBA74" android:offset="1.0" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Dark Flowing Hair Back -->
+    <path
+        android:fillColor="#1C1917"
+        android:pathData="M60,80 C55,125 65,170 85,185 C75,145 75,105 80,80 Z" />
+    <path
+        android:fillColor="#1C1917"
+        android:pathData="M140,80 C145,125 135,170 115,185 C125,145 125,105 120,80 Z" />
+    <path
+        android:fillColor="#1C1917"
+        android:pathData="M100,35 C75,35 60,55 60,85 C60,115 75,135 100,135 C125,135 140,115 140,85 C140,55 125,35 100,35 Z" />
+
+    <!-- Maroon Kurta / Torso -->
+    <path
+        android:pathData="M50,200 C55,145 75,128 100,132 C125,128 145,145 150,200 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:startX="50"
+                android:startY="130"
+                android:endX="150"
+                android:endY="200"
+                android:type="linear">
+                <item android:color="#9F1239" android:offset="0.0" />
+                <item android:color="#881337" android:offset="0.6" />
+                <item android:color="#4C0519" android:offset="1.0" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Golden Zari Embroidery on Kurta -->
+    <path
+        android:strokeColor="#FBBF24"
+        android:strokeWidth="2.5"
+        android:strokeLineCap="round"
+        android:pathData="M84,132 Q100,148 116,132" />
+    <path
+        android:strokeColor="#FBBF24"
+        android:strokeWidth="1.5"
+        android:pathData="M100,143 L100,200" />
+
+    <!-- Neck -->
+    <path
+        android:fillColor="#FDBA74"
+        android:pathData="M88,105 L88,135 Q100,140 112,135 L112,105 Z" />
+
+    <!-- Face Oval -->
+    <path
+        android:pathData="M100,45 C80,45 74,60 74,82 C74,106 85,118 100,118 C115,118 126,106 126,82 C126,60 120,45 100,45 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:startX="100"
+                android:startY="45"
+                android:endX="100"
+                android:endY="118"
+                android:type="linear">
+                <item android:color="#FED7AA" android:offset="0.0" />
+                <item android:color="#FDBA74" android:offset="1.0" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Cheeks Soft Blush -->
+    <path
+        android:fillColor="#33F43F5E"
+        android:pathData="M85,90 A5,3 0 1,0 85,96 A5,3 0 1,0 85,90 Z" />
+    <path
+        android:fillColor="#33F43F5E"
+        android:pathData="M115,90 A5,3 0 1,0 115,96 A5,3 0 1,0 115,90 Z" />
+
+    <!-- Front Glossy Hair Strands (Side parted) -->
+    <path
+        android:fillColor="#292524"
+        android:pathData="M74,70 Q94,55 100,75 Q90,52 74,56 Z" />
+    <path
+        android:fillColor="#292524"
+        android:pathData="M126,70 Q106,55 100,75 Q110,52 126,56 Z" />
+    <path
+        android:fillColor="#44403C"
+        android:pathData="M76,56 C86,43 114,43 124,56 C116,46 84,46 76,56 Z" />
+
+    <!-- Sacred Red Bindi -->
+    <path
+        android:fillColor="#B91C1C"
+        android:pathData="M100,68 A2,2 0 1,0 100,72 A2,2 0 1,0 100,68 Z" />
+
+    <!-- Arched Eyebrows -->
+    <path
+        android:strokeColor="#1C1917"
+        android:strokeWidth="1.2"
+        android:strokeLineCap="round"
+        android:pathData="M82,73 Q89,70 95,74" />
+    <path
+        android:strokeColor="#1C1917"
+        android:strokeWidth="1.2"
+        android:strokeLineCap="round"
+        android:pathData="M118,73 Q111,70 105,74" />
+
+    <!-- Smiling Expressive Eyes -->
+    <path
+        android:strokeColor="#1C1917"
+        android:strokeWidth="1.5"
+        android:strokeLineCap="round"
+        android:pathData="M84,78 Q89,83 94,78" />
+    <path
+        android:strokeColor="#1C1917"
+        android:strokeWidth="1.5"
+        android:strokeLineCap="round"
+        android:pathData="M116,78 Q111,83 106,78" />
+
+    <!-- Soft Nose -->
+    <path
+        android:strokeColor="#EA580C"
+        android:strokeWidth="1.0"
+        android:strokeLineCap="round"
+        android:strokeAlpha="0.6"
+        android:pathData="M100,76 L100,88 Q100,90 102,89" />
+
+    <!-- Gentle Warm Smile (Lips) -->
+    <path
+        android:fillColor="#E11D48"
+        android:strokeColor="#BE123C"
+        android:strokeWidth="0.6"
+        android:pathData="M93,96 Q100,104 107,96 Z" />
+
+    <!-- Golden Earrings -->
+    <path
+        android:fillColor="#FBBF24"
+        android:pathData="M73,88 A1.5,1.5 0 1,0 73,91 A1.5,1.5 0 1,0 73,88 Z" />
+    <path
+        android:fillColor="#F59E0B"
+        android:pathData="M72,91 L74,91 L73,95 Z" />
+    <path
+        android:fillColor="#FBBF24"
+        android:pathData="M127,88 A1.5,1.5 0 1,0 127,91 A1.5,1.5 0 1,0 127,88 Z" />
+    <path
+        android:fillColor="#F59E0B"
+        android:pathData="M126,91 L128,91 L127,95 Z" />
+
+    <!-- Sleeves & Arms for Namaste -->
+    <path
+        android:fillColor="#881337"
+        android:pathData="M62,195 L87,160 L93,168 L72,200 Z" />
+    <path
+        android:fillColor="#881337"
+        android:pathData="M138,195 L113,160 L107,168 L128,200 Z" />
+
+    <!-- Gold Bangles on Wrists -->
+    <path
+        android:strokeColor="#FBBF24"
+        android:strokeWidth="1.5"
+        android:pathData="M89,163 L92,168" />
+    <path
+        android:strokeColor="#FBBF24"
+        android:strokeWidth="1.5"
+        android:pathData="M111,163 L108,168" />
+
+    <!-- Namaste Joined Palms (Anjali Mudra) -->
+    <path
+        android:fillColor="#FED7AA"
+        android:strokeColor="#FDBA74"
+        android:strokeWidth="0.5"
+        android:pathData="M100,122 C105,133 108,150 105,170 C102,173 98,173 95,170 C92,150 95,133 100,122 Z" />
+    <!-- Center Palm Line -->
+    <path
+        android:strokeColor="#EA580C"
+        android:strokeWidth="1.0"
+        android:strokeLineCap="round"
+        android:strokeAlpha="0.6"
+        android:pathData="M100,124 L100,168" />
+</vector>

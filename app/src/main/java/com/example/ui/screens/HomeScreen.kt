@@ -53,7 +53,6 @@ fun HomeScreen(
     userId: String = "",
     currentUserId: String = userId,
     onLogoutClick: () -> Unit = {},
-    onSwitchToProvider: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -85,7 +84,7 @@ fun HomeScreen(
     var language by remember { mutableStateOf(userSession.getLanguage()) }
 
     // Navigation View: "today", "sadhak", "remedy", "dreams", "wallet"
-    var currentView by remember { mutableStateOf("today") }
+    var currentView by remember { mutableStateOf("sadhak") }
     var searchQuery by remember { mutableStateOf("") }
     var activeJournalFilter by remember { mutableStateOf(JournalFilterType.ALL) }
     var customFilterDateMillis by remember { mutableStateOf<Long?>(null) }
@@ -99,6 +98,8 @@ fun HomeScreen(
     var showEditNameDialog by remember { mutableStateOf(false) }
     var showPoochhoSheet by remember { mutableStateOf(false) }
     var showDreamsModalSheet by remember { mutableStateOf(false) }
+    var selectedCategoryId by remember { mutableStateOf<String?>(null) }
+    var selectedCardId by remember { mutableStateOf<String?>(null) }
     var editedNameInput by remember { mutableStateOf("") }
     var newDreamText by remember { mutableStateOf("") }
 
@@ -415,7 +416,7 @@ fun HomeScreen(
             title = {
                 Text(
                     text = "Edit Profile Name",
-                    fontFamily = FontFamily.Serif,
+                    fontFamily = AppFontFamily,
                     fontWeight = FontWeight.Medium,
                     fontSize = 18.sp,
                     color = Ink
@@ -508,78 +509,72 @@ fun HomeScreen(
         return
     }
 
-    BackHandler(enabled = currentView != "today") {
-        currentView = "today"
+    BackHandler(enabled = currentView != "sadhak") {
+        currentView = "sadhak"
     }
 
     // Main Scaffold in Bento Editorial Design
     Scaffold(
         modifier = modifier.fillMaxSize(),
-        containerColor = Color(0xFFFAFAFA), // Unified background
+        containerColor = Color(0xFFFAF7F2), // Off-white / light cream background
         topBar = {
-            if (currentView == "today") {
+            if (currentView in listOf("today", "sadhak")) {
                 Surface(
-                    color = Color(0xFFFAFAFA), // Matches Scaffold
+                    color = Color(0xFFFAF7F2), // Matches Scaffold off-white
                     modifier = Modifier.statusBarsPadding()
                 ) {
-                    Column {
-                        BentoEditorialMasthead(
-                            balanceAmount = walletBalance,
-                            language = language,
-                            isHindi = isHindi,
-                            onLanguageSelect = { newLang ->
-                                HapticFeedbackHelper.playClick(haptic)
-                                language = newLang
-                                isHindi = (newLang == "hi")
-                                userSession.setLanguage(newLang)
-                                UserManager.updateLanguagePreference(targetUserDocId, newLang)
-                                val toastText = when (newLang) {
-                                    "hi" -> "भाषा: हिंदी (Hindi) सक्रिय ✨"
-                                    "hgl" -> "Bhasha: Hinglish active ✨"
-                                    else -> "Language: English active ✨"
-                                }
-                                showToast(toastText)
-                            },
-                            onToggleLanguage = {
-                                HapticFeedbackHelper.playClick(haptic)
-                                val nextLang = when (language) {
-                                    "en" -> "hi"
-                                    "hi" -> "hgl"
-                                    else -> "en"
-                                }
-                                language = nextLang
-                                isHindi = (nextLang == "hi")
-                                userSession.setLanguage(nextLang)
-                                UserManager.updateLanguagePreference(targetUserDocId, nextLang)
-                                val toastText = when (nextLang) {
-                                    "hi" -> "भाषा: हिंदी (Hindi) सक्रिय ✨"
-                                    "hgl" -> "Bhasha: Hinglish active ✨"
-                                    else -> "Language: English active ✨"
-                                }
-                                showToast(toastText)
-                            },
-                            onBalanceClick = { currentView = "wallet" }
-                        )
-                        // Personalized Recommendation Panel
-                        BentoEditorialRecommendationPanel(
-                            userName = userDisplayName,
-                            onClick = { showToast("Top ritual selected ✨") }
-                        )
-                    }
+                    BentoEditorialMasthead(
+                        userName = userDisplayName,
+                        balanceAmount = walletBalance,
+                        language = language,
+                        isHindi = isHindi,
+                        onProfileClick = {
+                            HapticFeedbackHelper.playClick(haptic)
+                            showProfileSheet = true
+                        },
+                        onLanguageSelect = { newLang ->
+                            HapticFeedbackHelper.playClick(haptic)
+                            language = newLang
+                            isHindi = (newLang == "hi")
+                            userSession.setLanguage(newLang)
+                            UserManager.updateLanguagePreference(targetUserDocId, newLang)
+                            val toastText = when (newLang) {
+                                "hi" -> "भाषा: हिंदी (Hindi) सक्रिय ✨"
+                                "hgl" -> "Bhasha: Hinglish active ✨"
+                                else -> "Language: English active ✨"
+                            }
+                            showToast(toastText)
+                        },
+                        onToggleLanguage = {
+                            HapticFeedbackHelper.playClick(haptic)
+                            val nextLang = when (language) {
+                                "en" -> "hi"
+                                "hi" -> "hgl"
+                                else -> "en"
+                            }
+                            language = nextLang
+                            isHindi = (nextLang == "hi")
+                            userSession.setLanguage(nextLang)
+                            UserManager.updateLanguagePreference(targetUserDocId, nextLang)
+                            val toastText = when (nextLang) {
+                                "hi" -> "भाषा: हिंदी (Hindi) सक्रिय ✨"
+                                "hgl" -> "Bhasha: Hinglish active ✨"
+                                else -> "Language: English active ✨"
+                            }
+                            showToast(toastText)
+                        },
+                        onBalanceClick = { currentView = "wallet" }
+                    )
                 }
             }
         },
         bottomBar = {
-            if (currentView in listOf("today", "sadhak", "remedy")) {
+            if (currentView in listOf("today", "sadhak", "dreams", "remedy")) {
                 BentoEditorialDock(
                     currentTab = currentView,
                     onTabSelect = { tab ->
                         HapticFeedbackHelper.playClick(haptic)
-                        if (tab == "profile") {
-                            showProfileSheet = true
-                        } else {
-                            currentView = tab
-                        }
+                        currentView = tab
                     },
                     hasUnreadSadhak = !isOfferClaimed || freeMins == 0,
                     isHindi = isHindi,
@@ -651,6 +646,19 @@ fun HomeScreen(
                                 language = language
                             )
 
+
+
+                            // 5. Circular Problem & Guidance Categories Row
+                            Spacer(modifier = Modifier.height(8.dp))
+                            BentoProblemCategoryRow(
+                                onCategoryClick = { category ->
+                                    selectedCardId = category
+                                    currentView = "firestore_card"
+                                },
+                                isHindi = isHindi,
+                                language = language
+                            )
+
                             // 2. Real-time Filtered Search Results (displays when searching or date filtering)
                             if (isJournalSearchActive) {
                                 HomeJournalSearchResultsSection(
@@ -682,32 +690,16 @@ fun HomeScreen(
                                 )
                             }
 
-                            // 3. Promo / Coupon Code Banner (DEV100 / Free 15 Mins)
+                            // 3. Featured Big "पूछा" Card (Direct Sadhak Query & Instant Resolution)
                             Spacer(modifier = Modifier.height(10.dp))
-                            BentoEditorialPromoBanner(
-                                isOfferClaimed = isOfferClaimed,
-                                onClaimOffer = { handleClaimTicket() },
+                            BentoEditorialPoochhaHeroCard(
+                                onAskClick = { showPoochhoSheet = true },
                                 isHindi = isHindi,
                                 language = language
                             )
 
-                            // 4. Grouped Tools Grid (Poochho, Dreams, and Circular Quick Tools)
-                            Spacer(modifier = Modifier.height(14.dp))
-                            BentoEditorialToolsGrid(
-                                currentView = currentView,
-                                onPoochhoClick = { showPoochhoSheet = true },
-                                onDreamsClick = { showDreamsModalSheet = true },
-                                onKundliClick = { currentView = "kundli" },
-                                onTarotClick = { currentView = "tarot" },
-                                onMatchClick = { currentView = "match" },
-                                onHabitsClick = { currentView = "habits" },
-                                onTimerClick = { currentView = "timer" },
-                                isHindi = isHindi,
-                                language = language
-                            )
-
-                            // 5. Experts on Call (Featured card + Expert rows)
-                            Spacer(modifier = Modifier.height(14.dp))
+                            // 4. Verified Sadhaks on Call (Featured card + Expert list)
+                            Spacer(modifier = Modifier.height(16.dp))
                             BentoEditorialExpertsSection(
                                 sadhaks = saadhakList,
                                 onChatClick = { sadhak ->
@@ -726,19 +718,35 @@ fun HomeScreen(
                     }
 
                     "sadhak" -> {
-                        SadhakDirectoryScreen(
-                            sadhaks = saadhakList,
-                            isHindi = isHindi,
-                            onConsultSadhak = { sadhak ->
-                                handleStartConsultation(sadhak, "chat")
-                            },
-                            onCallClick = { sadhak ->
-                                handleStartConsultation(sadhak, "call")
-                            },
-                            onChatClick = { sadhak ->
-                                handleStartConsultation(sadhak, "chat")
-                            }
-                        )
+                        Column {
+                            BentoEditorialPromoBanner(
+                                isOfferClaimed = isOfferClaimed,
+                                onClaimOffer = { handleClaimTicket() },
+                                onTalkNowClick = {
+                                    val firstSadhak = saadhakList.firstOrNull()
+                                    if (firstSadhak != null) {
+                                        handleStartConsultation(firstSadhak, "call")
+                                    } else {
+                                        showBookingSheet = true
+                                    }
+                                },
+                                isHindi = isHindi,
+                                language = language
+                            )
+                            SadhakDirectoryScreen(
+                                sadhaks = saadhakList,
+                                isHindi = isHindi,
+                                onConsultSadhak = { sadhak ->
+                                    handleStartConsultation(sadhak, "chat")
+                                },
+                                onCallClick = { sadhak ->
+                                    handleStartConsultation(sadhak, "call")
+                                },
+                                onChatClick = { sadhak ->
+                                    handleStartConsultation(sadhak, "chat")
+                                }
+                            )
+                        }
                     }
 
                     "remedy" -> {
@@ -834,6 +842,27 @@ fun HomeScreen(
                             language = language
                         )
                     }
+
+                    "firestore_card" -> {
+                        FirestoreCardDetailScreen(
+                            cardId = selectedCardId ?: "family",
+                            onBackClick = { currentView = "today" },
+                            onStartChat = { sadhak -> handleStartConsultation(sadhak, "chat") },
+                            onStartCall = { sadhak -> handleStartConsultation(sadhak, "call") },
+                            sadhaks = saadhakList,
+                            isHindi = isHindi,
+                            language = language
+                        )
+                    }
+
+                    "profile" -> {
+                        UserProfileScreen(
+                            userId = targetUserDocId,
+                            userNameInitial = userDisplayName,
+                            onBackClick = { currentView = "today" },
+                            onLogoutClick = onLogoutClick
+                        )
+                    }
                 }
             }
 
@@ -889,6 +918,12 @@ fun HomeScreen(
 
     // Bottom Sheet: Poochho Problem & Consult Sheet (Tile 01)
     if (showPoochhoSheet) {
+        val categoryMap = mapOf(
+            "family" to "🏡 पारिवारिक क्लेश",
+            "career" to "💼 करियर / व्यापार",
+            "marriage" to "❤️ विवाह / संबंध",
+            "health" to "🩺 स्वास्थ्य / शांति"
+        )
         PoochhoProblemConsultSheet(
             sadhaks = saadhakList,
             onStartChat = { sadhak, problemText ->
@@ -903,7 +938,11 @@ fun HomeScreen(
                     showToast("कॉल शुरू: $problemText ✨")
                 }
             },
-            onDismiss = { showPoochhoSheet = false },
+            onDismiss = {
+                showPoochhoSheet = false
+                selectedCategoryId = null
+            },
+            initialCategory = selectedCategoryId?.let { categoryMap[it] },
             isHindi = isHindi,
             language = language
         )
@@ -945,18 +984,8 @@ fun HomeScreen(
             language = language,
             onDismiss = { showProfileSheet = false },
             onEditProfile = {
-                editedNameInput = userDisplayName
                 showProfileSheet = false
-                showEditNameDialog = true
-            },
-            onOrdersClick = {
-                val ordersMsg = when(language) {
-                    "hi" -> "मेरे ऑर्डर — शीघ्र आ रहे हैं"
-                    "hinglish" -> "Mere orders — jaldi aa rahe hain"
-                    else -> "My orders — opening soon"
-                }
-                showToast(ordersMsg)
-                showProfileSheet = false
+                currentView = "profile"
             },
             onLanguageChange = { newLang ->
                 language = newLang
@@ -979,10 +1008,6 @@ fun HomeScreen(
                 }
                 showToast(helpMsg)
                 showProfileSheet = false
-            },
-            onSwitchToProvider = {
-                showProfileSheet = false
-                onSwitchToProvider()
             },
             onLogoutClick = {
                 showProfileSheet = false

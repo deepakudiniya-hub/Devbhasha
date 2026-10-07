@@ -187,9 +187,9 @@ fun HomeJournalSearchBar(
     }
 
     val placeholderText = when (currentLangCode) {
-        "hi" -> "डायरी में खोजें — शब्द या तारीख (उदा. शिव, 28 Sep, कल)..."
-        "hgl" -> "Journal search karein — keyword ya date (eg. Shiv, 28 Sep)..."
-        else -> "Search journal by keyword or date (e.g. Shiva, 28 Sep)..."
+        "hi" -> "खोजें…"
+        "hgl" -> "Khojein…"
+        else -> "Search…"
     }
 
     // Function to launch Android DatePickerDialog
@@ -228,24 +228,25 @@ fun HomeJournalSearchBar(
     ) {
         // Main Search Bar Pill
         Surface(
-            shape = RoundedCornerShape(999.dp),
-            color = Color(0xFFF0F4F8), // Soft M3 container color
-            border = null, // Remove outline
+            shape = RoundedCornerShape(10.dp),
+            color = Color(0xFFF2F2F7), // Light grey background
             shadowElevation = 0.dp,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(44.dp)
         ) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 14.dp, vertical = 12.dp), // Adjust vertical padding
+                    .padding(horizontal = 12.dp),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 // Search Icon
                 Icon(
                     imageVector = Icons.Outlined.Search,
                     contentDescription = "Search",
-                    tint = TextSecondary,
+                    tint = Color(0xFF8E8E93),
                     modifier = Modifier.size(20.dp)
                 )
 
@@ -253,14 +254,14 @@ fun HomeJournalSearchBar(
                 Box(
                     modifier = Modifier
                         .weight(1f)
-                        .padding(horizontal = 4.dp),
+                        .padding(horizontal = 2.dp),
                     contentAlignment = Alignment.CenterStart
                 ) {
                     if (query.isEmpty() && customDateMillis == null) {
                         Text(
                             text = placeholderText,
-                            color = TextSecondary,
-                            fontSize = 14.sp,
+                            color = Color(0xFF8E8E93),
+                            fontSize = 15.sp,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
@@ -271,11 +272,11 @@ fun HomeJournalSearchBar(
                         onValueChange = onQueryChange,
                         singleLine = true,
                         textStyle = TextStyle(
-                            color = TextPrimary,
-                            fontSize = 14.sp,
+                            color = Color(0xFF2B2B2B),
+                            fontSize = 14.5.sp,
                             fontWeight = FontWeight.Medium
                         ),
-                        cursorBrush = SolidColor(GoogleBlue),
+                        cursorBrush = SolidColor(Color(0xFFC2410C)),
                         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
                         keyboardActions = KeyboardActions(onSearch = {
                             focusManager.clearFocus()
@@ -290,20 +291,20 @@ fun HomeJournalSearchBar(
                     val dateLabel = SimpleDateFormat("d MMM", Locale.getDefault()).format(Date(customDateMillis))
                     Surface(
                         shape = RoundedCornerShape(8.dp),
-                        color = Terra,
+                        color = Color(0xFFC2410C),
                         modifier = Modifier.clickable { onCustomDateSelect(null) }
                     ) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 3.dp)
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                         ) {
                             Text(
-                                text = "📅 $dateLabel",
+                                text = dateLabel,
                                 color = Color.White,
-                                fontSize = 10.5.sp,
+                                fontSize = 11.sp,
                                 fontWeight = FontWeight.Bold
                             )
-                            Spacer(modifier = Modifier.width(3.dp))
+                            Spacer(modifier = Modifier.width(4.dp))
                             Icon(
                                 imageVector = Icons.Filled.Close,
                                 contentDescription = "Clear Date",
@@ -332,56 +333,20 @@ fun HomeJournalSearchBar(
                     }
                 }
 
-                // Filter Toggle Icon Button
-                IconButton(
-                    onClick = { showFilters = !showFilters },
-                    modifier = Modifier
-                        .size(32.dp)
-                        .clip(CircleShape)
-                        .background(if (showFilters || activeFilter != JournalFilterType.ALL) Terra.copy(alpha = 0.15f) else Color(0xFFF1F5F9))
-                ) {
-                    Icon(
-                        imageVector = Icons.Outlined.Tune,
-                        contentDescription = "Toggle Filters",
-                        tint = if (showFilters || activeFilter != JournalFilterType.ALL) Terra else InkSoft,
-                        modifier = Modifier.size(16.dp)
-                    )
-                }
-
-                // Date Picker Calendar Button
+                // Single Date Picker Calendar Button
                 IconButton(
                     onClick = { openDatePicker() },
                     modifier = Modifier
-                        .size(32.dp)
+                        .size(34.dp)
                         .clip(CircleShape)
-                        .background(if (customDateMillis != null) Terra.copy(alpha = 0.15f) else Color(0xFFF1F5F9))
+                        .background(if (customDateMillis != null) Color(0xFFC2410C).copy(alpha = 0.12f) else Color(0xFFF1F5F9))
                 ) {
                     Icon(
                         imageVector = Icons.Outlined.CalendarMonth,
                         contentDescription = "Pick Date",
-                        tint = if (customDateMillis != null) Terra else InkSoft,
-                        modifier = Modifier.size(17.dp)
+                        tint = if (customDateMillis != null) Color(0xFFC2410C) else Color(0xFF475569),
+                        modifier = Modifier.size(18.dp)
                     )
-                }
-
-                // Voice / Journal Quick Shortcut
-                Surface(
-                    shape = CircleShape,
-                    color = Terra,
-                    shadowElevation = 1.dp,
-                    modifier = Modifier
-                        .size(32.dp)
-                        .clip(CircleShape)
-                        .clickable { onOpenJournalClick() }
-                ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Icon(
-                            imageVector = Icons.Outlined.AutoStories,
-                            contentDescription = "Open Journal",
-                            tint = Color.White,
-                            modifier = Modifier.size(15.dp)
-                        )
-                    }
                 }
             }
         }

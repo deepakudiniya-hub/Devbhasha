@@ -13,6 +13,7 @@
  */
 
 const { onCall, HttpsError } = require("firebase-functions/v2/https");
+const { onDocumentUpdated } = require("firebase-functions/v2/firestore");
 const { defineSecret } = require("firebase-functions/params");
 const admin = require("firebase-admin");
 const crypto = require("crypto");
@@ -27,7 +28,67 @@ const RAZORPAY_KEY_SECRET = defineSecret("RAZORPAY_KEY_SECRET");
 
 const MAX_RECHARGE_PAISE = 500000; // ₹5,000 cap per recharge
 const SIGNUP_BONUS_PAISE = 10000;  // ₹100 signup bonus — owner-configurable
+const REFERRAL_BONUS_PAISE = 10000; // ₹100 referral bonus for referee and referrer
 const SECRETS = [RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET];
+
+async function processReferralReward(tx, uid, userSnap) {
+  const userData = userSnap.data() || {};
+  if (userData.referralBonusClaimed || !userData.referredBy) {
+    return;
+  }
+
+  const referrerCodeOrUid = userData.referredBy;
+  let referrerQuery = db.collection("users").where("referralCode", "==", referrerCodeOrUid);
+  let referrerSnap = await tx.get(referrerQuery);
+  let referrerDocRef = null;
+
+  if (!referrerSnap.empty) {
+    referrerDocRef = referrerSnap.docs[0].ref;
+  } else {
+    const directRef = db.collection("users").doc(referrerCodeOrUid);
+    const directSnap = await tx.get(directRef);
+    if (directSnap.exists) {
+      referrerDocRef = directRef;
+    }
+  }
+
+  if (!referrerDocRef) {
+    tx.set(db.collection("users").doc(uid), { referralBonusClaimed: true }, { merge: true });
+    return;
+  }
+
+  const refereeRef = db.collection("users").doc(uid);
+  const refereeLedgerRef = db.collection("walletLedger").doc(`${uid}_referral_reward`);
+  const referrerLedgerRef = db.collection("walletLedger").doc(`${referrerDocRef.id}_referral_earned_${uid}`);
+
+  // Credit referee (₹100)
+  tx.set(refereeRef, {
+    walletBalance: FieldValue.increment(REFERRAL_BONUS_PAISE),
+    referralBonusClaimed: true,
+  }, { merge: true });
+
+  tx.set(refereeLedgerRef, {
+    uid,
+    amountPaise: REFERRAL_BONUS_PAISE,
+    purpose: "referral_welcome_bonus",
+    ref: "referral_reward",
+    createdAt: FieldValue.serverTimestamp(),
+  });
+
+  // Credit referrer (₹100)
+  tx.set(referrerDocRef, {
+    walletBalance: FieldValue.increment(REFERRAL_BONUS_PAISE),
+    totalReferralEarnings: FieldValue.increment(REFERRAL_BONUS_PAISE),
+  }, { merge: true });
+
+  tx.set(referrerLedgerRef, {
+    uid: referrerDocRef.id,
+    amountPaise: REFERRAL_BONUS_PAISE,
+    purpose: "referral_earned",
+    ref: `referral_earned_${uid}`,
+    createdAt: FieldValue.serverTimestamp(),
+  });
+}
 
 function razorpayClient() {
   return new Razorpay({
@@ -150,6 +211,9 @@ exports.verifyRazorpayAndCredit = onCall({ secrets: SECRETS }, async (request) =
     tx.set(userRef, { walletBalance: FieldValue.increment(order.amountPaise) }, { merge: true });
     tx.set(orderRef, { status: "paid", paymentId }, { merge: true });
 
+    // Process referral reward upon first successful transaction
+    await processReferralReward(tx, uid, userSnap);
+
     return {
       alreadyProcessed: false,
       balancePaise: balancePaiseOf(userSnap) + order.amountPaise,
@@ -269,3 +333,276 @@ exports.claimSignupBonus = onCall(async (request) => {
     return { alreadyClaimed: false, balancePaise: bal + SIGNUP_BONUS_PAISE };
   });
 });
+
+/**
+ * Execute call settlement idempotently in a single Firestore transaction:
+ * - active_calls -> 'ended': earnedAmount = ceil(durationSeconds/60)*ratePerMinute paise
+ * - debit /users/{callerId}.walletBalance
+ * - write /walletLedger
+ * - credit /providers/{providerId}/transactions
+ * - bump /providers/{providerId}/wallet/summary balance and totalEarnings
+ * - update /active_calls/{callId} with earnedAmount and settled status
+ */
+async function executeSettleCall(callId, currentCallData = null) {
+  const callRef = db.collection("active_calls").doc(callId);
+
+  return db.runTransaction(async (tx) => {
+    const callSnap = await tx.get(callRef);
+    if (!callSnap.exists) {
+      console.warn(`[settleCall] active_calls/${callId} does not exist`);
+      return { skipped: true, reason: "not_found" };
+    }
+
+    const callData = callSnap.data() || {};
+    // Idempotency: skip if already settled or earnedAmount is recorded
+    if (callData.settled || callData.earnedAmount != null) {
+      return { alreadySettled: true, earnedAmount: callData.earnedAmount };
+    }
+
+    const callerId = callData.callerId;
+    const providerId = callData.providerId;
+    if (!callerId || !providerId) {
+      console.warn(`[settleCall] missing callerId or providerId for ${callId}`);
+      return { skipped: true, reason: "missing_participants" };
+    }
+
+    const durationSeconds = Math.max(0, Number(callData.durationSeconds || 0));
+    const ratePerMinute = Math.max(0, Number(callData.ratePerMinute || 0));
+    const billedMinutes = Math.ceil(durationSeconds / 60);
+    const earnedAmount = Math.round(billedMinutes * ratePerMinute); // integer paise
+
+    const userRef = db.collection("users").doc(callerId);
+    const ledgerRef = db.collection("walletLedger").doc(`${callerId}_call_${callId}`);
+    const providerTxRef = db.collection("providers").doc(providerId).collection("transactions").doc(`call_${callId}`);
+    const providerWalletRef = db.collection("providers").doc(providerId).collection("wallet").doc("summary");
+
+    const [userSnap, ledgerSnap, providerTxSnap, providerWalletSnap] = await Promise.all([
+      tx.get(userRef),
+      tx.get(ledgerRef),
+      tx.get(providerTxRef),
+      tx.get(providerWalletRef),
+    ]);
+
+    if (ledgerSnap.exists || providerTxSnap.exists) {
+      return { alreadySettled: true, earnedAmount };
+    }
+
+    // 1. Debit caller wallet balance
+    tx.set(userRef, {
+      walletBalance: FieldValue.increment(-earnedAmount),
+    }, { merge: true });
+
+    // 2. Write /walletLedger
+    tx.set(ledgerRef, {
+      uid: callerId,
+      amountPaise: -earnedAmount,
+      purpose: "call_charge",
+      ref: `call_${callId}`,
+      providerId,
+      callId,
+      durationSeconds,
+      ratePerMinute,
+      createdAt: FieldValue.serverTimestamp(),
+    });
+
+    // 3. Credit /providers/{providerId}/transactions
+    tx.set(providerTxRef, {
+      id: `call_${callId}`,
+      type: "call_earning",
+      amountPaise: earnedAmount,
+      callId,
+      callerId,
+      callerName: callData.callerName || "",
+      durationSeconds,
+      ratePerMinute,
+      timestamp: FieldValue.serverTimestamp(),
+      status: "completed",
+    });
+
+    // 4. Bump /providers/{providerId}/wallet/summary balance and totalEarnings
+    tx.set(providerWalletRef, {
+      balance: FieldValue.increment(earnedAmount),
+      totalEarnings: FieldValue.increment(earnedAmount),
+      updatedAt: FieldValue.serverTimestamp(),
+    }, { merge: true });
+
+    // 5. Update /active_calls/{callId}
+    tx.set(callRef, {
+      earnedAmount,
+      settled: true,
+      settledAt: FieldValue.serverTimestamp(),
+    }, { merge: true });
+
+    return {
+      success: true,
+      callId,
+      earnedAmount,
+      billedMinutes,
+      callerId,
+      providerId,
+    };
+  });
+}
+
+/**
+ * Settle active call: triggers when active_calls document transitions to 'ended'.
+ */
+exports.settleCall = onDocumentUpdated("active_calls/{callId}", async (event) => {
+  const callId = event.params.callId;
+  const before = event.data?.before?.data() || {};
+  const after = event.data?.after?.data() || {};
+
+  if (after.status !== "ended") {
+    return null;
+  }
+  if (before.status === "ended") {
+    return null;
+  }
+
+  return executeSettleCall(callId, after);
+});
+
+// Callable endpoint for manual or client invocation
+exports.settleCallCallable = onCall(async (request) => {
+  const data = request.data || {};
+  const callId = String(data.callId || "");
+  if (!callId) {
+    throw new HttpsError("invalid-argument", "Missing callId.");
+  }
+  return executeSettleCall(callId);
+});
+
+/**
+ * Execute question settlement idempotently in a single Firestore transaction:
+ * - status -> 'answered'
+ * - earningAmount in integer paise
+ * - debit /users/{userId}.walletBalance
+ * - write /walletLedger
+ * - credit /providers/{providerId}/transactions
+ * - bump /providers/{providerId}/wallet/summary balance and totalEarnings
+ * - update /questions/{questionId} with earningAmount and settled: true
+ */
+async function executeSettleQuestion(questionId, currentQuestionData = null) {
+  const questionRef = db.collection("questions").doc(questionId);
+
+  return db.runTransaction(async (tx) => {
+    const questionSnap = await tx.get(questionRef);
+    if (!questionSnap.exists) {
+      console.warn(`[settleQuestion] questions/${questionId} does not exist`);
+      return { skipped: true, reason: "not_found" };
+    }
+
+    const qData = questionSnap.data() || {};
+    if (qData.settled) {
+      return { alreadySettled: true, earningAmount: qData.earningAmount };
+    }
+
+    const userId = qData.userId;
+    const providerId = qData.providerId;
+    if (!userId || !providerId) {
+      console.warn(`[settleQuestion] missing userId or providerId for ${questionId}`);
+      return { skipped: true, reason: "missing_participants" };
+    }
+
+    const rawAmount = qData.earningAmount != null ? qData.earningAmount : (qData.amountPaise != null ? qData.amountPaise : 5100);
+    const earningAmount = Math.round(Math.max(0, Number(rawAmount)));
+
+    const userRef = db.collection("users").doc(userId);
+    const ledgerRef = db.collection("walletLedger").doc(`${userId}_question_${questionId}`);
+    const providerTxRef = db.collection("providers").doc(providerId).collection("transactions").doc(`question_${questionId}`);
+    const providerWalletRef = db.collection("providers").doc(providerId).collection("wallet").doc("summary");
+
+    const [userSnap, ledgerSnap, providerTxSnap, providerWalletSnap] = await Promise.all([
+      tx.get(userRef),
+      tx.get(ledgerRef),
+      tx.get(providerTxRef),
+      tx.get(providerWalletRef),
+    ]);
+
+    if (ledgerSnap.exists || providerTxSnap.exists) {
+      return { alreadySettled: true, earningAmount };
+    }
+
+    // 1. Debit seeker wallet balance
+    tx.set(userRef, {
+      walletBalance: FieldValue.increment(-earningAmount),
+    }, { merge: true });
+
+    // 2. Write /walletLedger
+    tx.set(ledgerRef, {
+      uid: userId,
+      amountPaise: -earningAmount,
+      purpose: "question_charge",
+      ref: `question_${questionId}`,
+      providerId,
+      questionId,
+      createdAt: FieldValue.serverTimestamp(),
+    });
+
+    // 3. Credit /providers/{providerId}/transactions
+    tx.set(providerTxRef, {
+      id: `question_${questionId}`,
+      type: "question_earning",
+      amountPaise: earningAmount,
+      questionId,
+      userId,
+      userName: qData.userName || "",
+      timestamp: FieldValue.serverTimestamp(),
+      status: "completed",
+    });
+
+    // 4. Bump /providers/{providerId}/wallet/summary balance and totalEarnings
+    tx.set(providerWalletRef, {
+      balance: FieldValue.increment(earningAmount),
+      totalEarnings: FieldValue.increment(earningAmount),
+      updatedAt: FieldValue.serverTimestamp(),
+    }, { merge: true });
+
+    // 5. Update /questions/{questionId}
+    tx.set(questionRef, {
+      earningAmount,
+      settled: true,
+      settledAt: FieldValue.serverTimestamp(),
+    }, { merge: true });
+
+    return {
+      success: true,
+      questionId,
+      earningAmount,
+      userId,
+      providerId,
+    };
+  });
+}
+
+/**
+ * Settle question: triggers when questions document transitions to 'answered'.
+ */
+exports.settleQuestion = onDocumentUpdated("questions/{questionId}", async (event) => {
+  const questionId = event.params.questionId;
+  const before = event.data?.before?.data() || {};
+  const after = event.data?.after?.data() || {};
+
+  if (after.status !== "answered") {
+    return null;
+  }
+  if (before.status === "answered") {
+    return null;
+  }
+
+  return executeSettleQuestion(questionId, after);
+});
+
+// Callable endpoint for manual or client invocation
+exports.settleQuestionCallable = onCall(async (request) => {
+  const data = request.data || {};
+  const questionId = String(data.questionId || "");
+  if (!questionId) {
+    throw new HttpsError("invalid-argument", "Missing questionId.");
+  }
+  return executeSettleQuestion(questionId);
+});
+
+exports.executeSettleCall = executeSettleCall;
+exports.executeSettleQuestion = executeSettleQuestion;
+

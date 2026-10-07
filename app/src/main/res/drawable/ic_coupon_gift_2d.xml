@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="120dp"
+    android:height="120dp"
+    android:viewportWidth="120"
+    android:viewportHeight="120">
+
+    <!-- 1. Ambient Golden Halo / Glow Circle -->
+    <path
+        android:pathData="M60,60 m-50,0 a50,50 0 1,0 100,0 a50,50 0 1,0 -100,0"
+        android:fillColor="#33FFFFFF" />
+
+    <path
+        android:pathData="M60,60 m-40,0 a40,40 0 1,0 80,0 a40,40 0 1,0 -80,0"
+        android:fillColor="#44FFFFFF" />
+
+    <!-- 2. 2D Gift Box Body -->
+    <path
+        android:pathData="M26,52 L94,52 C97,52 100,55 100,58 L100,94 C100,98 97,101 93,101 L27,101 C23,101 20,98 20,94 L20,58 C20,55 23,52 26,52 Z"
+        android:fillColor="#FFF8E7" />
+
+    <!-- 2D Gift Box Lid -->
+    <path
+        android:pathData="M16,42 L104,42 C107,42 109,44 109,47 L109,53 C109,56 107,58 104,58 L16,58 C13,58 11,56 11,53 L11,47 C11,44 13,42 16,42 Z"
+        android:fillColor="#FFE8B2" />
+
+    <!-- 3. Vertical Golden Festive Ribbon -->
+    <path
+        android:pathData="M52,42 L68,42 L68,101 L52,101 Z"
+        android:fillColor="#F59E0B" />
+
+    <!-- 4. 2D Ribbon Bow / Loops -->
+    <!-- Left Loop -->
+    <path
+        android:pathData="M60,42 C50,28 32,26 34,36 C36,44 54,42 60,42 Z"
+        android:fillColor="#D97706" />
+    <path
+        android:pathData="M58,42 C50,32 38,30 38,36 C38,41 52,42 58,42 Z"
+        android:fillColor="#FBBF24" />
+
+    <!-- Right Loop -->
+    <path
+        android:pathData="M60,42 C70,28 88,26 86,36 C84,44 66,42 60,42 Z"
+        android:fillColor="#D97706" />
+    <path
+        android:pathData="M62,42 C70,32 82,30 82,36 C82,41 68,42 62,42 Z"
+        android:fillColor="#FBBF24" />
+
+    <!-- Bow Knot Center -->
+    <path
+        android:pathData="M54,38 L66,38 C68,38 70,40 70,42 L70,46 C70,48 68,50 66,50 L54,50 C52,50 50,48 50,46 L50,42 C50,40 52,38 54,38 Z"
+        android:fillColor="#B45309" />
+
+    <!-- 5. 2D Sparkles and Stars (4-Point Stars) -->
+    <!-- Top-Right Big Sparkle -->
+    <path
+        android:pathData="M98,22 C98,28 104,28 104,28 C104,28 98,28 98,34 C98,28 92,28 92,28 C92,28 98,28 98,22 Z"
+        android:fillColor="#FFF" />
+
+    <!-- Top-Left Small Sparkle -->
+    <path
+        android:pathData="M24,18 C24,22 28,22 28,22 C28,22 24,22 24,26 C24,22 20,22 20,22 C20,22 24,22 24,18 Z"
+        android:fillColor="#FDE68A" />
+
+    <!-- Bottom-Left Mini Sparkle -->
+    <path
+        android:pathData="M12,74 C12,77 15,77 15,77 C15,77 12,77 12,80 C12,77 9,77 9,77 C9,77 12,77 12,74 Z"
+        android:fillColor="#FFF" />
+
+    <!-- Bottom-Right Mini Sparkle -->
+    <path
+        android:pathData="M106,78 C106,81 109,81 109,81 C109,81 106,81 106,84 C106,81 103,81 103,81 C103,81 106,81 106,78 Z"
+        android:fillColor="#FDE68A" />
+
+    <!-- 6. 100% Free Badge / Coin on the Gift Box -->
+    <path
+        android:pathData="M60,76 m-14,0 a14,14 0 1,0 28,0 a14,14 0 1,0 -28,0"
+        android:fillColor="#FEF3C7" />
+    <path
+        android:pathData="M60,76 m-11,0 a11,11 0 1,0 22,0 a11,11 0 1,0 -22,0"
+        android:fillColor="#F59E0B" />
+
+    <!-- Sparkle inside coin -->
+    <path
+        android:pathData="M60,70 L61.5,74.5 L66,76 L61.5,77.5 L60,82 L58.5,77.5 L54,76 L58.5,74.5 Z"
+        android:fillColor="#FFF" />
+
+</vector>

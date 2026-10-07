@@ -538,7 +538,7 @@ fun LiveChatRoomScreen(
 
     var messages by remember { mutableStateOf<List<ChatMessage>>(emptyList()) }
     val listState = rememberLazyListState()
-    val db = FirebaseFirestore.getInstance()
+    val db = remember { com.example.utils.FirestoreProvider.get(context) }
     val chatRef = db.collection("chats")
         .document(sadhak.id)
         .collection("messages")

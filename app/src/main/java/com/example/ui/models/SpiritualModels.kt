@@ -378,44 +378,181 @@ data class AvatarOption(
     val nameHi: String,
     val nameEn: String,
     val symbol: String,
-    val bgColor: Color
+    val bgColor: Color,
+    val descriptionHi: String = "",
+    val badgeHi: String = "साधक"
 )
 
 val AVATAR_PACKAGES = listOf(
     AvatarPackage(
-        id = "symbols",
-        titleHi = "सनातन प्रतीक पैकेज",
-        titleEn = "Sacred Symbols",
-        description = "ॐ, दीपक, शंख, कमल एवं पावन प्रतीक"
+        id = "sadhaks",
+        titleHi = "साधक व तपस्वी (12+)",
+        titleEn = "Sadhaks & Yogis",
+        description = "ध्यानस्थ, रुद्राक्षधारी, ऋषि, पंडित, योगिनी व तपस्वी अवतार"
     ),
     AvatarPackage(
-        id = "seekers",
-        titleHi = "साधक एवं भक्त पैकेज",
-        titleEn = "Seekers & Devotees",
-        description = "साधक, भक्त, जप-माला एवं शिष्य"
+        id = "symbols",
+        titleHi = "सनातन प्रतीक",
+        titleEn = "Sacred Symbols",
+        description = "ॐ, दीपक, शंख, कमल, सूर्य व मंगल कलश"
+    ),
+    AvatarPackage(
+        id = "deities",
+        titleHi = "देवता कृपा",
+        titleEn = "Divine Deities",
+        description = "शिव, गणेश, हनुमान, दुर्गा व नारायण स्वरूप"
     )
 )
 
 val ALL_AVATAR_OPTIONS = listOf(
-    // पैकेज 1: सनातन प्रतीक (Sacred Symbols)
-    AvatarOption("om", "symbols", "ॐ (प्रणव)", "Om", "ॐ", Color(0xFFFF6B00)),
-    AvatarOption("deepak", "symbols", "दीपक (ज्योति)", "Deepak", "🪔", Color(0xFFFF6B00)),
-    AvatarOption("kamal", "symbols", "कमल पुष्प", "Lotus", "🪷", Color(0xFFDB2777)),
-    AvatarOption("shankh", "symbols", "शंख", "Shankh", "🐚", Color(0xFF0284C7)),
-    AvatarOption("surya", "symbols", "सूर्य देव", "Surya", "☀️", Color(0xFFFF6B00)),
-    AvatarOption("trishul", "symbols", "त्रिशूल", "Trishul", "🔱", Color(0xFF9333EA)),
+    // -------------------------------------------------------------
+    // पैकेज 1: साधक व तपस्वी (12+ Sadhak Avatars)
+    // -------------------------------------------------------------
+    AvatarOption(
+        id = "sadhak_dhyan",
+        packageId = "sadhaks",
+        nameHi = "ध्यानस्थ साधक",
+        nameEn = "Meditation Yogi",
+        symbol = "🧘",
+        bgColor = Color(0xFF059669),
+        descriptionHi = "गहन ध्यान, समाधि एवं एकाग्रता का प्रतीक",
+        badgeHi = "ध्यान योग"
+    ),
+    AvatarOption(
+        id = "sadhak_rudraksha",
+        packageId = "sadhaks",
+        nameHi = "रुद्राक्षधारी साधक",
+        nameEn = "Rudraksha Sadhak",
+        symbol = "📿",
+        bgColor = Color(0xFF9A3412),
+        descriptionHi = "भगवान शिव के उपासक एवं रुद्राक्ष माला साधक",
+        badgeHi = "शैव साधक"
+    ),
+    AvatarOption(
+        id = "sadhak_rishi",
+        packageId = "sadhaks",
+        nameHi = "वैदिक महर्षि",
+        nameEn = "Vedic Rishi",
+        symbol = "🌿",
+        bgColor = Color(0xFF15803D),
+        descriptionHi = "वेदों, उपनिषदों एवं सनातन ज्ञान के ज्ञाता",
+        badgeHi = "तत्वदर्शी"
+    ),
+    AvatarOption(
+        id = "sadhak_shakti",
+        packageId = "sadhaks",
+        nameHi = "शक्ति / तंत्र साधक",
+        nameEn = "Shakti Sadhak",
+        symbol = "🔱",
+        bgColor = Color(0xFF7E22CE),
+        descriptionHi = "भगवती आदिशक्ति व भैरव के गूढ़ उपासक",
+        badgeHi = "शक्ति उपासक"
+    ),
+    AvatarOption(
+        id = "sadhak_bhakt",
+        packageId = "sadhaks",
+        nameHi = "अनन्य भक्त (नमन)",
+        nameEn = "Humble Devotee",
+        symbol = "🙏",
+        bgColor = Color(0xFFFF6B00),
+        descriptionHi = "ईश्वर के प्रति पूर्ण समर्पण व विनम्रता का भाव",
+        badgeHi = "भक्ति भाव"
+    ),
+    AvatarOption(
+        id = "sadhak_pandit",
+        packageId = "sadhaks",
+        nameHi = "वैदिक आचार्य / पंडित",
+        nameEn = "Vedic Acharya",
+        symbol = "🪔",
+        bgColor = Color(0xFFD97706),
+        descriptionHi = "पवित्र मंत्रोच्चार, यज्ञ व कर्मकांड विशेषज्ञ",
+        badgeHi = "कर्मकांडी"
+    ),
+    AvatarOption(
+        id = "sadhak_sanyasi",
+        packageId = "sadhaks",
+        nameHi = "संन्यासी / तपस्वी",
+        nameEn = "Ascetic Hermit",
+        symbol = "🕉️",
+        bgColor = Color(0xFFEA580C),
+        descriptionHi = "वैराग्य, तपस्या एवं आत्म-साक्षात्कार मार्गी",
+        badgeHi = "तपस्वी"
+    ),
+    AvatarOption(
+        id = "sadhak_jyotish",
+        packageId = "sadhaks",
+        nameHi = "दैवज्ञ ज्योतिषी",
+        nameEn = "Astrology Seeker",
+        symbol = "📜",
+        bgColor = Color(0xFF1E40AF),
+        descriptionHi = "नवग्रह, नक्षत्र एवं काल गणना के मर्मज्ञ",
+        badgeHi = "ज्योतिर्विद"
+    ),
+    AvatarOption(
+        id = "sadhak_homa",
+        packageId = "sadhaks",
+        nameHi = "अग्निहोत्री साधक",
+        nameEn = "Yajna Priest",
+        symbol = "🔥",
+        bgColor = Color(0xFFDC2626),
+        descriptionHi = "नित्य अग्निहोत्र व वैदिक यज्ञ आहुति साधक",
+        badgeHi = "अग्निहोत्र"
+    ),
+    AvatarOption(
+        id = "sadhak_yogini",
+        packageId = "sadhaks",
+        nameHi = "साधिका / योगिनी",
+        nameEn = "Yogini Sadhika",
+        symbol = "🧘‍♀️",
+        bgColor = Color(0xFFBE185D),
+        descriptionHi = "कुंडलिनी जागरण व प्राणायाम साधिका",
+        badgeHi = "योग साधिका"
+    ),
+    AvatarOption(
+        id = "sadhak_satsang",
+        packageId = "sadhaks",
+        nameHi = "संकीर्तन साधक",
+        nameEn = "Kirtan Seeker",
+        symbol = "🪕",
+        bgColor = Color(0xFFA21CAF),
+        descriptionHi = "भगवन्नाम संकीर्तन एवं संगीत उपासना",
+        badgeHi = "कीर्तन रस"
+    ),
+    AvatarOption(
+        id = "sadhak_gurukul",
+        packageId = "sadhaks",
+        nameHi = "गुरुकुल ब्रह्मचारी",
+        nameEn = "Brahmachari Disciple",
+        symbol = "📖",
+        bgColor = Color(0xFF4338CA),
+        descriptionHi = "गुरुकुल परंपरा में निरंतर स्वाध्याय व ब्रह्मचर्य",
+        badgeHi = "विद्यार्थी"
+    ),
 
-    // पैकेज 2: साधक एवं भक्त (Seekers & Devotees)
-    AvatarOption("sadhak_med", "seekers", "ध्यानस्थ साधक", "Sadhak", "🧘", Color(0xFF059669)),
-    AvatarOption("bhakt_namaste", "seekers", "भक्त (नमन)", "Devotee", "🙏", Color(0xFFFF6B00)),
-    AvatarOption("jap_mala", "seekers", "जप माला", "Jap Mala", "📿", Color(0xFF000000)),
-    AvatarOption("vedic_student", "seekers", "वैदिक शिष्य", "Vedic Seeker", "📖", Color(0xFF4338CA)),
-    AvatarOption("rishi", "seekers", "ऋषि / मुनि", "Rishi", "🌿", Color(0xFF15803D)),
-    AvatarOption("kalash", "seekers", "मंगल कलश", "Kalash", "🏺", Color(0xFFFF6B00))
+    // -------------------------------------------------------------
+    // पैकेज 2: सनातन प्रतीक (Sacred Symbols)
+    // -------------------------------------------------------------
+    AvatarOption("om", "symbols", "ॐ (प्रणव नाद)", "Om", "ॐ", Color(0xFFFF6B00), "ब्रह्मांड की प्रथम पावन ध्वनि", "सनातन"),
+    AvatarOption("deepak", "symbols", "दीपक (ज्योति)", "Deepak", "🪔", Color(0xFFEA580C), "अंधकार से प्रकाश की ओर ले जाने वाली ज्योति", "पावन ज्योति"),
+    AvatarOption("kamal", "symbols", "कमल पुष्प", "Lotus", "🪷", Color(0xFFDB2777), "पवित्रता, अनासक्ति एवं भगवती लक्ष्मी का आसन", "पवित्र"),
+    AvatarOption("shankh", "symbols", "मंगल शंख", "Shankh", "🐚", Color(0xFF0284C7), "सकारात्मक ऊर्जा व विजय का पावन उद्घोष", "मंगल"),
+    AvatarOption("surya", "symbols", "सूर्य देव", "Surya", "☀️", Color(0xFFF59E0B), "ऊर्जा, तेज एवं नवजीवन के प्रत्यक्ष देवता", "तेजस्वी"),
+    AvatarOption("kalash", "symbols", "मंगल कलश", "Kalash", "🏺", Color(0xFFC2410C), "समृद्धि, मांगलिकता व वरुण देव का प्रतीक", "मांगलिक"),
+
+    // -------------------------------------------------------------
+    // पैकेज 3: देवता कृपा (Divine Deities)
+    // -------------------------------------------------------------
+    AvatarOption("deva_shiva", "deities", "भगवान शिव", "Lord Shiva", "🔱", Color(0xFF475569), "देवाधिदेव महादेव की असीम अनुकंपा", "महादेव"),
+    AvatarOption("deva_ganesh", "deities", "श्री गणेश", "Lord Ganesha", "🐘", Color(0xFFE11D48), "प्रथम पूज्य विघ्नहर्ता मंगलकर्ता", "विघ्नहर्ता"),
+    AvatarOption("deva_hanuman", "deities", "बजरंगबली हनुमान", "Lord Hanuman", "🚩", Color(0xFFEA580C), "बल, बुद्धि, विद्या व संकटमोचन कृपा", "संकटमोचन"),
+    AvatarOption("deva_durga", "deities", "माँ दुर्गा भवानी", "Maa Durga", "🦁", Color(0xFFB91C1C), "दुष्टनाशिनी, शक्तिदायिनी जगदम्बा", "जगदम्बा"),
+    AvatarOption("deva_vishnu", "deities", "भगवान श्री नारायण", "Lord Vishnu", "🪷", Color(0xFF1D4ED8), "जगत के पालनहार श्री हरि विष्णु", "पालनहार")
 )
 
 fun getAvatarById(id: String): AvatarOption {
-    return ALL_AVATAR_OPTIONS.find { it.id == id } ?: ALL_AVATAR_OPTIONS.first()
+    return ALL_AVATAR_OPTIONS.find { it.id == id } 
+        ?: ALL_AVATAR_OPTIONS.find { it.id == "sadhak_dhyan" }
+        ?: ALL_AVATAR_OPTIONS.first()
 }
 
 // -------------------------------------------------------------

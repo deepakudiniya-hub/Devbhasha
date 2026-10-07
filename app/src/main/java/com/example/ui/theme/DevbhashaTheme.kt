@@ -41,10 +41,10 @@ val TextSecondary = Color(0xFF49454F)
 val TextTertiary = Color(0xFF5F6368)
 
 // Accent (ONLY FOR CTA):
-// Strict Pure Saffron Accent (#FF6B00) - No beige, no gold
-val Saffron = Color(0xFFFF6B00)
-val SaffronGradientStart = Color(0xFFFF8A00)
-val SaffronGradientEnd = Color(0xFFFF6B00)
+// Soothing Muted Terracotta (#E76F51) & Soft Peach (#F4A261) - Easier on the eyes
+val Saffron = Color(0xFFE76F51)
+val SaffronGradientStart = Color(0xFFF4A261)
+val SaffronGradientEnd = Color(0xFFE76F51)
 val SaffronLight = Color(0xFFFFFFFF)
 
 // Neutral:
@@ -75,14 +75,14 @@ val TextDark = Color(0xFF000000)
 val TextLight = Color(0xFFFFFFFF)
 val TextMuted = Color(0xFF737373)
 
-val Terra = Color(0xFFFF6B00)
-val TerraDeep = Color(0xFFFF6B00)
-val DevOrange = Color(0xFFFF6B00)
-val SaffronPrimary = Color(0xFFFF6B00)
-val SaffronDeep = Color(0xFFFF6B00)
-val SaffronGold = Color(0xFFFF8A00)
+val Terra = Color(0xFFE76F51)
+val TerraDeep = Color(0xFFE76F51)
+val DevOrange = Color(0xFFE76F51)
+val SaffronPrimary = Color(0xFFE76F51)
+val SaffronDeep = Color(0xFFE76F51)
+val SaffronGold = Color(0xFFF4A261)
 val SaffronSoftBg = Color(0xFFFFFFFF)
-val GoldStamp = Color(0xFFFF6B00)
+val GoldStamp = Color(0xFFE76F51)
 val GoldStampSoft = Color(0xFFFFFFFF)
 val Sage = Color(0xFF16A34A)
 val SageDeep = Color(0xFF15803D)
@@ -135,34 +135,93 @@ private val DarkColorScheme = darkColorScheme(
 )
 // ... (rest of the file remains same, keeping the AppTypography defined earlier)
 
-val RobotoFontFamily = FontFamily(
-    Font(R.font.noto_sans_devanagari, FontWeight.Normal),
+val AppFontFamily = FontFamily(
+    Font(R.font.poppins, FontWeight.Normal),
+    Font(R.font.noto_sans_devanagari, FontWeight.Normal)
 )
+
+val RobotoFontFamily = AppFontFamily
 
 private val AppTypography = Typography(
     displayLarge = TextStyle(
-        fontFamily = FontFamily.SansSerif,
+        fontFamily = AppFontFamily,
         fontSize = 57.sp,
         fontWeight = FontWeight.Light,
         letterSpacing = (-0.25).sp,
         color = TextColor
     ),
+    headlineLarge = TextStyle(
+        fontFamily = AppFontFamily,
+        fontSize = 32.sp,
+        fontWeight = FontWeight.SemiBold,
+        color = TextColor
+    ),
+    headlineMedium = TextStyle(
+        fontFamily = AppFontFamily,
+        fontSize = 28.sp,
+        fontWeight = FontWeight.SemiBold,
+        color = TextColor
+    ),
+    headlineSmall = TextStyle(
+        fontFamily = AppFontFamily,
+        fontSize = 24.sp,
+        fontWeight = FontWeight.SemiBold,
+        color = TextColor
+    ),
     titleLarge = TextStyle(
-        fontFamily = FontFamily.SansSerif,
+        fontFamily = AppFontFamily,
         fontSize = 22.sp,
         fontWeight = FontWeight.Medium,
         color = TextColor
     ),
-    bodyMedium = TextStyle(
-        fontFamily = FontFamily.SansSerif,
+    titleMedium = TextStyle(
+        fontFamily = AppFontFamily,
+        fontSize = 16.sp,
+        fontWeight = FontWeight.SemiBold,
+        color = TextColor
+    ),
+    titleSmall = TextStyle(
+        fontFamily = AppFontFamily,
+        fontSize = 14.sp,
+        fontWeight = FontWeight.Medium,
+        color = TextColor
+    ),
+    bodyLarge = TextStyle(
+        fontFamily = AppFontFamily,
         fontSize = 16.sp,
         fontWeight = FontWeight.Normal,
         lineHeight = 24.sp,
         color = TextColor
     ),
-    labelLarge = TextStyle(
-        fontFamily = FontFamily.SansSerif,
+    bodyMedium = TextStyle(
+        fontFamily = AppFontFamily,
         fontSize = 14.sp,
+        fontWeight = FontWeight.Normal,
+        lineHeight = 20.sp,
+        color = TextColor
+    ),
+    bodySmall = TextStyle(
+        fontFamily = AppFontFamily,
+        fontSize = 12.sp,
+        fontWeight = FontWeight.Normal,
+        lineHeight = 16.sp,
+        color = TextColor
+    ),
+    labelLarge = TextStyle(
+        fontFamily = AppFontFamily,
+        fontSize = 14.sp,
+        fontWeight = FontWeight.Medium,
+        color = TextColor
+    ),
+    labelMedium = TextStyle(
+        fontFamily = AppFontFamily,
+        fontSize = 12.sp,
+        fontWeight = FontWeight.Medium,
+        color = TextColor
+    ),
+    labelSmall = TextStyle(
+        fontFamily = AppFontFamily,
+        fontSize = 11.sp,
         fontWeight = FontWeight.Medium,
         color = TextColor
     )
@@ -211,11 +270,11 @@ val SurfaceWhite = Color(0xFFFFFFFF)
 val SurfaceAlt   = Color(0xFFFAFAFA)
 val BorderSoft   = Color(0xFFE5E5E5)
 
-// Brand — saffron
-val SaffronBase = Color(0xFFFF6B00)
-val SaffronDeep2 = Color(0xFFFF6D00)
-val SaffronSoft = Color(0xFFFFF7ED)
-val SaffronSoftAlt = Color(0xFFFFF8E1)
+// Brand — Muted Terracotta & Soft Peach
+val SaffronBase = Color(0xFFE76F51)
+val SaffronDeep2 = Color(0xFFE76F51)
+val SaffronSoft = Color(0xFFFDF6F0)
+val SaffronSoftAlt = Color(0xFFFAF0E6)
 
 // Success — green
 val GreenBase = Color(0xFF16A34A)

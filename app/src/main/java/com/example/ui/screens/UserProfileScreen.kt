@@ -15,6 +15,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -22,8 +23,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.HelpOutline
 import androidx.compose.material.icons.automirrored.outlined.Logout
+import androidx.compose.material.icons.automirrored.outlined.Chat
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
@@ -34,6 +37,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -45,6 +49,9 @@ import com.example.ui.models.AVATAR_PACKAGES
 import com.example.ui.models.ALL_AVATAR_OPTIONS
 import com.example.ui.models.getAvatarById
 import com.example.ui.theme.*
+import com.example.ui.components.DevLogoIcon
+import com.example.ui.components.DevWatermarkLogo
+import com.example.utils.HapticFeedbackHelper
 import com.example.utils.UserSession
 import com.example.utils.WalletRepository
 
@@ -139,6 +146,7 @@ private fun sanitizeDevoteePhone(raw: String?): String {
 fun UserProfileScreen(
     userId: String,
     userNameInitial: String = "साधक",
+    onBackClick: (() -> Unit)? = null,
     onLogoutClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
@@ -151,6 +159,8 @@ fun UserProfileScreen(
     )
     val initialSanitizedPhone = sanitizeDevoteePhone(userSession.getPhoneNumber())
 
+    val haptic = LocalHapticFeedback.current
+
     // User State
     var userName by remember { mutableStateOf(initialSanitizedName) }
     var phone by remember { mutableStateOf(initialSanitizedPhone) }
@@ -159,7 +169,7 @@ fun UserProfileScreen(
     var birthTime by remember { mutableStateOf("") }
     var birthPlace by remember { mutableStateOf("") }
     var gotra by remember { mutableStateOf("") }
-    var avatarId by remember { mutableStateOf("om") }
+    var avatarId by remember { mutableStateOf(userSession.getAvatarId()) }
     var walletBalance by remember { mutableDoubleStateOf(userSession.getCachedWalletBalance()) }
     DisposableEffect(effectiveUserId) {
         val reg = WalletRepository.observeBalance(effectiveUserId) {
@@ -196,6 +206,7 @@ fun UserProfileScreen(
     var dailyNotificationsEnabled by remember { mutableStateOf(true) }
 
     val currentAvatar = remember(avatarId) { getAvatarById(avatarId) }
+    val sadhakAvatarsList = remember { ALL_AVATAR_OPTIONS.filter { it.packageId == "sadhaks" } }
 
     val isProfileIncomplete = phone.isBlank()
 
@@ -225,41 +236,57 @@ fun UserProfileScreen(
                         .fillMaxWidth()
                         .background(
                             Brush.verticalGradient(
-                                colors = listOf(Color(0xFFFFF9F0), Color.White)
+                                colors = listOf(SurfaceAlt, SurfaceWhite)
                             )
                         )
                         .padding(18.dp)
                 ) {
-                    // Top Badge: Devotee Status & Saffron Om
+                    // Top Badge: Devotee Status & Saffron Om + Optional Back Button
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Surface(
-                            shape = RoundedCornerShape(20.dp),
-                            color = SaffronSoftBg,
-                            border = BorderStroke(1.dp, Color(0xFFFDBA74))
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
-                                verticalAlignment = Alignment.CenterVertically
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            if (onBackClick != null) {
+                                IconButton(
+                                    onClick = onBackClick,
+                                    modifier = Modifier.size(32.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                        contentDescription = "Back",
+                                        tint = SaffronDeep,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                }
+                                Spacer(modifier = Modifier.width(6.dp))
+                            }
+                            Surface(
+                                shape = RoundedCornerShape(20.dp),
+                                color = SaffronSoft,
+                                border = BorderStroke(1.dp, SaffronGold.copy(alpha = 0.5f))
                             ) {
-                                Text(text = "🕉️", fontSize = 12.sp)
-                                Spacer(modifier = Modifier.width(5.dp))
-                                Text(
-                                    text = "वैदिक साधक प्रोफाइल",
-                                    fontSize = 11.5.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = SaffronDeep
-                                )
+                                Row(
+                                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(text = "🕉️", fontSize = 12.sp)
+                                    Spacer(modifier = Modifier.width(5.dp))
+                                    Text(
+                                        text = "वैदिक साधक प्रोफाइल",
+                                        fontSize = 11.5.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = SaffronDeep
+                                    )
+                                }
                             }
                         }
 
                         // Tap to copy UID
                         Surface(
                             shape = RoundedCornerShape(20.dp),
-                            color = Color(0xFFF1F5F9),
+                            color = Neutral100,
                             modifier = Modifier.clickable {
                                 val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
                                 val clip = ClipData.newPlainText("Devbhasha UID", effectiveUserId)
@@ -275,13 +302,13 @@ fun UserProfileScreen(
                                     text = "UID: ${effectiveUserId.take(6)}...",
                                     fontSize = 10.5.sp,
                                     fontWeight = FontWeight.Medium,
-                                    color = Color(0xFF64748B)
+                                    color = Neutral500
                                 )
                                 Spacer(modifier = Modifier.width(4.dp))
                                 Icon(
                                     imageVector = Icons.Outlined.ContentCopy,
                                     contentDescription = "Copy UID",
-                                    tint = Color(0xFF64748B),
+                                    tint = Neutral500,
                                     modifier = Modifier.size(11.dp)
                                 )
                             }
@@ -295,28 +322,43 @@ fun UserProfileScreen(
                         modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        // Spiritual Avatar with halo border
+                        // Spiritual Avatar with glowing border & camera/edit badge
                         Box(
                             modifier = Modifier
-                                .size(74.dp)
+                                .size(80.dp)
                                 .clip(CircleShape)
-                                .border(2.5.dp, Color(0xFFF59E0B), CircleShape)
+                                .background(
+                                    Brush.sweepGradient(
+                                        listOf(
+                                            Color(0xFFF59E0B),
+                                            Color(0xFFFF6B00),
+                                            Color(0xFFEA580C),
+                                            Color(0xFFF59E0B)
+                                        )
+                                    )
+                                )
+                                .padding(3.dp)
+                                .clip(CircleShape)
+                                .background(Color.White)
                                 .padding(3.dp)
                                 .clip(CircleShape)
                                 .background(currentAvatar.bgColor)
-                                .clickable { showAvatarPickerDialog = true },
+                                .clickable {
+                                    HapticFeedbackHelper.playClick(haptic)
+                                    showAvatarPickerDialog = true
+                                },
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
                                 text = currentAvatar.symbol,
-                                fontSize = 32.sp,
+                                fontSize = 34.sp,
                                 color = Color.White
                             )
 
-                            // Small edit pencil badge
+                            // Edit Avatar sparkle badge
                             Box(
                                 modifier = Modifier
-                                    .size(22.dp)
+                                    .size(24.dp)
                                     .align(Alignment.BottomEnd)
                                     .clip(CircleShape)
                                     .background(Color.White)
@@ -330,10 +372,10 @@ fun UserProfileScreen(
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Icon(
-                                        imageVector = Icons.Filled.Edit,
-                                        contentDescription = "अवतार बदलें",
+                                        imageVector = Icons.Filled.AutoAwesome,
+                                        contentDescription = "साधक अवतार बदलें",
                                         tint = Color.White,
-                                        modifier = Modifier.size(11.dp)
+                                        modifier = Modifier.size(12.dp)
                                     )
                                 }
                             }
@@ -342,13 +384,50 @@ fun UserProfileScreen(
                         Spacer(modifier = Modifier.width(16.dp))
 
                         Column(modifier = Modifier.weight(1f)) {
-                            // User Name
-                            Text(
-                                text = userName,
-                                fontSize = 20.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = TextDark
-                            )
+                            // User Name & Sadhak Avatar Badge
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                Text(
+                                    text = userName,
+                                    fontSize = 19.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = TextDark,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.height(3.dp))
+
+                            // Avatar Title Chip
+                            Surface(
+                                shape = RoundedCornerShape(12.dp),
+                                color = currentAvatar.bgColor.copy(alpha = 0.12f),
+                                border = BorderStroke(0.8.dp, currentAvatar.bgColor.copy(alpha = 0.4f)),
+                                modifier = Modifier.clickable {
+                                    HapticFeedbackHelper.playClick(haptic)
+                                    showAvatarPickerDialog = true
+                                }
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.5.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        text = currentAvatar.symbol,
+                                        fontSize = 11.sp
+                                    )
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Text(
+                                        text = "${currentAvatar.nameHi} • ${currentAvatar.badgeHi}",
+                                        fontSize = 11.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = currentAvatar.bgColor
+                                    )
+                                }
+                            }
 
                             Spacer(modifier = Modifier.height(4.dp))
 
@@ -364,7 +443,7 @@ fun UserProfileScreen(
                                     Spacer(modifier = Modifier.width(6.dp))
                                     Text(
                                         text = phone,
-                                        fontSize = 13.sp,
+                                        fontSize = 12.5.sp,
                                         fontWeight = FontWeight.Medium,
                                         color = Color(0xFF334155)
                                     )
@@ -389,7 +468,7 @@ fun UserProfileScreen(
                                         Spacer(modifier = Modifier.width(4.dp))
                                         Text(
                                             text = "फ़ोन नंबर जोड़ें (+)",
-                                            fontSize = 11.5.sp,
+                                            fontSize = 11.sp,
                                             fontWeight = FontWeight.Bold,
                                             color = Color(0xFFB45309)
                                         )
@@ -397,39 +476,150 @@ fun UserProfileScreen(
                                 }
                             }
 
-                            // Email or Astrological Gotra / DOB if entered
+                            // Gotra or DOB
                             if (dob.isNotBlank() || gotra.isNotBlank()) {
-                                Spacer(modifier = Modifier.height(4.dp))
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Text(
-                                        text = buildString {
-                                            if (dob.isNotBlank()) append("जन्म: $dob")
-                                            if (dob.isNotBlank() && gotra.isNotBlank()) append(" • ")
-                                            if (gotra.isNotBlank()) append("गोत्र: $gotra")
-                                        },
-                                        fontSize = 11.5.sp,
-                                        color = Color(0xFF64748B),
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
-                                    )
-                                }
-                            } else if (email.isNotBlank()) {
                                 Spacer(modifier = Modifier.height(3.dp))
+                                Text(
+                                    text = buildString {
+                                        if (dob.isNotBlank()) append("जन्म: $dob")
+                                        if (dob.isNotBlank() && gotra.isNotBlank()) append(" • ")
+                                        if (gotra.isNotBlank()) append("गोत्र: $gotra")
+                                    },
+                                    fontSize = 11.sp,
+                                    color = Color(0xFF64748B),
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(14.dp))
+
+                    // ---------------------------------------------------------
+                    // 12+ Sadhak Avatars Quick Selection Strip
+                    // ---------------------------------------------------------
+                    Surface(
+                        shape = RoundedCornerShape(14.dp),
+                        color = Color(0xFFFFFBEB),
+                        border = BorderStroke(1.dp, Color(0xFFFED7AA).copy(alpha = 0.7f)),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Column(modifier = Modifier.padding(vertical = 10.dp, horizontal = 12.dp)) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
                                 Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Icon(
-                                        imageVector = Icons.Outlined.Email,
-                                        contentDescription = null,
-                                        tint = TextMuted,
-                                        modifier = Modifier.size(12.dp)
-                                    )
+                                    Text(text = "🧘", fontSize = 13.sp)
                                     Spacer(modifier = Modifier.width(5.dp))
                                     Text(
-                                        text = email,
-                                        fontSize = 11.5.sp,
-                                        color = TextMuted,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
+                                        text = "साधक अवतार चुनें (12+ उपलब्ध)",
+                                        fontSize = 12.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = SaffronDeep
                                     )
+                                }
+                                TextButton(
+                                    onClick = {
+                                        HapticFeedbackHelper.playClick(haptic)
+                                        showAvatarPickerDialog = true
+                                    },
+                                    contentPadding = PaddingValues(horizontal = 6.dp, vertical = 0.dp),
+                                    modifier = Modifier.height(28.dp)
+                                ) {
+                                    Text(
+                                        text = "सभी देखें (+)",
+                                        fontSize = 11.5.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = SaffronPrimary
+                                    )
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.height(6.dp))
+
+                            // Horizontal list of 12+ Sadhak Avatars
+                            LazyRow(
+                                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                items(sadhakAvatarsList) { option ->
+                                    val isSelected = option.id == avatarId
+                                    Column(
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                        modifier = Modifier
+                                            .clip(RoundedCornerShape(12.dp))
+                                            .background(
+                                                if (isSelected) SaffronSoft else Color.Transparent
+                                            )
+                                            .clickable {
+                                                HapticFeedbackHelper.playSuccess(haptic)
+                                                avatarId = option.id
+                                                userSession.setAvatarId(option.id)
+                                                Toast.makeText(
+                                                    context,
+                                                    "${option.symbol} ${option.nameHi} अवतार चुना गया!",
+                                                    Toast.LENGTH_SHORT
+                                                ).show()
+                                            }
+                                            .padding(horizontal = 6.dp, vertical = 4.dp)
+                                    ) {
+                                        Box(
+                                            modifier = Modifier
+                                                .size(46.dp)
+                                                .clip(CircleShape)
+                                                .background(option.bgColor)
+                                                .border(
+                                                    width = if (isSelected) 2.5.dp else 1.dp,
+                                                    color = if (isSelected) Color(0xFFF59E0B) else Color.White,
+                                                    shape = CircleShape
+                                                ),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Text(
+                                                text = option.symbol,
+                                                fontSize = 22.sp,
+                                                color = Color.White
+                                            )
+                                            if (isSelected) {
+                                                Box(
+                                                    modifier = Modifier
+                                                        .size(16.dp)
+                                                        .align(Alignment.TopEnd)
+                                                        .clip(CircleShape)
+                                                        .background(Color.White)
+                                                        .padding(1.dp)
+                                                ) {
+                                                    Box(
+                                                        modifier = Modifier
+                                                            .fillMaxSize()
+                                                            .clip(CircleShape)
+                                                            .background(GreenPrimary),
+                                                        contentAlignment = Alignment.Center
+                                                    ) {
+                                                        Icon(
+                                                            imageVector = Icons.Filled.Check,
+                                                            contentDescription = "Selected",
+                                                            tint = Color.White,
+                                                            modifier = Modifier.size(10.dp)
+                                                        )
+                                                    }
+                                                }
+                                            }
+                                        }
+
+                                        Spacer(modifier = Modifier.height(3.dp))
+
+                                        Text(
+                                            text = option.badgeHi,
+                                            fontSize = 9.5.sp,
+                                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                            color = if (isSelected) SaffronDeep else TextDark,
+                                            maxLines = 1
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -441,60 +631,93 @@ fun UserProfileScreen(
 
                     // Dakshina & Sadhana Counter Strip
                     Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(14.dp))
-                            .background(Color(0xFFFFF7ED))
-                            .border(1.dp, Color(0xFFFFEDD5), RoundedCornerShape(14.dp))
-                            .padding(horizontal = 14.dp, vertical = 10.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Box(
-                                modifier = Modifier
-                                    .size(32.dp)
-                                    .clip(CircleShape)
-                                    .background(Color.White),
-                                contentAlignment = Alignment.Center
+                        // Wallet Balance Card
+                        Surface(
+                            shape = RoundedCornerShape(16.dp),
+                            color = SaffronSoft,
+                            border = BorderStroke(1.dp, SaffronGold),
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(14.dp),
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Icon(
-                                    imageVector = Icons.Outlined.AccountBalanceWallet,
-                                    contentDescription = null,
-                                    tint = SaffronPrimary,
-                                    modifier = Modifier.size(18.dp)
-                                )
-                            }
-                            Spacer(modifier = Modifier.width(10.dp))
-                            Column {
-                                Text(
-                                    text = "वॉलेट दक्षिणा शेष",
-                                    fontSize = 11.sp,
-                                    color = Color(0xFF9A3412),
-                                    fontWeight = FontWeight.Medium
-                                )
-                                Text(
-                                    text = "₹${walletBalance.toInt()}",
-                                    fontSize = 16.sp,
-                                    fontWeight = FontWeight.ExtraBold,
-                                    color = SaffronDeep
-                                )
+                                Box(
+                                    modifier = Modifier
+                                        .size(36.dp)
+                                        .clip(CircleShape)
+                                        .background(Color.White),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Outlined.AccountBalanceWallet,
+                                        contentDescription = null,
+                                        tint = SaffronPrimary,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                }
+                                Spacer(modifier = Modifier.width(10.dp))
+                                Column {
+                                    Text(
+                                        text = "वॉलेट शेष",
+                                        fontSize = 11.sp,
+                                        color = WarningAmberDeep,
+                                        fontWeight = FontWeight.Medium
+                                    )
+                                    Text(
+                                        text = "₹${walletBalance.toInt()}",
+                                        fontSize = 16.sp,
+                                        fontWeight = FontWeight.ExtraBold,
+                                        color = SaffronDeep
+                                    )
+                                }
                             }
                         }
 
-                        // Consultations summary count
-                        Column(horizontalAlignment = Alignment.End) {
-                            Text(
-                                text = "परामर्श प्रश्न",
-                                fontSize = 11.sp,
-                                color = Color(0xFF64748B)
-                            )
-                            Text(
-                                text = "${userQuestions.size}",
-                                fontSize = 15.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = TextDark
-                            )
+                        // Consultations summary card
+                        Surface(
+                            shape = RoundedCornerShape(16.dp),
+                            color = Neutral50,
+                            border = BorderStroke(1.dp, BorderSoft),
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(14.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(36.dp)
+                                        .clip(CircleShape)
+                                        .background(Color.White),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.AutoMirrored.Outlined.Chat,
+                                        contentDescription = null,
+                                        tint = Neutral500,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                }
+                                Spacer(modifier = Modifier.width(10.dp))
+                                Column {
+                                    Text(
+                                        text = "परामर्श",
+                                        fontSize = 11.sp,
+                                        color = Neutral500,
+                                        fontWeight = FontWeight.Medium
+                                    )
+                                    Text(
+                                        text = "${userQuestions.size}",
+                                        fontSize = 16.sp,
+                                        fontWeight = FontWeight.ExtraBold,
+                                        color = Ink
+                                    )
+                                }
+                            }
                         }
                     }
 
@@ -507,7 +730,10 @@ fun UserProfileScreen(
                     ) {
                         // "विवरण जोड़ें / संपादित करें" Button
                         Button(
-                            onClick = { showEditProfileDialog = true },
+                            onClick = {
+                                HapticFeedbackHelper.playClick(haptic)
+                                showEditProfileDialog = true
+                            },
                             modifier = Modifier
                                 .weight(1f)
                                 .height(44.dp)
@@ -535,7 +761,10 @@ fun UserProfileScreen(
 
                         // "अवतार बदलें" Button
                         OutlinedButton(
-                            onClick = { showAvatarPickerDialog = true },
+                            onClick = {
+                                HapticFeedbackHelper.playClick(haptic)
+                                showAvatarPickerDialog = true
+                            },
                             modifier = Modifier
                                 .weight(0.9f)
                                 .height(44.dp)
@@ -552,7 +781,7 @@ fun UserProfileScreen(
                             )
                             Spacer(modifier = Modifier.width(6.dp))
                             Text(
-                                text = "अवतार चुनें",
+                                text = "साधक अवतार",
                                 fontSize = 12.5.sp,
                                 fontWeight = FontWeight.Bold
                             )
@@ -977,12 +1206,20 @@ fun UserProfileScreen(
                                                 lineHeight = 16.sp
                                             )
                                             Spacer(modifier = Modifier.height(4.dp))
-                                            Text(
-                                                text = "साधना लाभ: ${mantra.benefitHi}",
-                                                fontSize = 11.sp,
-                                                fontWeight = FontWeight.SemiBold,
-                                                color = GreenPrimary
-                                            )
+                                            Row(
+                                                modifier = Modifier.fillMaxWidth(),
+                                                horizontalArrangement = Arrangement.SpaceBetween,
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                Text(
+                                                    text = "साधना लाभ: ${mantra.benefitHi}",
+                                                    fontSize = 11.sp,
+                                                    fontWeight = FontWeight.SemiBold,
+                                                    color = GreenPrimary,
+                                                    modifier = Modifier.weight(1f)
+                                                )
+                                                DevWatermarkLogo()
+                                            }
                                         }
                                     }
                                 }
@@ -1007,18 +1244,14 @@ fun UserProfileScreen(
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    // Header
+                    // Header with Dev Logo
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Box(
-                            modifier = Modifier
-                                .size(36.dp)
-                                .clip(CircleShape)
-                                .background(Color(0xFFFFF7ED)),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(text = "⚙️", fontSize = 18.sp)
-                        }
-                        Spacer(modifier = Modifier.width(10.dp))
+                        DevLogoIcon(
+                            size = 36.dp,
+                            elevation = 2.dp,
+                            showGlow = false
+                        )
+                        Spacer(modifier = Modifier.width(12.dp))
                         Column {
                             Text(
                                 text = "सेटिंग्स एवं सहायता (Settings & Support)",
@@ -1205,7 +1438,7 @@ fun UserProfileScreen(
     }
 
     // =========================================================================
-    // Dialog 1: Comprehensive "Edit Profile" Dialog (Name, Phone, DOB, Gotra)
+    // Dialog 1: Comprehensive "Edit Profile" Dialog (Avatar, Name, Phone, DOB, Gotra)
     // =========================================================================
     if (showEditProfileDialog) {
         var editName by remember { mutableStateOf(if (userName == "प्रिय साधक") "" else userName) }
@@ -1215,7 +1448,10 @@ fun UserProfileScreen(
         var editBirthTime by remember { mutableStateOf(birthTime) }
         var editBirthPlace by remember { mutableStateOf(birthPlace) }
         var editGotra by remember { mutableStateOf(gotra) }
+        var editAvatarId by remember { mutableStateOf(avatarId) }
         var isSaving by remember { mutableStateOf(false) }
+
+        val editAvatar = remember(editAvatarId) { getAvatarById(editAvatarId) }
 
         AlertDialog(
             onDismissRequest = { if (!isSaving) showEditProfileDialog = false },
@@ -1224,7 +1460,7 @@ fun UserProfileScreen(
                     Text(text = "🕉️", fontSize = 20.sp)
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "साधक व्यक्तिगत विवरण",
+                        text = "साधक प्रोफ़ाइल विवरण",
                         fontWeight = FontWeight.Bold,
                         fontSize = 18.sp,
                         color = TextDark
@@ -1240,10 +1476,86 @@ fun UserProfileScreen(
                 ) {
                     Text(
                         text = "सटीक कुंडली विचार, वैदिक परामर्श एवं पूजा संकल्प हेतु अपना प्रामाणिक विवरण दर्ज करें:",
-                        fontSize = 12.sp,
+                        fontSize = 11.5.sp,
                         color = TextMuted,
-                        lineHeight = 16.sp
+                        lineHeight = 15.sp
                     )
+
+                    // 0. Sadhak Avatar Selection Strip inside Edit Profile
+                    Surface(
+                        shape = RoundedCornerShape(14.dp),
+                        color = Color(0xFFFFFBEB),
+                        border = BorderStroke(1.dp, Color(0xFFFED7AA))
+                    ) {
+                        Column(modifier = Modifier.padding(10.dp)) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(36.dp)
+                                            .clip(CircleShape)
+                                            .background(editAvatar.bgColor),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(text = editAvatar.symbol, fontSize = 18.sp)
+                                    }
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Column {
+                                        Text(
+                                            text = "साधक अवतार: ${editAvatar.nameHi}",
+                                            fontSize = 12.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = TextDark
+                                        )
+                                        Text(
+                                            text = editAvatar.badgeHi,
+                                            fontSize = 10.5.sp,
+                                            color = SaffronDeep,
+                                            fontWeight = FontWeight.Medium
+                                        )
+                                    }
+                                }
+                                TextButton(
+                                    onClick = { showAvatarPickerDialog = true },
+                                    contentPadding = PaddingValues(0.dp),
+                                    modifier = Modifier.height(26.dp)
+                                ) {
+                                    Text("अन्य (+)", fontSize = 11.sp, color = SaffronPrimary, fontWeight = FontWeight.Bold)
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            // Quick avatars row
+                            LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                items(sadhakAvatarsList) { opt ->
+                                    val isSelected = opt.id == editAvatarId
+                                    Box(
+                                        modifier = Modifier
+                                            .size(38.dp)
+                                            .clip(CircleShape)
+                                            .background(opt.bgColor)
+                                            .border(
+                                                width = if (isSelected) 2.5.dp else 0.dp,
+                                                color = if (isSelected) Color(0xFFF59E0B) else Color.Transparent,
+                                                shape = CircleShape
+                                            )
+                                            .clickable {
+                                                HapticFeedbackHelper.playClick(haptic)
+                                                editAvatarId = opt.id
+                                            },
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(text = opt.symbol, fontSize = 18.sp)
+                                    }
+                                }
+                            }
+                        }
+                    }
 
                     // 1. Full Name
                     OutlinedTextField(
@@ -1374,6 +1686,7 @@ fun UserProfileScreen(
                             userId = effectiveUserId,
                             phoneNumber = trimmedPhone
                         )
+                        userSession.setAvatarId(editAvatarId)
 
                         // Update local Compose state
                         userName = finalCleanName
@@ -1383,10 +1696,12 @@ fun UserProfileScreen(
                         birthTime = editBirthTime.trim()
                         birthPlace = editBirthPlace.trim()
                         gotra = editGotra.trim()
+                        avatarId = editAvatarId
 
+                        HapticFeedbackHelper.playSuccess(haptic)
                         isSaving = false
                         showEditProfileDialog = false
-                        Toast.makeText(context, "विवरण सफलतापूर्वक सुरक्षित हुआ!", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "विवरण एवं साधक अवतार सुरक्षित हुआ!", Toast.LENGTH_SHORT).show()
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = SaffronPrimary),
                     enabled = !isSaving
@@ -1410,25 +1725,38 @@ fun UserProfileScreen(
     }
 
     // =========================================================================
-    // Dialog 2: Sacred Avatar Selector Dialog
+    // Dialog 2: Sacred Avatar Selector Gallery Dialog (12+ Sadhaks & Symbols)
     // =========================================================================
     if (showAvatarPickerDialog) {
-        var selectedPackageId by remember { mutableStateOf("symbols") }
+        var selectedPackageId by remember { mutableStateOf("sadhaks") }
         var tempSelectedAvatarId by remember { mutableStateOf(avatarId) }
+        var searchQuery by remember { mutableStateOf("") }
 
-        val filteredAvatars = remember(selectedPackageId) {
-            ALL_AVATAR_OPTIONS.filter { it.packageId == selectedPackageId }
+        val activePackageAvatars = remember(selectedPackageId, searchQuery) {
+            val baseList = ALL_AVATAR_OPTIONS.filter { it.packageId == selectedPackageId }
+            if (searchQuery.isBlank()) {
+                baseList
+            } else {
+                ALL_AVATAR_OPTIONS.filter {
+                    it.nameHi.contains(searchQuery, ignoreCase = true) ||
+                    it.nameEn.contains(searchQuery, ignoreCase = true) ||
+                    it.badgeHi.contains(searchQuery, ignoreCase = true) ||
+                    it.descriptionHi.contains(searchQuery, ignoreCase = true)
+                }
+            }
         }
+
+        val previewAvatar = remember(tempSelectedAvatarId) { getAvatarById(tempSelectedAvatarId) }
 
         AlertDialog(
             onDismissRequest = { showAvatarPickerDialog = false },
             title = {
                 Column {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(text = "🕉️", fontSize = 20.sp)
+                        Text(text = "🕉️", fontSize = 22.sp)
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "पवित्र आध्यात्मिक अवतार",
+                            text = "पवित्र साधक अवतार चुनें",
                             fontWeight = FontWeight.Bold,
                             fontSize = 18.sp,
                             color = TextDark
@@ -1436,10 +1764,10 @@ fun UserProfileScreen(
                     }
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "प्रोफ़ाइल में अपनी आध्यात्मिक साधना के अनुकूल प्रतीक या साधक अवतार चुनें।",
+                        text = "अपनी आध्यात्मिक साधना के अनुकूल 12+ साधक, ऋषि, योगी व सनातन अवतार चुनें।",
                         fontSize = 11.5.sp,
                         color = TextMuted,
-                        lineHeight = 16.sp
+                        lineHeight = 15.sp
                     )
                 }
             },
@@ -1449,20 +1777,109 @@ fun UserProfileScreen(
                         .fillMaxWidth()
                         .verticalScroll(rememberScrollState())
                 ) {
-                    // Package Tabs (Chips)
+                    // ---------------------------------------------------------
+                    // 1. Live Interactive Preview Card
+                    // ---------------------------------------------------------
+                    Surface(
+                        shape = RoundedCornerShape(16.dp),
+                        color = previewAvatar.bgColor.copy(alpha = 0.08f),
+                        border = BorderStroke(1.2.dp, previewAvatar.bgColor.copy(alpha = 0.35f)),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(12.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(60.dp)
+                                    .clip(CircleShape)
+                                    .background(
+                                        Brush.sweepGradient(
+                                            listOf(
+                                                Color(0xFFF59E0B),
+                                                previewAvatar.bgColor,
+                                                Color(0xFFFF6B00),
+                                                Color(0xFFF59E0B)
+                                            )
+                                        )
+                                    )
+                                    .padding(2.5.dp)
+                                    .clip(CircleShape)
+                                    .background(Color.White)
+                                    .padding(2.dp)
+                                    .clip(CircleShape)
+                                    .background(previewAvatar.bgColor),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = previewAvatar.symbol,
+                                    fontSize = 28.sp,
+                                    color = Color.White
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.width(12.dp))
+
+                            Column(modifier = Modifier.weight(1f)) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                ) {
+                                    Text(
+                                        text = previewAvatar.nameHi,
+                                        fontSize = 15.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = TextDark
+                                    )
+                                    Surface(
+                                        shape = RoundedCornerShape(8.dp),
+                                        color = previewAvatar.bgColor.copy(alpha = 0.15f)
+                                    ) {
+                                        Text(
+                                            text = previewAvatar.badgeHi,
+                                            fontSize = 10.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = previewAvatar.bgColor,
+                                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                        )
+                                    }
+                                }
+                                if (previewAvatar.descriptionHi.isNotBlank()) {
+                                    Spacer(modifier = Modifier.height(2.dp))
+                                    Text(
+                                        text = previewAvatar.descriptionHi,
+                                        fontSize = 11.sp,
+                                        color = TextMuted,
+                                        lineHeight = 14.sp
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    // ---------------------------------------------------------
+                    // 2. Package Category Tabs (Chips)
+                    // ---------------------------------------------------------
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
                         AVATAR_PACKAGES.forEach { pkg ->
                             val isSelected = pkg.id == selectedPackageId
                             FilterChip(
                                 selected = isSelected,
-                                onClick = { selectedPackageId = pkg.id },
+                                onClick = {
+                                    HapticFeedbackHelper.playClick(haptic)
+                                    selectedPackageId = pkg.id
+                                    searchQuery = ""
+                                },
                                 label = {
                                     Text(
                                         text = pkg.titleHi,
-                                        fontSize = 12.sp,
+                                        fontSize = 11.sp,
                                         fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
                                     )
                                 },
@@ -1475,14 +1892,16 @@ fun UserProfileScreen(
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(14.dp))
 
-                    // Grid of Avatar Options (3 columns)
+                    // ---------------------------------------------------------
+                    // 3. Grid of Avatar Options (3 columns)
+                    // ---------------------------------------------------------
                     Column(
                         modifier = Modifier.fillMaxWidth(),
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                        verticalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
-                        filteredAvatars.chunked(3).forEach { rowAvatars ->
+                        activePackageAvatars.chunked(3).forEach { rowAvatars ->
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.SpaceAround
@@ -1492,18 +1911,25 @@ fun UserProfileScreen(
                                     Column(
                                         horizontalAlignment = Alignment.CenterHorizontally,
                                         modifier = Modifier
+                                            .weight(1f)
                                             .clip(RoundedCornerShape(12.dp))
-                                            .clickable { tempSelectedAvatarId = option.id }
-                                            .padding(6.dp)
+                                            .background(
+                                                if (isSelected) SaffronSoft else Color.Transparent
+                                            )
+                                            .clickable {
+                                                HapticFeedbackHelper.playClick(haptic)
+                                                tempSelectedAvatarId = option.id
+                                            }
+                                            .padding(vertical = 8.dp, horizontal = 4.dp)
                                     ) {
                                         Box(
                                             modifier = Modifier
-                                                .size(56.dp)
+                                                .size(54.dp)
                                                 .clip(CircleShape)
                                                 .background(option.bgColor)
                                                 .border(
-                                                    width = if (isSelected) 2.5.dp else 0.dp,
-                                                    color = if (isSelected) Color(0xFFF59E0B) else Color.Transparent,
+                                                    width = if (isSelected) 3.dp else 1.dp,
+                                                    color = if (isSelected) Color(0xFFF59E0B) else Color(0xFFE2E8F0),
                                                     shape = CircleShape
                                                 ),
                                             contentAlignment = Alignment.Center
@@ -1518,7 +1944,7 @@ fun UserProfileScreen(
                                             if (isSelected) {
                                                 Box(
                                                     modifier = Modifier
-                                                        .size(20.dp)
+                                                        .size(18.dp)
                                                         .align(Alignment.TopEnd)
                                                         .clip(CircleShape)
                                                         .background(Color.White)
@@ -1535,23 +1961,38 @@ fun UserProfileScreen(
                                                             imageVector = Icons.Filled.Check,
                                                             contentDescription = "Selected",
                                                             tint = Color.White,
-                                                            modifier = Modifier.size(12.dp)
+                                                            modifier = Modifier.size(11.dp)
                                                         )
                                                     }
                                                 }
                                             }
                                         }
 
-                                        Spacer(modifier = Modifier.height(4.dp))
+                                        Spacer(modifier = Modifier.height(5.dp))
 
                                         Text(
                                             text = option.nameHi,
                                             fontSize = 11.sp,
                                             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
                                             color = if (isSelected) SaffronDeep else TextDark,
-                                            textAlign = TextAlign.Center
+                                            textAlign = TextAlign.Center,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+
+                                        Text(
+                                            text = option.badgeHi,
+                                            fontSize = 9.5.sp,
+                                            color = if (isSelected) SaffronPrimary else TextMuted,
+                                            textAlign = TextAlign.Center,
+                                            maxLines = 1
                                         )
                                     }
+                                }
+
+                                // Pad remaining columns if last row has less than 3 items
+                                for (i in 0 until (3 - rowAvatars.size)) {
+                                    Spacer(modifier = Modifier.weight(1f))
                                 }
                             }
                         }
@@ -1562,13 +2003,15 @@ fun UserProfileScreen(
                 Button(
                     onClick = {
                         avatarId = tempSelectedAvatarId
+                        userSession.setAvatarId(tempSelectedAvatarId)
+                        HapticFeedbackHelper.playSuccess(haptic)
                         showAvatarPickerDialog = false
-                        val chosenName = getAvatarById(tempSelectedAvatarId).nameHi
-                        Toast.makeText(context, "$chosenName अवतार सफलतापूर्वक सेट हुआ!", Toast.LENGTH_SHORT).show()
+                        val chosen = getAvatarById(tempSelectedAvatarId)
+                        Toast.makeText(context, "${chosen.symbol} ${chosen.nameHi} अवतार सफलतापूर्वक सेट हुआ!", Toast.LENGTH_SHORT).show()
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = SaffronPrimary)
                 ) {
-                    Text("अवतार सेट करें", color = Color.White, fontWeight = FontWeight.Bold)
+                    Text("यह अवतार सेट करें", color = Color.White, fontWeight = FontWeight.Bold)
                 }
             },
             dismissButton = {
@@ -1587,10 +2030,14 @@ fun UserProfileScreen(
             onDismissRequest = { showSupportDialog = false },
             title = {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(text = "🕉️", fontSize = 20.sp)
-                    Spacer(modifier = Modifier.width(8.dp))
+                    DevLogoIcon(
+                        size = 38.dp,
+                        elevation = 2.dp,
+                        showGlow = false
+                    )
+                    Spacer(modifier = Modifier.width(10.dp))
                     Text(
-                        text = "साधक सहायता केंद्र",
+                        text = "देव भाषा सहायता केंद्र",
                         fontWeight = FontWeight.Bold,
                         fontSize = 17.sp,
                         color = TextDark
@@ -1659,10 +2106,14 @@ fun UserProfileScreen(
             onDismissRequest = { showTermsDialog = false },
             title = {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(text = "📜", fontSize = 20.sp)
-                    Spacer(modifier = Modifier.width(8.dp))
+                    DevLogoIcon(
+                        size = 38.dp,
+                        elevation = 2.dp,
+                        showGlow = false
+                    )
+                    Spacer(modifier = Modifier.width(10.dp))
                     Text(
-                        text = "नियम एवं गोपनीयता नीति",
+                        text = "देव भाषा नियम एवं नीतियां",
                         fontWeight = FontWeight.Bold,
                         fontSize = 17.sp,
                         color = TextDark

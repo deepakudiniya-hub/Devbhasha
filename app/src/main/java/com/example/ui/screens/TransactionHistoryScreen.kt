@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.ui.models.WalletTransaction
 import com.example.ui.theme.*
+import com.example.ui.components.DevLogoIcon
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -58,6 +59,59 @@ fun TransactionHistoryScreen(
         }
 
         Spacer(modifier = Modifier.height(10.dp))
+
+        // Official Invoice & Receipt Brand Header (40dp logo height)
+        Surface(
+            shape = RoundedCornerShape(12.dp),
+            color = Color.White,
+            shadowElevation = 1.dp,
+            border = BorderStroke(1.dp, EditorialLine),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 14.dp, vertical = 10.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    DevLogoIcon(
+                        size = 40.dp,
+                        elevation = 2.dp,
+                        showGlow = false
+                    )
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Column {
+                        Text(
+                            text = "देव भाषा • डिजिटल रसीद",
+                            fontSize = 13.5.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Ink
+                        )
+                        Text(
+                            text = "जीएसटी एवं वॉलेट लेन-देन विवरण",
+                            fontSize = 11.sp,
+                            color = InkSoft
+                        )
+                    }
+                }
+                Surface(
+                    color = Sage.copy(alpha = 0.12f),
+                    shape = RoundedCornerShape(999.dp)
+                ) {
+                    Text(
+                        text = "सुरक्षित ✓",
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Sage,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
+                    )
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(14.dp))
 
         // Transactions List
         if (transactions.isEmpty()) {

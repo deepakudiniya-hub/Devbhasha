@@ -13,7 +13,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import com.example.ui.screens.HomeScreen
 import com.example.ui.screens.LoginScreen
-import com.example.ui.screens.ProviderDashboardScreen
 import com.example.ui.screens.SplashScreen
 import com.example.ui.theme.DevbhashaTheme
 import com.example.utils.RazorpayPaymentManager
@@ -25,8 +24,7 @@ import com.razorpay.PaymentResultWithDataListener
 enum class AppScreen {
     SPLASH,
     LOGIN,
-    USER_HOME,
-    PROVIDER_HOME
+    USER_HOME
 }
 
 class MainActivity : ComponentActivity(), PaymentResultWithDataListener {
@@ -44,9 +42,8 @@ class MainActivity : ComponentActivity(), PaymentResultWithDataListener {
 
                 var currentUserName by remember { mutableStateOf(userSession.getUserName()) }
                 var currentUserId by remember { mutableStateOf(userSession.getUserId()) }
-                var currentUserRole by remember { mutableStateOf(userSession.getUserRole()) }
 
-                // App starts at Splash, then routes to appropriate role dashboard if logged in, else LOGIN
+                // App starts at Splash, then routes to user home if logged in, else LOGIN
                 var currentScreen by remember { mutableStateOf(AppScreen.SPLASH) }
 
                 Crossfade(targetState = currentScreen, label = "screen_transition") { screen ->
@@ -59,8 +56,7 @@ class MainActivity : ComponentActivity(), PaymentResultWithDataListener {
                                     if (loggedIn && uid.isNotBlank()) {
                                         currentUserName = userSession.getUserName()
                                         currentUserId = uid
-                                        currentUserRole = userSession.getUserRole()
-                                        currentScreen = if (userSession.isProvider()) AppScreen.PROVIDER_HOME else AppScreen.USER_HOME
+                                        currentScreen = AppScreen.USER_HOME
                                     } else {
                                         currentScreen = AppScreen.LOGIN
                                     }
@@ -72,32 +68,28 @@ class MainActivity : ComponentActivity(), PaymentResultWithDataListener {
                             Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                                 LoginScreen(
                                     onLoginSuccess = { uid, name, phone, role ->
-                                        userSession.saveUserSessionWithRole(
+                                        userSession.saveUserSession(
                                             userName = name,
                                             isLoggedIn = true,
                                             userId = uid,
-                                            phoneNumber = phone,
-                                            role = role
+                                            phoneNumber = phone
                                         )
                                         currentUserName = name
                                         currentUserId = uid
-                                        currentUserRole = role
-                                        currentScreen = if (role.equals("provider", ignoreCase = true)) AppScreen.PROVIDER_HOME else AppScreen.USER_HOME
+                                        currentScreen = AppScreen.USER_HOME
                                     },
                                     onSkip = { role ->
-                                        val defaultName = if (role.equals("provider", ignoreCase = true)) "आचार्य देव शर्मा" else "दीपक जी"
-                                        val defaultUid = if (role.equals("provider", ignoreCase = true)) "provider_acharya_dev" else "guest_explorer"
-                                        userSession.saveUserSessionWithRole(
+                                        val defaultName = "दीपक जी"
+                                        val defaultUid = "guest_explorer"
+                                        userSession.saveUserSession(
                                             userName = defaultName,
                                             isLoggedIn = true,
                                             userId = defaultUid,
-                                            phoneNumber = "",
-                                            role = role
+                                            phoneNumber = ""
                                         )
                                         currentUserName = defaultName
                                         currentUserId = defaultUid
-                                        currentUserRole = role
-                                        currentScreen = if (role.equals("provider", ignoreCase = true)) AppScreen.PROVIDER_HOME else AppScreen.USER_HOME
+                                        currentScreen = AppScreen.USER_HOME
                                     },
                                     modifier = Modifier.padding(innerPadding)
                                 )
@@ -112,31 +104,6 @@ class MainActivity : ComponentActivity(), PaymentResultWithDataListener {
                                     userSession.clearSession()
                                     currentUserId = ""
                                     currentUserName = "साधक"
-                                    currentUserRole = "user"
-                                    currentScreen = AppScreen.LOGIN
-                                },
-                                onSwitchToProvider = {
-                                    userSession.setUserRole("provider")
-                                    currentUserRole = "provider"
-                                    currentScreen = AppScreen.PROVIDER_HOME
-                                }
-                            )
-                        }
-
-                        AppScreen.PROVIDER_HOME -> {
-                            ProviderDashboardScreen(
-                                currentSadhakName = currentUserName.ifBlank { "आचार्य देव शर्मा" },
-                                providerId = currentUserId.ifBlank { "provider_1" },
-                                onSwitchToUserDashboard = {
-                                    userSession.setUserRole("user")
-                                    currentUserRole = "user"
-                                    currentScreen = AppScreen.USER_HOME
-                                },
-                                onLogoutClick = {
-                                    userSession.clearSession()
-                                    currentUserId = ""
-                                    currentUserName = "साधक"
-                                    currentUserRole = "user"
                                     currentScreen = AppScreen.LOGIN
                                 }
                             )

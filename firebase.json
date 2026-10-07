@@ -3,7 +3,10 @@
     "source": "functions",
     "runtime": "nodejs20"
   },
-  "firestore": {
-    "rules": "firestore.rules"
-  }
+  "firestore": [
+    {
+      "database": "devbhasha-d9e22",
+      "rules": "firestore.rules"
+    }
+  ]
 }

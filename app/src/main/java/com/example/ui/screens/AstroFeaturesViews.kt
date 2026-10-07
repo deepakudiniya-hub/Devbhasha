@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.ui.models.DEFAULT_RASHIS
 import com.example.ui.models.RashiHoroscope
+import com.example.ui.components.DevWatermarkLogo
 import com.example.ui.theme.*
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -223,12 +224,12 @@ fun TodayPanchangCard(
     Surface(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp),
-        shape = RoundedCornerShape(18.dp),
+            .padding(horizontal = 16.dp, vertical = 2.dp),
+        shape = RoundedCornerShape(14.dp),
         color = Color.White,
         border = BorderStroke(1.dp, BorderLight)
     ) {
-        Column(modifier = Modifier.padding(14.dp)) {
+        Column(modifier = Modifier.padding(10.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -237,24 +238,24 @@ fun TodayPanchangCard(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Box(
                         modifier = Modifier
-                            .size(28.dp)
+                            .size(24.dp)
                             .clip(CircleShape)
                             .background(Color(0xFFFAFAFA)),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text("🪔", fontSize = 14.sp)
+                        Text("🪔", fontSize = 12.sp)
                     }
-                    Spacer(modifier = Modifier.width(8.dp))
+                    Spacer(modifier = Modifier.width(6.dp))
                     Column {
                         Text(
                             text = if (isHindi) "आज का पंचांग एवं शुभ मुहूर्त" else "Today's Panchang & Muhurat",
-                            fontSize = 14.sp,
+                            fontSize = 13.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color(0xFF000000)
                         )
                         Text(
                             text = todayFormatted,
-                            fontSize = 11.sp,
+                            fontSize = 10.sp,
                             color = Color(0xFF737373)
                         )
                     }
@@ -262,23 +263,23 @@ fun TodayPanchangCard(
 
                 TextButton(
                     onClick = onViewFullPanchang,
-                    contentPadding = PaddingValues(horizontal = 6.dp, vertical = 2.dp)
+                    contentPadding = PaddingValues(horizontal = 4.dp, vertical = 1.dp)
                 ) {
                     Text(
-                        text = if (isHindi) "विस्तार देखें" else "Details",
-                        fontSize = 12.sp,
+                        text = if (isHindi) "विस्तार" else "Details",
+                        fontSize = 11.sp,
                         fontWeight = FontWeight.Bold,
                         color = SaffronDeep
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(6.dp))
 
-            // 4 Mini Panchang Indicators
+            // 3 Mini Compact Panchang Indicators
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 PanchangPill(
                     label = if (isHindi) "तिथि" else "Tithi",
@@ -291,10 +292,10 @@ fun TodayPanchangCard(
                     modifier = Modifier.weight(1f)
                 )
                 PanchangPill(
-                    label = if (isHindi) "अभिजीत मुहूर्त" else "Abhijit",
-                    value = "11:45 AM - 12:35 PM",
+                    label = if (isHindi) "अभिजीत" else "Abhijit",
+                    value = "11:45 AM",
                     isGood = true,
-                    modifier = Modifier.weight(1.3f)
+                    modifier = Modifier.weight(1.1f)
                 )
             }
         }
@@ -545,6 +546,15 @@ fun DailyHoroscopeBottomSheet(
                         color = Color(0xFF334155),
                         lineHeight = 20.sp
                     )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End
+                    ) {
+                        DevWatermarkLogo()
+                    }
 
                     Spacer(modifier = Modifier.height(16.dp))
 

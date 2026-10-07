@@ -7,4 +7,8 @@ object HapticFeedbackHelper {
     fun playClick(haptic: HapticFeedback) {
         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
     }
+
+    fun playSuccess(haptic: HapticFeedback) {
+        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+    }
 }

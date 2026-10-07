@@ -1643,6 +1643,89 @@ fun BentoEditorialWalletScreen(
                         }
                     }
                 }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Quick Pay Section
+                Text(
+                    text = when (currentLangCode) {
+                        "hi" -> "त्वरित भुगतान"
+                        "hgl" -> "Quick Pay"
+                        else -> "Quick Pay"
+                    },
+                    fontSize = 12.sp,
+                    color = InkSoft,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+
+                LazyRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    val quickAmounts = listOf(200, 500, 1000)
+                    items(quickAmounts) { amount ->
+                        Surface(
+                            shape = RoundedCornerShape(8.dp),
+                            color = Terra.copy(alpha = 0.1f),
+                            border = BorderStroke(1.dp, Terra),
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(8.dp))
+                                .clickable { /* Handle quick pay */ }
+                        ) {
+                            Text(
+                                text = "₹$amount",
+                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Terra
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(18.dp))
+
+        // Predefined Amount Selection Grid
+        val amounts = listOf(50, 100, 200, 300, 500, 750, 1000, 2000, 5000, 10000)
+        Text(
+            text = when (currentLangCode) {
+                "hi" -> "राशि चुनें"
+                "hgl" -> "Select Amount"
+                else -> "Select Amount"
+            },
+            fontSize = 12.sp,
+            color = InkSoft,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(4),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.height(140.dp)
+        ) {
+            items(amounts) { amount ->
+                Surface(
+                    shape = RoundedCornerShape(8.dp),
+                    color = PaperBg,
+                    border = BorderStroke(1.dp, InkSoft),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(40.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .clickable { /* Handle amount select */ }
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Text(
+                            text = "₹$amount",
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = Ink
+                        )
+                    }
+                }
             }
         }
 

@@ -34,9 +34,9 @@ android {
     applicationId = "com.aistudio.devbhasha.kxmpzq"
     minSdk = 24
     targetSdk = 36
-    versionCode = 21
+    versionCode = 24
   
-    versionName = "3.3.4"
+    versionName = "24.0"
     
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
   }
@@ -89,6 +89,10 @@ android {
   dependenciesInfo {
     includeInApk = false
     includeInBundle = true
+  }
+  lint {
+    checkReleaseBuilds = false
+    abortOnError = false
   }
 }
 

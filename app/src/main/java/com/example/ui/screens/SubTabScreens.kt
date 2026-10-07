@@ -25,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -122,7 +123,7 @@ fun SadhakDirectoryScreen(
             )
         )
 
-        Spacer(modifier = Modifier.height(10.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
         // Filters
         Row(
@@ -155,7 +156,7 @@ fun SadhakDirectoryScreen(
             }
         }
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
         if (isLoading) {
             Box(
@@ -218,41 +219,54 @@ fun SadhakDirectoryCard(
     modifier: Modifier = Modifier
 ) {
     Surface(
-        shape = RoundedCornerShape(18.dp),
+        shape = RoundedCornerShape(20.dp),
         color = Color.White,
-        shadowElevation = 2.dp,
-        border = BorderStroke(1.dp, Color(0xFFE2E8F0)),
-        modifier = modifier.fillMaxWidth()
+        shadowElevation = 3.dp,
+        border = BorderStroke(1.2.dp, Saffron.copy(alpha = 0.2f)),
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(20.dp))
+            .clickable { onConsultClick() }
     ) {
-        Column(modifier = Modifier.padding(14.dp)) {
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Avatar with initial and online indicator
+                // Avatar with premium gradient background & online indicator
                 Box(
                     contentAlignment = Alignment.Center
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .size(54.dp)
-                            .clip(CircleShape)
-                            .background(SaffronPrimary),
-                        contentAlignment = Alignment.Center
+                    Surface(
+                        shape = CircleShape,
+                        color = Saffron,
+                        modifier = Modifier.size(60.dp),
+                        shadowElevation = 2.dp
                     ) {
-                        Text(
-                            text = if (isHindi) sadhak.initialHi else sadhak.initialEn,
-                            color = Color.White,
-                            fontSize = 22.sp,
-                            fontWeight = FontWeight.Bold
-                        )
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier.background(
+                                Brush.linearGradient(
+                                    listOf(SaffronGradientStart, SaffronGradientEnd)
+                                )
+                            )
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.Person,
+                                contentDescription = null,
+                                tint = Color.White,
+                                modifier = Modifier.size(28.dp)
+                            )
+                        }
                     }
 
                     if (sadhak.isOnline) {
                         Box(
                             modifier = Modifier
                                 .align(Alignment.BottomEnd)
-                                .size(15.dp)
+                                .size(16.dp)
                                 .clip(CircleShape)
                                 .background(Color.White)
                                 .padding(2.dp)
@@ -267,119 +281,180 @@ fun SadhakDirectoryCard(
                     }
                 }
 
-                Spacer(modifier = Modifier.width(12.dp))
+                Spacer(modifier = Modifier.width(14.dp))
 
                 Column(modifier = Modifier.weight(1f)) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
                         Text(
                             text = if (isHindi) sadhak.nameHi else sadhak.nameEn,
                             fontWeight = FontWeight.Bold,
-                            fontSize = 15.sp,
+                            fontSize = 16.sp,
                             color = Color(0xFF1E293B)
                         )
-                        Spacer(modifier = Modifier.width(6.dp))
-                        if (sadhak.isOnline) {
-                            Box(
-                                modifier = Modifier
-                                    .size(8.dp)
-                                    .clip(CircleShape)
-                                    .background(GreenPrimary)
-                            )
-                        }
+                        // Verified badge
+                        Icon(
+                            imageVector = Icons.Default.CheckCircle,
+                            contentDescription = "Verified",
+                            tint = Color(0xFF0284C7),
+                            modifier = Modifier.size(15.dp)
+                        )
                     }
+
+                    Spacer(modifier = Modifier.height(2.dp))
 
                     Text(
                         text = if (isHindi) sadhak.titleHi else sadhak.titleEn,
                         color = SaffronDeep,
-                        fontSize = 12.sp,
+                        fontSize = 12.5.sp,
                         fontWeight = FontWeight.Medium
                     )
 
+                    Spacer(modifier = Modifier.height(6.dp))
+
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.padding(top = 2.dp)
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Icon(
-                            imageVector = Icons.Filled.Star,
-                            contentDescription = null,
-                            tint = Saffron,
-                            modifier = Modifier.size(13.dp)
-                        )
-                        Spacer(modifier = Modifier.width(2.dp))
-                        Text(
-                            text = sadhak.rating,
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color(0xFF1E293B)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = "• ${if (isHindi) sadhak.experienceHi else sadhak.experienceEn}",
-                            fontSize = 12.sp,
-                            color = Color(0xFF64748B)
-                        )
-                    }
-                }
-
-                // Action Buttons (Call 📞 / Chat 💬 / Consult)
-                if (sadhak.isOnline) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                        IconButton(
-                            onClick = onCallClick,
-                            modifier = Modifier
-                                .size(36.dp)
-                                .clip(CircleShape)
-                                .background(GreenPrimary.copy(alpha = 0.12f))
+                        // Rating Chip
+                        Surface(
+                            shape = RoundedCornerShape(8.dp),
+                            color = Color(0xFFFEF3C7)
                         ) {
-                            Icon(
-                                imageVector = Icons.Outlined.Phone,
-                                contentDescription = "Call",
-                                tint = GreenPrimary,
-                                modifier = Modifier.size(18.dp)
+                            Row(
+                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(3.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Filled.Star,
+                                    contentDescription = null,
+                                    tint = Color(0xFFD97706),
+                                    modifier = Modifier.size(12.dp)
+                                )
+                                Text(
+                                    text = sadhak.rating,
+                                    fontSize = 11.5.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color(0xFF92400E)
+                                )
+                            }
+                        }
+
+                        // Experience Chip
+                        Surface(
+                            shape = RoundedCornerShape(8.dp),
+                            color = Color(0xFFF1F5F9)
+                        ) {
+                            Text(
+                                text = if (isHindi) sadhak.experienceHi else sadhak.experienceEn,
+                                fontSize = 11.5.sp,
+                                fontWeight = FontWeight.Medium,
+                                color = Color(0xFF475569),
+                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                             )
                         }
 
-                        IconButton(
-                            onClick = onChatClick,
-                            modifier = Modifier
-                                .size(36.dp)
-                                .clip(CircleShape)
-                                .background(SaffronPrimary.copy(alpha = 0.12f))
+                        // Pricing Pill
+                        Surface(
+                            shape = RoundedCornerShape(8.dp),
+                            color = Color(0xFFECFDF5)
                         ) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Outlined.Chat,
-                                contentDescription = "Chat",
-                                tint = SaffronPrimary,
-                                modifier = Modifier.size(18.dp)
+                            Text(
+                                text = "₹20/min",
+                                fontSize = 11.5.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF047857),
+                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                             )
                         }
-                    }
-                } else {
-                    Button(
-                        onClick = onConsultClick,
-                        shape = RoundedCornerShape(12.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF94A3B8)),
-                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
-                    ) {
-                        Text(
-                            text = if (isHindi) "विवरण" else "Details",
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Bold
-                        )
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(12.dp))
             HorizontalDivider(color = Color(0xFFF1F5F9))
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(10.dp))
 
+            // Bio / Expertise text
             Text(
                 text = sadhak.bio,
-                fontSize = 12.5.sp,
+                fontSize = 13.sp,
                 color = Color(0xFF475569),
-                lineHeight = 17.sp
+                lineHeight = 18.sp
             )
+
+            Spacer(modifier = Modifier.height(14.dp))
+
+            // Action Buttons Row (Call & Chat)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                // Call Button (Primary - Solid Filled)
+                Surface(
+                    shape = RoundedCornerShape(14.dp),
+                    color = Saffron,
+                    shadowElevation = 1.dp,
+                    modifier = Modifier
+                        .weight(1f)
+                        .clip(RoundedCornerShape(14.dp))
+                        .clickable { onCallClick() }
+                ) {
+                    Row(
+                        modifier = Modifier.padding(vertical = 11.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.Phone,
+                            contentDescription = "Call",
+                            tint = Color.White,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = if (isHindi) "कॉल करें" else "Call Now",
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White
+                        )
+                    }
+                }
+
+                // Chat Button (Secondary - Outlined)
+                Surface(
+                    shape = RoundedCornerShape(14.dp),
+                    color = Color.White,
+                    border = BorderStroke(1.2.dp, Saffron),
+                    modifier = Modifier
+                        .weight(1f)
+                        .clip(RoundedCornerShape(14.dp))
+                        .clickable { onChatClick() }
+                ) {
+                    Row(
+                        modifier = Modifier.padding(vertical = 11.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Outlined.Chat,
+                            contentDescription = "Chat",
+                            tint = Saffron,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = if (isHindi) "चैट करें" else "Start Chat",
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Saffron
+                        )
+                    }
+                }
+            }
         }
     }
 }

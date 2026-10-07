@@ -16,7 +16,7 @@ import com.google.firebase.functions.FirebaseFunctions
 object WalletRepository {
     private const val TAG = "WalletRepository"
 
-    private val db: FirebaseFirestore = FirebaseFirestore.getInstance()
+    private val db: FirebaseFirestore get() = FirestoreProvider.get()
     private val functions: FirebaseFunctions = FirebaseFunctions.getInstance()
 
     private fun userDoc(uid: String) = db.collection("users").document(uid)
@@ -29,6 +29,10 @@ object WalletRepository {
      * the server; this listener just mirrors it.
      */
     fun observeBalance(uid: String, onChange: (Double) -> Unit): ListenerRegistration {
+        val currentAuth = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser
+        if (currentAuth == null || currentAuth.uid != uid) {
+            return ListenerRegistration { }
+        }
         return userDoc(uid).addSnapshotListener { snap, err ->
             if (err != null) {
                 Log.w(TAG, "balance listener error", err)

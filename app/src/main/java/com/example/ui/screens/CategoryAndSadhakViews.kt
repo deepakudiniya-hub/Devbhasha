@@ -35,8 +35,8 @@ import com.example.ui.models.SadhakItem
 import com.example.ui.theme.*
 
 /**
- * 5 Circular Guidance Categories: पूजा-पाठ, मंत्र जप, ध्यान, वास्तु, अनुष्ठान
- * Horizontally scrollable circular categories right below search bar.
+ * Circular Guidance Categories: दैनिक राशिफल, पारिवारिक समस्या, कुंडली मिलान, साधक चैट, साधक कॉल, पूजा-पाठ, स्वप्न विचार, वास्तु, मंत्र जप
+ * Horizontally scrollable circular categories right below search/promo banner.
  */
 @Composable
 fun GuidanceCategoriesSection(
@@ -46,7 +46,11 @@ fun GuidanceCategoriesSection(
     onCategoryClick: (CircleCategoryItem) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Column(modifier = modifier.fillMaxWidth()) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp)
+    ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -60,37 +64,39 @@ fun GuidanceCategoriesSection(
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier
-                        .width(72.dp)
+                        .width(74.dp)
+                        .clip(RoundedCornerShape(12.dp))
                         .clickable { onCategoryClick(item) }
+                        .padding(vertical = 4.dp)
                 ) {
-                    // Circular icon container with warm yellow/golden glow from inspiration image
-                    Box(
-                        modifier = Modifier
-                            .size(64.dp)
-                            .shadow(if (isSelected) 4.dp else 1.dp, CircleShape)
-                            .clip(CircleShape)
-                            .background(
-                                if (isSelected) Color(0xFF000000) else Color(0xFFFAFAFA)
-                            )
-                            .border(
-                                width = if (isSelected) 2.dp else 1.dp,
-                                color = if (isSelected) Saffron else BorderLight,
-                                shape = CircleShape
-                            ),
-                        contentAlignment = Alignment.Center
+                    // Circular icon container with warm aesthetic gradient/glow
+                    Surface(
+                        modifier = Modifier.size(62.dp),
+                        shape = CircleShape,
+                        color = if (isSelected) Color(0xFFFFF2E8) else item.softBgColor,
+                        shadowElevation = if (isSelected) 4.dp else 1.5.dp,
+                        border = BorderStroke(
+                            width = if (isSelected) 2.dp else 1.2.dp,
+                            color = if (isSelected) Color(0xFFE8590C) else item.borderColor
+                        )
                     ) {
-                        if (item.icon != null) {
-                            Icon(
-                                imageVector = item.icon,
-                                contentDescription = item.titleHi,
-                                tint = item.primaryColor,
-                                modifier = Modifier.size(30.dp)
-                            )
-                        } else {
-                            Text(
-                                text = item.symbol,
-                                fontSize = 28.sp
-                            )
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            if (item.icon != null) {
+                                Icon(
+                                    imageVector = item.icon,
+                                    contentDescription = item.titleHi,
+                                    tint = item.primaryColor,
+                                    modifier = Modifier.size(30.dp)
+                                )
+                            } else {
+                                Text(
+                                    text = item.symbol,
+                                    fontSize = 28.sp
+                                )
+                            }
                         }
                     }
 
@@ -100,7 +106,7 @@ fun GuidanceCategoriesSection(
                         text = if (isHindi) item.titleHi else item.titleEn,
                         fontSize = 11.5.sp,
                         fontWeight = if (isSelected) FontWeight.Bold else FontWeight.SemiBold,
-                        color = if (isSelected) SaffronDeep else Color(0xFF334155),
+                        color = if (isSelected) Color(0xFFE8590C) else Color(0xFF2D3748),
                         textAlign = TextAlign.Center,
                         maxLines = 1
                     )

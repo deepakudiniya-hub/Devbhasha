@@ -16,13 +16,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Chat
 import androidx.compose.material.icons.automirrored.outlined.HelpOutline
 import androidx.compose.material.icons.automirrored.outlined.Logout
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.filled.ExpandLess
-import androidx.compose.material.icons.filled.ExpandMore
-import androidx.compose.material.icons.filled.Mic
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.filled.Stop
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -31,13 +25,23 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import android.widget.Toast
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.text.style.TextOverflow
+import com.example.ui.models.ALL_AVATAR_OPTIONS
+import com.example.ui.models.AVATAR_PACKAGES
+import com.example.ui.models.AvatarOption
 import com.example.ui.models.SadhakItem
+import com.example.ui.models.getAvatarById
+import com.example.utils.HapticFeedbackHelper
+import com.example.utils.UserSession
 import com.example.ui.theme.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -75,13 +79,32 @@ fun BentoEditorialRechargeSheet(
                 .padding(horizontal = 24.dp)
                 .padding(bottom = 36.dp)
         ) {
-            Text(
-                text = "Recharge",
-                fontFamily = FontFamily.Serif,
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Medium,
-                color = Ink
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Recharge Wallet",
+                    fontFamily = AppFontFamily,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Ink
+                )
+                Surface(
+                    shape = RoundedCornerShape(999.dp),
+                    color = Color(0xFFFEF3C7),
+                    border = BorderStroke(1.dp, Color(0xFFFDE68A))
+                ) {
+                    Text(
+                        text = "✨ 100% Welcome Bonus",
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF92400E),
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
+                    )
+                }
+            }
 
             Spacer(modifier = Modifier.height(4.dp))
 
@@ -93,11 +116,42 @@ fun BentoEditorialRechargeSheet(
                 )
                 Text(
                     text = "₹${currentBalance.toInt()}",
-                    fontFamily = FontFamily.Serif,
+                    fontFamily = AppFontFamily,
                     fontSize = 15.sp,
                     fontWeight = FontWeight.Bold,
                     color = Ink
                 )
+            }
+
+            Spacer(modifier = Modifier.height(14.dp))
+
+            // First-time bonus highlight banner
+            Surface(
+                shape = RoundedCornerShape(14.dp),
+                color = Color(0xFFFFFBEB),
+                border = BorderStroke(1.2.dp, Color(0xFFF59E0B)),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Row(
+                    modifier = Modifier.padding(12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    Text(text = "🎁", fontSize = 24.sp)
+                    Column {
+                        Text(
+                            text = "प्रथम रीचार्ज पर ₹100 बोनस!",
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF92400E)
+                        )
+                        Text(
+                            text = "₹100 या अधिक ऐड करने पर वॉलेट में तुरंत ₹100 अतिरिक्त जुड़ेंगे।",
+                            fontSize = 11.sp,
+                            color = Color(0xFF78350F)
+                        )
+                    }
+                }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -118,14 +172,61 @@ fun BentoEditorialRechargeSheet(
                             .clip(RoundedCornerShape(12.dp))
                             .clickable { selectedAmount = amt }
                     ) {
-                        Text(
-                            text = "₹$amt",
-                            fontSize = 15.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = if (isSel) Color.White else Ink,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.padding(vertical = 14.dp)
-                        )
+                        Column(
+                            modifier = Modifier.padding(vertical = 12.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(
+                                text = "₹$amt",
+                                fontSize = 15.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = if (isSel) Color.White else Ink,
+                                textAlign = TextAlign.Center
+                            )
+                            Text(
+                                text = "+₹$amt Bonus",
+                                fontSize = 9.5.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = if (isSel) Color(0xFFFDE68A) else Color(0xFFB83A0E),
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Summary Calculation
+            Surface(
+                shape = RoundedCornerShape(12.dp),
+                color = Color(0xFFF8FAFC),
+                border = BorderStroke(1.dp, Color(0xFFE2E8F0)),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Column(modifier = Modifier.padding(12.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(text = "Recharge Amount:", fontSize = 12.sp, color = Color(0xFF64748B))
+                        Text(text = "₹$selectedAmount", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1E293B))
+                    }
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(text = "First-Time Welcome Bonus:", fontSize = 12.sp, color = Color(0xFFB83A0E))
+                        Text(text = "+₹$selectedAmount", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color(0xFFB83A0E))
+                    }
+                    HorizontalDivider(modifier = Modifier.padding(vertical = 6.dp), color = Color(0xFFE2E8F0))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(text = "Total Credited in Wallet:", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1E293B))
+                        Text(text = "₹${selectedAmount * 2}", fontSize = 14.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF16A34A))
                     }
                 }
             }
@@ -139,10 +240,10 @@ fun BentoEditorialRechargeSheet(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(999.dp))
-                    .clickable { onConfirmRecharge(selectedAmount) }
+                    .clickable { onConfirmRecharge(selectedAmount * 2) }
             ) {
                 Text(
-                    text = "Add ₹$selectedAmount",
+                    text = "Pay ₹$selectedAmount & Get ₹${selectedAmount * 2}",
                     fontSize = 13.5.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.White,
@@ -167,10 +268,8 @@ fun BentoEditorialProfileSheet(
     language: String = "en",
     onDismiss: () -> Unit,
     onEditProfile: () -> Unit,
-    onOrdersClick: () -> Unit,
     onLanguageChange: (String) -> Unit,
     onHelpClick: () -> Unit,
-    onSwitchToProvider: (() -> Unit)? = null,
     onLogoutClick: () -> Unit
 ) {
     val isEn = language == "en"
@@ -197,6 +296,13 @@ fun BentoEditorialProfileSheet(
             ) {}
         }
     ) {
+        val context = LocalContext.current
+        val haptic = LocalHapticFeedback.current
+        val userSession = remember { UserSession(context) }
+        var currentAvatarId by remember { mutableStateOf(userSession.getAvatarId()) }
+        val avatar = remember(currentAvatarId) { getAvatarById(currentAvatarId) }
+        var showAvatarModalDialog by remember { mutableStateOf(false) }
+
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -207,56 +313,183 @@ fun BentoEditorialProfileSheet(
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(14.dp),
-                modifier = Modifier.padding(bottom = 14.dp)
+                modifier = Modifier.padding(bottom = 12.dp)
             ) {
-                Box {
+                Box(
+                    modifier = Modifier.clickable {
+                        HapticFeedbackHelper.playClick(haptic)
+                        showAvatarModalDialog = true
+                    }
+                ) {
                     Surface(
                         shape = CircleShape,
-                        color = Color(0xFFFFF7ED), // Light orange background
-                        border = BorderStroke(1.dp, Color(0xFFFFE0B2)),
-                        modifier = Modifier.size(52.dp)
+                        color = avatar.bgColor,
+                        border = BorderStroke(2.5.dp, Color(0xFFF59E0B)),
+                        shadowElevation = 3.dp,
+                        modifier = Modifier.size(58.dp)
                     ) {
                         Box(contentAlignment = Alignment.Center) {
                             Text(
-                                text = userName.split(" ").mapNotNull { it.firstOrNull()?.toString() }.joinToString("").ifEmpty { "दे" },
-                                fontSize = 18.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = Color(0xFF1F2937) // Dark text
+                                text = avatar.symbol,
+                                fontSize = 28.sp,
+                                color = Color.White
                             )
                         }
                     }
                     // Small edit icon badge at the corner
                     Surface(
                         shape = CircleShape,
-                        color = Color(0xFF1F2937),
+                        color = SaffronPrimary,
+                        border = BorderStroke(1.5.dp, Color.White),
+                        shadowElevation = 2.dp,
                         modifier = Modifier
                             .align(Alignment.BottomEnd)
-                            .size(18.dp)
+                            .size(22.dp)
                     ) {
                         Box(contentAlignment = Alignment.Center) {
                             Icon(
-                                imageVector = Icons.Outlined.Edit,
+                                imageVector = Icons.Filled.AutoAwesome,
                                 contentDescription = "Edit avatar",
                                 tint = Color.White,
-                                modifier = Modifier.size(10.dp)
+                                modifier = Modifier.size(12.dp)
                             )
                         }
                     }
                 }
 
-                Column {
+                Column(
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = userName.ifBlank { "साधक" },
+                            fontFamily = AppFontFamily,
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Ink
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Surface(
+                            shape = RoundedCornerShape(8.dp),
+                            color = SaffronSoft
+                        ) {
+                            Text(
+                                text = avatar.badgeHi,
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = SaffronDeep,
+                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                            )
+                        }
+                    }
                     Text(
-                        text = userName.ifBlank { "साधक" },
-                        fontFamily = FontFamily.Serif,
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Medium,
-                        color = Ink
+                        text = avatar.nameHi + " • " + (if (userEmail.isNotBlank()) userEmail else "साधना पथ"),
+                        fontSize = 11.5.sp,
+                        color = InkSoft,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
-                    Text(
-                        text = userEmail.ifBlank { "" },
-                        fontSize = 11.sp,
-                        color = InkSoft
-                    )
+                }
+            }
+
+            // Quick 1-Tap Sadhak Avatar Strip
+            Surface(
+                shape = RoundedCornerShape(14.dp),
+                color = Color(0xFFFFFBEB),
+                border = BorderStroke(1.dp, Color(0xFFFDE68A)),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 12.dp)
+            ) {
+                Column(modifier = Modifier.padding(10.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = "✨ साधक अवतार चुनें",
+                                fontSize = 12.5.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF92400E)
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Surface(
+                                shape = RoundedCornerShape(999.dp),
+                                color = Color(0xFFF59E0B)
+                            ) {
+                                Text(
+                                    text = "12+ उपलब्ध",
+                                    fontSize = 9.5.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.White,
+                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                )
+                            }
+                        }
+                        Text(
+                            text = "सभी देखें ›",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFFB45309),
+                            modifier = Modifier.clickable {
+                                HapticFeedbackHelper.playClick(haptic)
+                                showAvatarModalDialog = true
+                            }
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    LazyRow(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        val sadhakAvatars = ALL_AVATAR_OPTIONS.filter { it.packageId == "sadhaks" }
+                        items(sadhakAvatars) { opt ->
+                            val isSelected = (opt.id == currentAvatarId)
+                            Surface(
+                                shape = RoundedCornerShape(12.dp),
+                                color = if (isSelected) Color.White else Color(0xFFFEF3C7),
+                                border = BorderStroke(
+                                    if (isSelected) 2.dp else 1.dp,
+                                    if (isSelected) Color(0xFFF59E0B) else Color(0xFFFDE68A)
+                                ),
+                                shadowElevation = if (isSelected) 2.dp else 0.dp,
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .clickable {
+                                        HapticFeedbackHelper.playClick(haptic)
+                                        currentAvatarId = opt.id
+                                        userSession.setAvatarId(opt.id)
+                                        Toast.makeText(context, "अवतार चुना गया: ${opt.nameHi} ✨", Toast.LENGTH_SHORT).show()
+                                    }
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                ) {
+                                    Surface(
+                                        shape = CircleShape,
+                                        color = opt.bgColor,
+                                        modifier = Modifier.size(24.dp)
+                                    ) {
+                                        Box(contentAlignment = Alignment.Center) {
+                                            Text(text = opt.symbol, fontSize = 13.sp)
+                                        }
+                                    }
+                                    Text(
+                                        text = opt.nameHi,
+                                        fontSize = 11.sp,
+                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                        color = if (isSelected) Color(0xFF92400E) else Color(0xFF78350F)
+                                    )
+                                }
+                            }
+                        }
+                    }
                 }
             }
 
@@ -270,7 +503,7 @@ fun BentoEditorialProfileSheet(
                 ProfileStatBox(label = if (isHi) "खाता स्थिति" else "MEMBERSHIP", value = if (isHi) "सक्रिय" else "Active", modifier = Modifier.weight(1f))
             }
 
-            Spacer(modifier = Modifier.height(24.dp)) // Increased vertical spacing
+            Spacer(modifier = Modifier.height(18.dp))
 
             // Settings Rows
             Surface(
@@ -280,9 +513,20 @@ fun BentoEditorialProfileSheet(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column {
-                    ProfileMenuRow(icon = Icons.Outlined.Edit, title = if (isHi) "प्रोफ़ाइल बदलें" else "Edit profile", onClick = onEditProfile)
+                    ProfileMenuRow(
+                        icon = Icons.Filled.AutoAwesome,
+                        title = if (isHi) "साधक अवतार बदलें (12+ विकल्प)" else "Change Sadhak Avatar",
+                        onClick = {
+                            HapticFeedbackHelper.playClick(haptic)
+                            showAvatarModalDialog = true
+                        }
+                    )
                     HorizontalDivider(color = EditorialLine)
-                    ProfileMenuRow(icon = Icons.Outlined.ShoppingBag, title = if (isHi) "मेरे आर्डर" else "My orders", onClick = onOrdersClick)
+                    ProfileMenuRow(
+                        icon = Icons.Outlined.Edit,
+                        title = if (isHi) "प्रोफ़ाइल एवं जन्म विवरण बदलें" else "Edit profile & details",
+                        onClick = onEditProfile
+                    )
                     HorizontalDivider(color = EditorialLine)
                     
                     // Language Selection
@@ -357,67 +601,7 @@ fun BentoEditorialProfileSheet(
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Switch to Provider / Astrologer Dashboard
-            if (onSwitchToProvider != null) {
-                Surface(
-                    shape = RoundedCornerShape(14.dp),
-                    color = Color(0xFFFFFBEB), // Soft warm amber
-                    border = BorderStroke(1.dp, Color(0xFFFDE68A)),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(14.dp))
-                        .clickable { onSwitchToProvider() }
-                ) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 13.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(12.dp)
-                        ) {
-                            Surface(
-                                shape = CircleShape,
-                                color = Saffron,
-                                modifier = Modifier.size(36.dp)
-                            ) {
-                                Box(contentAlignment = Alignment.Center) {
-                                    Icon(
-                                        imageVector = Icons.Filled.Star,
-                                        contentDescription = null,
-                                        tint = Color.White,
-                                        modifier = Modifier.size(18.dp)
-                                    )
-                                }
-                            }
-                            Column {
-                                Text(
-                                    text = if (isHi) "परामर्शदाता मोड (Provider)" else "Switch to Provider Dashboard",
-                                    fontSize = 13.5.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = Color(0xFF92400E)
-                                )
-                                Text(
-                                    text = if (isHi) "ज्योतिषी एवं साधक प्रबंधन पैनल" else "Astrologer & consultation management",
-                                    fontSize = 11.sp,
-                                    color = Color(0xFFB45309)
-                                )
-                            }
-                        }
-                        Icon(
-                            imageVector = Icons.Filled.ChevronRight,
-                            contentDescription = null,
-                            tint = Color(0xFFB45309),
-                            modifier = Modifier.size(18.dp)
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(14.dp))
-            }
+            Spacer(modifier = Modifier.height(14.dp))
 
             // Log Out Button (Distinct, full-width pill-shaped outlined button with soft red/orange border)
             OutlinedButton(
@@ -443,6 +627,268 @@ fun BentoEditorialProfileSheet(
                     fontWeight = FontWeight.Bold
                 )
             }
+        }
+
+        // =========================================================================
+        // Full Sadhak Avatar Picker Dialog (12+ Spiritual & Devotional Avatars)
+        // =========================================================================
+        if (showAvatarModalDialog) {
+            var selectedPackageId by remember { mutableStateOf("sadhaks") }
+            var avatarSearchQuery by remember { mutableStateOf("") }
+            var tempSelectedAvatarId by remember { mutableStateOf(currentAvatarId) }
+            val tempAvatar = remember(tempSelectedAvatarId) { getAvatarById(tempSelectedAvatarId) }
+
+            val filteredAvatars = remember(selectedPackageId, avatarSearchQuery) {
+                ALL_AVATAR_OPTIONS.filter { opt ->
+                    val matchesPkg = (opt.packageId == selectedPackageId)
+                    val matchesQuery = if (avatarSearchQuery.isBlank()) true else {
+                        opt.nameHi.contains(avatarSearchQuery, ignoreCase = true) ||
+                        opt.nameEn.contains(avatarSearchQuery, ignoreCase = true) ||
+                        opt.descriptionHi.contains(avatarSearchQuery, ignoreCase = true) ||
+                        opt.badgeHi.contains(avatarSearchQuery, ignoreCase = true)
+                    }
+                    matchesPkg && matchesQuery
+                }
+            }
+
+            AlertDialog(
+                onDismissRequest = { showAvatarModalDialog = false },
+                title = {
+                    Column {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "✨ साधक अवतार चुनें",
+                                fontFamily = AppFontFamily,
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF1E293B)
+                            )
+                            IconButton(
+                                onClick = { showAvatarModalDialog = false },
+                                modifier = Modifier.size(28.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Filled.Close,
+                                    contentDescription = "Close",
+                                    tint = Color(0xFF64748B),
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+                        }
+                        Text(
+                            text = "अपनी साधना एवं भक्ति अनुसार दिव्य अवतार चुनें",
+                            fontSize = 11.5.sp,
+                            color = Color(0xFF64748B)
+                        )
+                    }
+                },
+                text = {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(max = 480.dp)
+                    ) {
+                        // Live Preview Header Card
+                        Surface(
+                            shape = RoundedCornerShape(16.dp),
+                            color = tempAvatar.bgColor.copy(alpha = 0.12f),
+                            border = BorderStroke(1.5.dp, tempAvatar.bgColor),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 12.dp)
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(12.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                Surface(
+                                    shape = CircleShape,
+                                    color = tempAvatar.bgColor,
+                                    border = BorderStroke(2.dp, Color.White),
+                                    shadowElevation = 3.dp,
+                                    modifier = Modifier.size(54.dp)
+                                ) {
+                                    Box(contentAlignment = Alignment.Center) {
+                                        Text(text = tempAvatar.symbol, fontSize = 26.sp)
+                                    }
+                                }
+
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Text(
+                                            text = tempAvatar.nameHi,
+                                            fontSize = 15.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = Color(0xFF1E293B)
+                                        )
+                                        Spacer(modifier = Modifier.width(6.dp))
+                                        Surface(
+                                            shape = RoundedCornerShape(999.dp),
+                                            color = tempAvatar.bgColor
+                                        ) {
+                                            Text(
+                                                text = tempAvatar.badgeHi,
+                                                fontSize = 9.5.sp,
+                                                fontWeight = FontWeight.Bold,
+                                                color = Color.White,
+                                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                            )
+                                        }
+                                    }
+                                    Text(
+                                        text = tempAvatar.descriptionHi.ifBlank { "सात्विक साधना अवतार" },
+                                        fontSize = 11.sp,
+                                        color = Color(0xFF475569),
+                                        lineHeight = 15.sp
+                                    )
+                                }
+                            }
+                        }
+
+                        // Category Tabs (Sadhaks, Symbols, Deities)
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 10.dp),
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            AVATAR_PACKAGES.forEach { pkg ->
+                                val isSelected = (pkg.id == selectedPackageId)
+                                Surface(
+                                    shape = RoundedCornerShape(10.dp),
+                                    color = if (isSelected) Color(0xFFB83A0E) else Color(0xFFF1F5F9),
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .clickable {
+                                            HapticFeedbackHelper.playClick(haptic)
+                                            selectedPackageId = pkg.id
+                                        }
+                                ) {
+                                    Text(
+                                        text = pkg.titleHi,
+                                        fontSize = 11.sp,
+                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                        color = if (isSelected) Color.White else Color(0xFF475569),
+                                        textAlign = TextAlign.Center,
+                                        maxLines = 1,
+                                        modifier = Modifier.padding(vertical = 7.dp, horizontal = 2.dp)
+                                    )
+                                }
+                            }
+                        }
+
+                        // Grid List of Avatars
+                        LazyColumn(
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .weight(1f)
+                        ) {
+                            items(filteredAvatars) { opt ->
+                                val isSelected = (opt.id == tempSelectedAvatarId)
+                                Surface(
+                                    shape = RoundedCornerShape(14.dp),
+                                    color = if (isSelected) Color(0xFFFFFBEB) else Color.White,
+                                    border = BorderStroke(
+                                        if (isSelected) 2.dp else 1.dp,
+                                        if (isSelected) Color(0xFFF59E0B) else Color(0xFFE2E8F0)
+                                    ),
+                                    shadowElevation = if (isSelected) 2.dp else 0.5.dp,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clickable {
+                                            HapticFeedbackHelper.playClick(haptic)
+                                            tempSelectedAvatarId = opt.id
+                                        }
+                                ) {
+                                    Row(
+                                        modifier = Modifier.padding(10.dp),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                                    ) {
+                                        Surface(
+                                            shape = CircleShape,
+                                            color = opt.bgColor,
+                                            modifier = Modifier.size(38.dp)
+                                        ) {
+                                            Box(contentAlignment = Alignment.Center) {
+                                                Text(text = opt.symbol, fontSize = 20.sp)
+                                            }
+                                        }
+
+                                        Column(modifier = Modifier.weight(1f)) {
+                                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                                Text(
+                                                    text = opt.nameHi,
+                                                    fontSize = 13.sp,
+                                                    fontWeight = FontWeight.Bold,
+                                                    color = Color(0xFF1E293B)
+                                                )
+                                                Spacer(modifier = Modifier.width(6.dp))
+                                                Surface(
+                                                    shape = RoundedCornerShape(999.dp),
+                                                    color = opt.bgColor.copy(alpha = 0.15f)
+                                                ) {
+                                                    Text(
+                                                        text = opt.badgeHi,
+                                                        fontSize = 9.sp,
+                                                        fontWeight = FontWeight.Bold,
+                                                        color = opt.bgColor,
+                                                        modifier = Modifier.padding(horizontal = 5.dp, vertical = 1.dp)
+                                                    )
+                                                }
+                                            }
+                                            Text(
+                                                text = opt.descriptionHi,
+                                                fontSize = 10.5.sp,
+                                                color = Color(0xFF64748B),
+                                                maxLines = 1,
+                                                overflow = TextOverflow.Ellipsis
+                                            )
+                                        }
+
+                                        if (isSelected) {
+                                            Icon(
+                                                imageVector = Icons.Filled.Check,
+                                                contentDescription = "Selected",
+                                                tint = Color(0xFFB83A0E),
+                                                modifier = Modifier.size(20.dp)
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            HapticFeedbackHelper.playClick(haptic)
+                            currentAvatarId = tempSelectedAvatarId
+                            userSession.setAvatarId(tempSelectedAvatarId)
+                            showAvatarModalDialog = false
+                            Toast.makeText(context, "साधक अवतार लागू हुआ: ${tempAvatar.nameHi} ✨", Toast.LENGTH_SHORT).show()
+                        },
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFB83A0E)),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(
+                            text = "यह अवतार सेट करें (Apply Avatar)",
+                            fontSize = 13.5.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White
+                        )
+                    }
+                },
+                dismissButton = null
+            )
         }
     }
 }
@@ -584,7 +1030,7 @@ fun BentoEditorialBookingSheet(
         ) {
             Text(
                 text = "Book a pro",
-                fontFamily = FontFamily.Serif,
+                fontFamily = AppFontFamily,
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Medium,
                 color = Ink
@@ -633,7 +1079,7 @@ fun BentoEditorialBookingSheet(
                                     Box(contentAlignment = Alignment.Center) {
                                         Text(
                                             text = sadhak.initialEn.take(2),
-                                            fontFamily = FontFamily.Serif,
+                                            fontFamily = AppFontFamily,
                                             fontSize = 14.sp,
                                             fontWeight = FontWeight.Bold,
                                             color = Color.White
@@ -644,7 +1090,7 @@ fun BentoEditorialBookingSheet(
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(
                                         text = sadhak.nameEn,
-                                        fontFamily = FontFamily.Serif,
+                                        fontFamily = AppFontFamily,
                                         fontSize = 15.sp,
                                         fontWeight = FontWeight.Medium,
                                         color = Ink
@@ -723,11 +1169,12 @@ fun PoochhoProblemConsultSheet(
     onStartChat: (SadhakItem, String) -> Unit,
     onStartCall: (SadhakItem, String) -> Unit,
     onDismiss: () -> Unit,
+    initialCategory: String? = null,
     isHindi: Boolean = false,
     language: String = if (isHindi) "hi" else "en"
 ) {
     var problemText by remember { mutableStateOf("") }
-    var selectedCategory by remember { mutableStateOf("💼 करियर / व्यापार") }
+    var selectedCategory by remember { mutableStateOf(initialCategory ?: "💼 करियर / व्यापार") }
     var selectedSadhak by remember { mutableStateOf<SadhakItem?>(sadhaks.firstOrNull()) }
     var isListening by remember { mutableStateOf(false) }
 
@@ -774,7 +1221,7 @@ fun PoochhoProblemConsultSheet(
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
                             text = if (isHindi) "पूछा (Poocha)" else "Poocha",
-                            fontFamily = FontFamily.Serif,
+                            fontFamily = AppFontFamily,
                             fontSize = 22.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color(0xFF000000)
@@ -1176,7 +1623,7 @@ fun DreamQuickRecorderSheet(
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
                             text = "Dreams",
-                            fontFamily = FontFamily.Serif,
+                            fontFamily = AppFontFamily,
                             fontSize = 22.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color(0xFF000000)

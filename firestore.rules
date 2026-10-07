@@ -1,57 +1,84 @@
 rules_version = '2';
 
-// Devbhasha Firestore security rules.
-// The client is untrusted. Money fields are server-writable only (the Admin
-// SDK in Cloud Functions bypasses these rules; the app never can).
+// Devbhasha & Devsadhak merged Firestore security rules.
+// Client is untrusted. Money/financial fields are server-writable only.
 
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    function isSignedIn() { return request.auth != null; }
-    function isSelf(uid) { return isSignedIn() && request.auth.uid == uid; }
-
-    // Users: owner may read; owner may update profile fields but NEVER the
-    // server-owned wallet balance.
-    match /users/{uid} {
-      allow read: if isSelf(uid);
-      allow create: if isSelf(uid)
-                    && !request.resource.data.keys().hasAny(['walletBalance']);
-      allow update: if isSelf(uid)
-                    && !request.resource.data.diff(resource.data)
-                        .affectedKeys().hasAny(['walletBalance']);
-      allow delete: if false;
+    function isSignedIn() {
+      return request.auth != null;
     }
 
-    // Sadhaks: readable to signed-in users; verification/status is server/ops
-    // only, never client-writable.
-    match /sadhaks/{id} {
-      allow read: if isSignedIn();
+    function isSelf(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    // /users, /payments, /paymentOrders, /walletLedger — uid-scoped read, server-only write
+    match /users/{uid} {
+      allow read: if isSelf(uid);
       allow write: if false;
     }
 
-    // Questions: a user owns their own questions; sadhak answers come via server.
-    match /questions/{id} {
-      allow read: if isSignedIn();
-      allow create: if isSignedIn();
-      allow update, delete: if false;
-    }
-
-    // Payment records and ledger are server-written; a user may read only their
-    // own payment documents.
     match /payments/{id} {
       allow read: if isSignedIn() && resource.data.uid == request.auth.uid;
       allow write: if false;
     }
+
     match /paymentOrders/{id} {
       allow read: if isSignedIn() && resource.data.uid == request.auth.uid;
       allow write: if false;
     }
+
     match /walletLedger/{id} {
       allow read: if isSignedIn() && resource.data.uid == request.auth.uid;
       allow write: if false;
     }
 
-    // Chats and consultation messages
+    // /sadhaks — signed-in read; sadhak may update only name/bio/photo/rate/availability
+    // of their own doc, never verified/rating/earnings
+    match /sadhaks/{sadhakId} {
+      allow read: if isSignedIn();
+      allow create, delete: if false;
+      allow update: if isSelf(sadhakId)
+                    && request.resource.data.diff(resource.data).affectedKeys()
+                        .hasOnly(['name', 'bio', 'photo', 'rate', 'availability']);
+    }
+
+    // /questions — seeker creates own; assigned provider (providerId == auth.uid) may
+    // update only answer, status, answeredAt; earningAmount server-only
+    match /questions/{questionId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn()
+                    && request.resource.data.userId == request.auth.uid
+                    && !request.resource.data.keys().hasAny(['earningAmount']);
+      allow update: if isSignedIn()
+                    && resource.data.providerId == request.auth.uid
+                    && request.resource.data.diff(resource.data).affectedKeys()
+                        .hasOnly(['answer', 'status', 'answeredAt']);
+      allow delete: if false;
+    }
+
+    // /active_calls — only callerId or providerId can read; caller creates with status 'ringing';
+    // either party may update status/durationSeconds; earnedAmount server-only
+    match /active_calls/{callId} {
+      allow read: if isSignedIn() && (
+        resource.data.callerId == request.auth.uid ||
+        resource.data.providerId == request.auth.uid
+      );
+      allow create: if isSignedIn()
+                    && request.resource.data.callerId == request.auth.uid
+                    && request.resource.data.status == 'ringing'
+                    && !request.resource.data.keys().hasAny(['earnedAmount']);
+      allow update: if isSignedIn() && (
+        resource.data.callerId == request.auth.uid ||
+        resource.data.providerId == request.auth.uid
+      ) && request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(['status', 'durationSeconds']);
+      allow delete: if false;
+    }
+
+    // /chats/{chatId}/messages — participants read/write
     match /chats/{chatId} {
       allow read, write: if isSignedIn();
       match /messages/{messageId} {
@@ -59,7 +86,36 @@ service cloud.firestore {
       }
     }
 
-    // Everything else: deny by default.
+    // /providers/{providerId}/{jobs,remedies,payout_requests} — owner read/write
+    // /providers/{providerId}/{wallet,transactions} — owner read, server-only write
+    match /providers/{providerId} {
+      allow read: if isSignedIn();
+      allow write: if isSelf(providerId);
+
+      match /jobs/{jobId} {
+        allow read, write: if isSelf(providerId);
+      }
+
+      match /remedies/{remedyId} {
+        allow read, write: if isSelf(providerId);
+      }
+
+      match /payout_requests/{requestId} {
+        allow read, write: if isSelf(providerId);
+      }
+
+      match /wallet/{docId} {
+        allow read: if isSelf(providerId);
+        allow write: if false;
+      }
+
+      match /transactions/{transactionId} {
+        allow read: if isSelf(providerId);
+        allow write: if false;
+      }
+    }
+
+    // Default deny
     match /{document=**} {
       allow read, write: if false;
     }

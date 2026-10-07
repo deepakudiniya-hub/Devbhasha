@@ -2,8 +2,10 @@ package com.example.ui.screens
 
 import android.widget.Toast
 import androidx.compose.animation.*
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -20,9 +22,13 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.automirrored.outlined.Chat
+import androidx.compose.material.icons.automirrored.outlined.MenuBook
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -36,7 +42,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import com.example.R
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -48,17 +57,27 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.ui.models.*
 import com.example.ui.theme.*
+import com.example.ui.components.DevLogoIcon
+import com.example.ui.components.DevWatermarkLogo
+import com.example.utils.HapticFeedbackHelper
+import com.example.utils.UserSession
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
 import java.text.SimpleDateFormat
 import java.util.*
 
 /**
- * Bento Editorial Masthead (Logo + DEV title + 3-Segment Language Toggle (HIN/ENG/HGL) + Saffron Balance Button)
+ * Bento Editorial Masthead
+ * Layout: Left has 36x36 Dev logo + "नमस्ते, दीपक जी" with small tithi/panchang below; Right has language toggle (with globe icon) and wallet chip.
  */
 @Composable
 fun BentoEditorialMasthead(
     balanceAmount: Double,
+    userName: String = "दीपक जी",
     language: String = "en",
     isHindi: Boolean = (language == "hi"),
+    onProfileClick: () -> Unit = {},
     onToggleLanguage: () -> Unit = {},
     onLanguageSelect: ((String) -> Unit)? = null,
     onSelectLanguage: ((String) -> Unit)? = null,
@@ -79,114 +98,488 @@ fun BentoEditorialMasthead(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // DEV Logo & Text
+        // Left Column: App Name Title "Devbhasha"
         Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            modifier = Modifier
+                .weight(1f)
+                .padding(vertical = 2.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            // Squircle Dev Icon
-            Surface(
-                modifier = Modifier.size(34.dp),
-                shape = RoundedCornerShape(11.dp),
-                color = Saffron, // Strict Saffron (#FF6B00) Logo
-                shadowElevation = 2.dp
-            ) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "देव",
-                        color = Color.White,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 15.sp
-                    )
-                }
-            }
-
             Text(
-                text = when (currentLangCode) {
-                    "hi" -> "देव भाषा"
-                    "hgl" -> "Dev Bhasha"
-                    else -> "D E V B H A S H A"
-                },
-                fontFamily = FontFamily.Serif,
+                text = "Devbhasha",
+                fontFamily = AppFontFamily,
+                fontSize = 22.sp,
                 fontWeight = FontWeight.Bold,
-                fontSize = if (currentLangCode == "hi") 16.5.sp else 14.5.sp,
-                letterSpacing = when (currentLangCode) {
-                    "hi" -> 0.5.sp
-                    "hgl" -> 1.sp
-                    else -> 1.8.sp
-                },
-                color = Ink
+                color = Color(0xFF2B2B2B),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
         }
 
-        // Right Action Group: Saffron Balance Pill Button
-        Surface(
-            shape = RoundedCornerShape(999.dp),
-            color = Terra,
-            shadowElevation = 2.dp,
-            modifier = Modifier
-                .clip(RoundedCornerShape(999.dp))
-                .clickable { onBalanceClick() }
+        // Right Action Group: Saffron Balance Pill + Profile
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            Row(
-                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(5.dp)
+            // Saffron / Maroon Accent Balance Pill Button
+            Surface(
+                shape = RoundedCornerShape(999.dp),
+                color = Color.White,
+                shadowElevation = 1.5.dp,
+                modifier = Modifier
+                    .clip(RoundedCornerShape(999.dp))
+                    .clickable { onBalanceClick() }
             ) {
-                Text(
-                    text = "₹${balanceAmount.toInt()}",
-                    color = Color.White,
-                    fontSize = 12.5.sp,
-                    fontWeight = FontWeight.Bold,
-                    fontFamily = FontFamily.Default
-                )
-                Icon(
-                    imageVector = Icons.Filled.Add,
-                    contentDescription = "Add money",
-                    tint = Color.White,
-                    modifier = Modifier.size(13.dp)
-                )
+                Row(
+                    modifier = Modifier.padding(horizontal = 11.dp, vertical = 6.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Text(
+                        text = "₹${balanceAmount.toInt()}",
+                        color = Color(0xFFB83A0E),
+                        fontFamily = AppFontFamily,
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Surface(
+                        shape = CircleShape,
+                        color = Color(0xFFB83A0E).copy(alpha = 0.12f),
+                        modifier = Modifier.size(16.dp)
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(
+                                imageVector = Icons.Filled.Add,
+                                contentDescription = "Add money",
+                                tint = Color(0xFFB83A0E),
+                                modifier = Modifier.size(11.dp)
+                            )
+                        }
+                    }
+                }
+            }
+            
+            // Profile / Sadhak Avatar Icon Button
+            val context = LocalContext.current
+            val userSession = remember { UserSession(context) }
+            val currentAvatar = remember(userSession) { getAvatarById(userSession.getAvatarId()) }
+
+            Surface(
+                shape = CircleShape,
+                color = currentAvatar.bgColor,
+                border = BorderStroke(2.dp, Color(0xFFF59E0B)),
+                shadowElevation = 2.dp,
+                modifier = Modifier
+                    .size(38.dp)
+                    .clip(CircleShape)
+                    .clickable { onProfileClick() }
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Text(
+                        text = currentAvatar.symbol,
+                        fontSize = 19.sp,
+                        color = Color.White
+                    )
+                }
             }
         }
     }
 }
 
+/**
+ * Prominent Large "पूछा" Hero Card - Direct consultation with verified Vedic Sadhak
+ */
 @Composable
-fun BentoEditorialRecommendationPanel(
-    userName: String,
-    onClick: () -> Unit,
+fun BentoEditorialPoochhaHeroCard(
+    onAskClick: () -> Unit,
+    isHindi: Boolean = false,
+    language: String = if (isHindi) "hi" else "en",
     modifier: Modifier = Modifier
 ) {
+    val currentLangCode = when {
+        language.lowercase() in listOf("hgl", "hinglish") -> "hgl"
+        language.lowercase() in listOf("hi", "hindi") || isHindi -> "hi"
+        else -> "en"
+    }
+
     Surface(
-        shape = RoundedCornerShape(16.dp),
-        color = Color(0xFFF3E8FF), // Soft Indigo
-        border = BorderStroke(1.dp, Color(0xFFDDD6FE)),
+        shape = RoundedCornerShape(22.dp),
+        color = Color.White,
+        shadowElevation = 4.dp,
+        border = BorderStroke(1.2.dp, Color(0xFFFED7AA)),
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp)
-            .clip(RoundedCornerShape(16.dp))
-            .clickable { onClick() }
+            .padding(horizontal = 16.dp, vertical = 6.dp)
+            .clip(RoundedCornerShape(22.dp))
+            .clickable { onAskClick() }
     ) {
-        Row(
-            modifier = Modifier.padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically
+        Column(
+            modifier = Modifier.padding(18.dp)
         ) {
-            Text(text = "🔮", fontSize = 20.sp)
-            Spacer(modifier = Modifier.width(12.dp))
-            Column {
-                Text(
-                    text = "Good Morning $userName!",
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFF4C1D95)
+            // Header Row: Icon + Title + Live Badge
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(46.dp)
+                            .clip(RoundedCornerShape(14.dp))
+                            .background(
+                                Brush.linearGradient(
+                                    listOf(Color(0xFFFFEDD5), Color(0xFFFED7AA))
+                                )
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(text = "🕉️", fontSize = 22.sp)
+                    }
+
+                    Spacer(modifier = Modifier.width(12.dp))
+
+                    Column {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = when (currentLangCode) {
+                                    "hi" -> "पूछा"
+                                    "hgl" -> "Poochha"
+                                    else -> "Poochha"
+                                },
+                                fontFamily = AppFontFamily,
+                                fontSize = 20.sp,
+                                fontWeight = FontWeight.ExtraBold,
+                                color = Color(0xFF1E293B)
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(
+                                text = "— " + if (currentLangCode == "hi") "सीधा मार्गदर्शन" else "Instant Answer",
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = Color(0xFFB83A0E)
+                            )
+                        }
+                        Text(
+                            text = if (currentLangCode == "hi") "सत्यापित साधक से व्यक्तिगत समाधान पाएं" else "Personal spiritual guidance from verified sadhak",
+                            fontSize = 11.5.sp,
+                            color = Color(0xFF64748B)
+                        )
+                    }
+                }
+
+                // Live Online Pill
+                Surface(
+                    shape = RoundedCornerShape(999.dp),
+                    color = Color(0xFFECFDF5),
+                    border = BorderStroke(1.dp, Color(0xFFA7F3D0))
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 9.dp, vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(7.dp)
+                                .clip(CircleShape)
+                                .background(Color(0xFF10B981))
+                        )
+                        Spacer(modifier = Modifier.width(5.dp))
+                        Text(
+                            text = if (currentLangCode == "hi") "लाइव" else "LIVE",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF047857)
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(14.dp))
+
+            // Interactive Input Bar
+            Surface(
+                shape = RoundedCornerShape(16.dp),
+                color = Color(0xFFFBF9F5),
+                border = BorderStroke(1.dp, Color(0xFFE7DFD5)),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(16.dp))
+                    .clickable { onAskClick() }
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Outlined.Chat,
+                        contentDescription = null,
+                        tint = Color(0xFFB83A0E),
+                        modifier = Modifier.size(19.dp)
+                    )
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Text(
+                        text = if (currentLangCode == "hi") "विवाह, करियर, स्वास्थ्य या कोई भी प्रश्न पूछें..." else "Ask about marriage, career, health or any question...",
+                        fontSize = 13.sp,
+                        color = Color(0xFF94A3B8),
+                        modifier = Modifier.weight(1f),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Surface(
+                        shape = CircleShape,
+                        color = Color(0xFFB83A0E),
+                        modifier = Modifier.size(30.dp)
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                                contentDescription = "Ask",
+                                tint = Color.White,
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // Quick Topic Tags Row
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                val topics = listOf(
+                    "💍 विवाह",
+                    "💼 करियर",
+                    "🪙 व्यापार",
+                    "🌿 स्वास्थ्य"
                 )
+                topics.forEach { topic ->
+                    Surface(
+                        shape = RoundedCornerShape(999.dp),
+                        color = Color(0xFFFFF7ED),
+                        border = BorderStroke(1.dp, Color(0xFFFFEDD5)),
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(999.dp))
+                            .clickable { onAskClick() }
+                    ) {
+                        Text(
+                            text = topic,
+                            fontSize = 11.5.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = Color(0xFF9A3412),
+                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Shubh Muhurat Card: "आज का शुभ मुहूर्त" with clock icon, green badge "शुक्र मुहूर्त ⭐️", Abhijit Muhurat times, description, pagination dots, Dev logo and arrow.
+ */
+@Composable
+fun BentoEditorialRecommendationPanel(
+    userName: String = "दीपक जी",
+    onClick: () -> Unit = {},
+    modifier: Modifier = Modifier
+) {
+    var selectedMuhuratIndex by remember { mutableStateOf(0) }
+    val muhuratList = remember {
+        listOf(
+            Triple(
+                "अभिजित मुहूर्त",
+                "11:45 AM – 12:35 PM",
+                "सर्वोत्तम शुभ समय • नवीन कार्य, गृह प्रवेश एवं महत्वपूर्ण निर्णयों हेतु उत्तम"
+            ),
+            Triple(
+                "गोधूलि मुहूर्त",
+                "06:15 PM – 06:40 PM",
+                "संध्या काल • संध्या पूजन, दीपदान एवं पारिवारिक शांति हेतु अत्यंत शुभ"
+            ),
+            Triple(
+                "अमृत काल",
+                "02:10 AM – 03:45 AM",
+                "सिद्धि योग • साधना, मंत्र जप एवं आध्यात्मिक अनुष्ठानों के लिए विशेष फलदायी"
+            )
+        )
+    }
+
+    val currentMuhurat = muhuratList[selectedMuhuratIndex]
+
+    Surface(
+        shape = RoundedCornerShape(22.dp),
+        color = Color.White,
+        shadowElevation = 3.dp,
+        border = BorderStroke(1.dp, Color(0xFFF1EDE6)),
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 6.dp)
+            .clip(RoundedCornerShape(22.dp))
+            .clickable {
+                selectedMuhuratIndex = (selectedMuhuratIndex + 1) % muhuratList.size
+                onClick()
+            }
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            // Header Row: Clock Icon with Orange Border + Title + Green Badge "शुक्र मुहूर्त ⭐️"
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Surface(
+                        shape = CircleShape,
+                        color = Color(0xFFFFF2E8),
+                        border = BorderStroke(1.2.dp, Color(0xFFF97316)),
+                        modifier = Modifier.size(32.dp)
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(
+                                imageVector = Icons.Outlined.Schedule,
+                                contentDescription = "Clock",
+                                tint = Color(0xFFEA580C),
+                                modifier = Modifier.size(17.dp)
+                            )
+                        }
+                    }
+                    Text(
+                        text = "आज का शुभ मुहूर्त",
+                        fontFamily = AppFontFamily,
+                        fontSize = 17.5.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF2B2B2B)
+                    )
+                }
+
+                Surface(
+                    shape = RoundedCornerShape(999.dp),
+                    color = Color(0xFFDCFCE7),
+                    border = BorderStroke(1.dp, Color(0xFF86EFAC))
+                ) {
+                    Text(
+                        text = "शुक्र मुहूर्त ⭐️",
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF15803D),
+                        modifier = Modifier.padding(horizontal = 9.dp, vertical = 4.dp)
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            // Centered Muhurat Name & Time
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.Start
+            ) {
                 Text(
-                    text = "Try Ananya's Top Pick ritual",
-                    fontSize = 12.sp,
-                    color = Color(0xFF6D28D9)
+                    text = currentMuhurat.first,
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = Color(0xFFB83A0E)
                 )
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(
+                    text = currentMuhurat.second,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = Color(0xFF1E293B)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(6.dp))
+
+            // Subtitle Description
+            Text(
+                text = currentMuhurat.third,
+                fontSize = 13.5.sp,
+                lineHeight = 19.sp,
+                fontWeight = FontWeight.Normal,
+                color = Color(0xFF4B5563)
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // Bottom Row: Saffron-colored pagination dots (3 dots) + Dev Logo + "देव भाषा" + Arrow
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Saffron Pagination Dots (3 dots)
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(5.dp)
+                ) {
+                    muhuratList.indices.forEach { index ->
+                        val isSelected = index == selectedMuhuratIndex
+                        Box(
+                            modifier = Modifier
+                                .size(if (isSelected) 14.dp else 6.dp, 6.dp)
+                                .clip(RoundedCornerShape(3.dp))
+                                .background(
+                                    if (isSelected) Color(0xFFEA580C) else Color(0xFFE2E8F0)
+                                )
+                                .clickable { selectedMuhuratIndex = index }
+                        )
+                    }
+                }
+
+                // Small Dev Logo + "देव भाषा" text + Arrow
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        DevLogoIcon(size = 18.dp, elevation = 0.dp)
+                        Text(
+                            text = "देव भाषा",
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFFB83A0E)
+                        )
+                    }
+
+                    Surface(
+                        shape = CircleShape,
+                        color = Color(0xFFF8FAFC),
+                        border = BorderStroke(1.dp, Color(0xFFE2E8F0)),
+                        modifier = Modifier
+                            .size(28.dp)
+                            .clip(CircleShape)
+                            .clickable {
+                                selectedMuhuratIndex = (selectedMuhuratIndex + 1) % muhuratList.size
+                            }
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                                contentDescription = "Next",
+                                tint = Color(0xFF475569),
+                                modifier = Modifier.size(14.dp)
+                            )
+                        }
+                    }
+                }
             }
         }
     }
@@ -295,7 +688,7 @@ fun BentoEditorialAskBar(
 }
 
 /**
- * Today's Panchang Headline & DayBlock Calendar Box
+ * Today's Panchang Headline & DayBlock Calendar Box (Compact & Sleek)
  */
 @Composable
 fun BentoEditorialPanchangHeadline(
@@ -314,87 +707,67 @@ fun BentoEditorialPanchangHeadline(
     val dayNum = SimpleDateFormat("dd", Locale.ENGLISH).format(calendar.time)
     val dayOfWeek = SimpleDateFormat("EEEE", if (currentLangCode == "hi") Locale("hi", "IN") else Locale.ENGLISH).format(calendar.time)
 
-    Column(modifier = modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 6.dp)) {
-        // Headline Row
+    Column(modifier = modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 2.dp)) {
+        // Compact Headline Row
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 4.dp),
+                .padding(vertical = 2.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.Bottom
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Column {
-                Row(verticalAlignment = Alignment.Bottom) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
                         text = when (currentLangCode) {
                             "hi" -> "आज का "
                             "hgl" -> "Aaj ka "
                             else -> "Today's "
                         },
-                        fontFamily = FontFamily.Serif,
-                        fontWeight = FontWeight.Normal,
-                        fontSize = 25.sp,
-                        lineHeight = 28.sp,
+                        fontFamily = AppFontFamily,
+                        fontWeight = FontWeight.Medium,
+                        fontSize = 19.sp,
+                        lineHeight = 22.sp,
                         color = Ink
                     )
                     Text(
                         text = when (currentLangCode) {
-                            "hi" -> "पंचांग।"
-                            "hgl" -> "panchang."
-                            else -> "panchang."
+                            "hi" -> "पंचांग"
+                            "hgl" -> "panchang"
+                            else -> "panchang"
                         },
-                        fontFamily = FontFamily.Serif,
+                        fontFamily = AppFontFamily,
                         fontStyle = FontStyle.Italic,
-                        fontWeight = FontWeight.Normal,
-                        fontSize = 25.sp,
-                        lineHeight = 28.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 19.sp,
+                        lineHeight = 22.sp,
                         color = Ink
                     )
                 }
 
-                // Decorative Subtle Squiggle Line
-                Canvas(modifier = Modifier.size(width = 90.dp, height = 8.dp)) {
-                    val path = Path()
-                    path.moveTo(0f, size.height / 2)
-                    var x = 0f
-                    val waveLength = 16f
-                    val waveHeight = 3.5f
-                    while (x < size.width) {
-                        path.relativeQuadraticTo(waveLength / 4, -waveHeight, waveLength / 2, 0f)
-                        path.relativeQuadraticTo(waveLength / 4, waveHeight, waveLength / 2, 0f)
-                        x += waveLength
-                    }
-                    drawPath(
-                        path = path,
-                        color = BorderMedium,
-                        style = Stroke(width = 1.8.dp.toPx())
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(2.dp))
                 Text(
                     text = when (currentLangCode) {
                         "hi" -> "सूर्योदय 6:12 · सूर्यास्त 6:32"
                         "hgl" -> "Suryoday 6:12 · Suryast 6:32"
                         else -> "Sunrise 6:12 · Sunset 6:32"
                     },
-                    fontSize = 10.sp,
-                    letterSpacing = 0.5.sp,
+                    fontSize = 9.5.sp,
+                    letterSpacing = 0.3.sp,
                     color = InkSoft,
                     fontWeight = FontWeight.Medium
                 )
             }
 
-            // DayBlock Calendar Box Widget
+            // Compact DayBlock Calendar Box Widget
             Surface(
-                shape = RoundedCornerShape(10.dp),
+                shape = RoundedCornerShape(8.dp),
                 color = PaperCard,
                 border = BorderStroke(1.dp, EditorialLineStrong),
-                shadowElevation = 2.dp,
-                modifier = Modifier.width(44.dp)
+                shadowElevation = 1.dp,
+                modifier = Modifier.width(36.dp)
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    // Minimal Ink Month header
                     Surface(
                         color = Ink,
                         modifier = Modifier.fillMaxWidth()
@@ -402,67 +775,67 @@ fun BentoEditorialPanchangHeadline(
                         Text(
                             text = monthName.uppercase(),
                             color = Color.White,
-                            fontSize = 8.sp,
+                            fontSize = 7.5.sp,
                             fontWeight = FontWeight.Bold,
                             textAlign = TextAlign.Center,
-                            letterSpacing = 1.sp,
-                            modifier = Modifier.padding(vertical = 2.dp)
+                            letterSpacing = 0.5.sp,
+                            modifier = Modifier.padding(vertical = 1.5.dp)
                         )
                     }
 
                     Text(
                         text = dayNum,
-                        fontFamily = FontFamily.Serif,
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Medium,
+                        fontFamily = AppFontFamily,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.SemiBold,
                         color = Ink,
-                        modifier = Modifier.padding(top = 2.dp)
+                        modifier = Modifier.padding(top = 1.dp)
                     )
 
                     Text(
                         text = dayOfWeek.take(3).uppercase(),
-                        fontSize = 7.sp,
-                        letterSpacing = 1.sp,
+                        fontSize = 6.5.sp,
+                        letterSpacing = 0.5.sp,
                         color = InkSoft,
                         fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(bottom = 4.dp)
+                        modifier = Modifier.padding(bottom = 2.dp)
                     )
                 }
             }
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
-        HorizontalDivider(color = EditorialLine, thickness = 1.dp)
-        Spacer(modifier = Modifier.height(6.dp))
+        Spacer(modifier = Modifier.height(4.dp))
+        HorizontalDivider(color = EditorialLine, thickness = 0.8.dp)
+        Spacer(modifier = Modifier.height(4.dp))
 
-        // Day Stats Strip with ✦ separator
+        // Compact Day Stats Strip with ✦ separator
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(text = if (currentLangCode == "hi") "तिथि " else "Tithi ", fontSize = 10.sp, color = InkSoft)
-                Text(text = if (currentLangCode == "hi") "शुक्ल दशमी" else "Shukla Dashami", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Ink)
+                Text(text = if (currentLangCode == "hi") "तिथि " else "Tithi ", fontSize = 9.5.sp, color = InkSoft)
+                Text(text = if (currentLangCode == "hi") "शुक्ल दशमी" else "Shukla Dashami", fontSize = 9.5.sp, fontWeight = FontWeight.Bold, color = Ink)
             }
-            Text(text = "✦", fontSize = 9.sp, color = InkSoft)
+            Text(text = "✦", fontSize = 8.sp, color = InkSoft)
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(text = if (currentLangCode == "hi") "नक्षत्र " else "Nakshatra ", fontSize = 10.sp, color = InkSoft)
-                Text(text = if (currentLangCode == "hi") "अनुराधा" else "Anuradha", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Ink)
+                Text(text = if (currentLangCode == "hi") "नक्षत्र " else "Nakshatra ", fontSize = 9.5.sp, color = InkSoft)
+                Text(text = if (currentLangCode == "hi") "अनुराधा" else "Anuradha", fontSize = 9.5.sp, fontWeight = FontWeight.Bold, color = Ink)
             }
-            Text(text = "✦", fontSize = 9.sp, color = InkSoft)
+            Text(text = "✦", fontSize = 8.sp, color = InkSoft)
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(text = if (currentLangCode == "hi") "योग " else "Yoga ", fontSize = 10.sp, color = InkSoft)
-                Text(text = if (currentLangCode == "hi") "सिद्ध" else "Siddha", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Ink)
+                Text(text = if (currentLangCode == "hi") "योग " else "Yoga ", fontSize = 9.5.sp, color = InkSoft)
+                Text(text = if (currentLangCode == "hi") "सिद्ध" else "Siddha", fontSize = 9.5.sp, fontWeight = FontWeight.Bold, color = Ink)
             }
         }
-        Spacer(modifier = Modifier.height(6.dp))
-        HorizontalDivider(color = EditorialLine, thickness = 1.dp)
+        Spacer(modifier = Modifier.height(4.dp))
+        HorizontalDivider(color = EditorialLine, thickness = 0.8.dp)
     }
 }
 
 /**
- * Grouped Tools Grid (Poochho, Dreams, and Circular Quick Tools Row)
+ * 2x2 Quick Services Grid: पूछो, स्वप्न विचार, कुंडली, पंचांग
  */
 @Composable
 fun BentoEditorialToolsGrid(
@@ -487,156 +860,144 @@ fun BentoEditorialToolsGrid(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 20.dp, vertical = 6.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp)
+            .padding(horizontal = 16.dp, vertical = 6.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        // Row 1: Poochho Tile (01) & Dreams Tile (02)
+        // Section Header: त्वरित सेवाएं
+        Text(
+            text = when (currentLangCode) {
+                "hi" -> "त्वरित सेवाएं"
+                "hgl" -> "Quick Services"
+                else -> "Quick Services"
+            },
+            fontFamily = AppFontFamily,
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color(0xFF2B2B2B)
+        )
+
+        // 2x2 Grid
+        // Row 1: पूछो (विशेषज्ञ से परामर्श) & स्वप्न विचार (अचेतन के संकेत)
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // Tile 1: Poochho (01)
-            Surface(
-                shape = RoundedCornerShape(24.dp),
-                color = Color.White,
-                border = BorderStroke(1.dp, BorderLight),
-                shadowElevation = 2.dp,
-                modifier = Modifier
-                    .weight(1f)
-                    .height(118.dp)
-                    .clip(RoundedCornerShape(24.dp))
-                    .clickable { onPoochhoClick() }
-            ) {
-                Box(modifier = Modifier.fillMaxSize().padding(14.dp)) {
-                    Text(
-                        text = "01",
-                        fontFamily = FontFamily.Serif,
-                        fontStyle = FontStyle.Italic,
-                        fontSize = 13.sp,
-                        color = Saffron,
-                        modifier = Modifier.align(Alignment.TopEnd)
-                    )
+            BentoQuickActionCard(
+                title = when (currentLangCode) {
+                    "hi" -> "पूछो"
+                    "hgl" -> "Poochho"
+                    else -> "Ask Expert"
+                },
+                subtitle = when (currentLangCode) {
+                    "hi" -> "विशेषज्ञ से परामर्श"
+                    "hgl" -> "Consult Expert"
+                    else -> "Consult Expert"
+                },
+                icon = Icons.AutoMirrored.Outlined.Chat,
+                onClick = onPoochhoClick,
+                modifier = Modifier.weight(1f)
+            )
 
-                    Row(
-                        modifier = Modifier.fillMaxSize(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = when (currentLangCode) {
-                                    "hi" -> "पूछा (Poocha)"
-                                    "hgl" -> "Poocha"
-                                    else -> "Poocha"
-                                },
-                                fontFamily = FontFamily.SansSerif,
-                                fontSize = 16.5.sp,
-                                fontWeight = FontWeight.SemiBold,
-                                color = Color(0xFF000000)
-                            )
-                            Spacer(modifier = Modifier.height(2.dp))
-                            Text(
-                                text = when (currentLangCode) {
-                                    "hi" -> "चैट व कॉल द्वारा\nपरामर्श प्राप्त करें"
-                                    "hgl" -> "Consult through\nchat and call"
-                                    else -> "Get consultation via\nchat and call"
-                                },
-                                fontSize = 11.sp,
-                                lineHeight = 14.sp,
-                                color = Color(0xFF737373)
-                            )
-                        }
-                        Text(text = "💬", fontSize = 26.sp)
-                    }
-                }
-            }
-
-            // Tile 2: Dreams (02)
-            Surface(
-                shape = RoundedCornerShape(24.dp),
-                color = Color.White,
-                border = BorderStroke(1.dp, BorderLight),
-                shadowElevation = 2.dp,
-                modifier = Modifier
-                    .weight(1f)
-                    .height(118.dp)
-                    .clip(RoundedCornerShape(24.dp))
-                    .clickable { onDreamsClick() }
-            ) {
-                Box(modifier = Modifier.fillMaxSize().padding(14.dp)) {
-                    Text(
-                        text = "02",
-                        fontFamily = FontFamily.SansSerif,
-                        fontStyle = FontStyle.Normal,
-                        fontSize = 13.sp,
-                        color = Saffron,
-                        modifier = Modifier.align(Alignment.TopEnd)
-                    )
-
-                    Row(
-                        modifier = Modifier.fillMaxSize(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = "Dreams",
-                                fontFamily = FontFamily.SansSerif,
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.SemiBold,
-                                color = Color(0xFF000000)
-                            )
-                            Spacer(modifier = Modifier.height(2.dp))
-                            Text(
-                                text = "Decode your subconscious\n& align with divine wisdom",
-                                fontSize = 10.sp,
-                                lineHeight = 13.sp,
-                                color = Color(0xFF737373)
-                            )
-                        }
-                        Text(text = "🌙✨", fontSize = 24.sp)
-                    }
-                }
-            }
+            BentoQuickActionCard(
+                title = when (currentLangCode) {
+                    "hi" -> "स्वप्न विचार"
+                    "hgl" -> "Dream Insights"
+                    else -> "Dream Insights"
+                },
+                subtitle = when (currentLangCode) {
+                    "hi" -> "अचेतन के संकेत"
+                    "hgl" -> "Unconscious signs"
+                    else -> "Unconscious signs"
+                },
+                icon = Icons.AutoMirrored.Outlined.MenuBook,
+                onClick = onDreamsClick,
+                modifier = Modifier.weight(1f)
+            )
         }
 
-        Spacer(modifier = Modifier.height(6.dp))
+        // Row 2: कुंडली (दोष व फलादेश) & पंचांग (दैनिक शुभ मुहूर्त)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            BentoQuickActionCard(
+                title = when (currentLangCode) {
+                    "hi" -> "कुंडली"
+                    "hgl" -> "Kundli"
+                    else -> "Kundli"
+                },
+                subtitle = when (currentLangCode) {
+                    "hi" -> "दोष व फलादेश"
+                    "hgl" -> "Dosha & Guidance"
+                    else -> "Dosha & Guidance"
+                },
+                icon = Icons.Outlined.Stars,
+                onClick = onKundliClick,
+                modifier = Modifier.weight(1f)
+            )
 
-        // Section Header for Problem & Vedic Remedies Cards
+            BentoQuickActionCard(
+                title = when (currentLangCode) {
+                    "hi" -> "पंचांग"
+                    "hgl" -> "Panchang"
+                    else -> "Panchang"
+                },
+                subtitle = when (currentLangCode) {
+                    "hi" -> "दैनिक शुभ मुहूर्त"
+                    "hgl" -> "Daily Auspicious Time"
+                    else -> "Daily Auspicious Time"
+                },
+                icon = Icons.Outlined.CalendarMonth,
+                onClick = onTarotClick,
+                modifier = Modifier.weight(1f)
+            )
+        }
+    }
+}
+
+/**
+ * Horizontal Scrollable Row for Circular Problem & Category Cards
+ */
+@Composable
+fun BentoProblemCategoryRow(
+    onCategoryClick: (String) -> Unit,
+    isHindi: Boolean = false,
+    language: String = if (isHindi) "hi" else "en",
+    modifier: Modifier = Modifier
+) {
+    val currentLangCode = when {
+        language.lowercase() in listOf("hgl", "hinglish") -> "hgl"
+        language.lowercase() in listOf("hi", "hindi") || isHindi -> "hi"
+        else -> "en"
+    }
+
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 6.dp)
+    ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 4.dp),
+                .padding(horizontal = 2.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(width = 3.5.dp, height = 15.dp)
-                        .clip(RoundedCornerShape(2.dp))
-                        .background(Saffron)
-                )
-                Text(
-                    text = when (currentLangCode) {
-                        "hi" -> "वैदिक समस्या व समाधान"
-                        "hgl" -> "Vedic Problem Remedies"
-                        else -> "Vedic Problem Remedies"
-                    },
-                    fontFamily = FontFamily.Serif,
-                    fontSize = 15.5.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.Black
-                )
-            }
+            Text(
+                text = when (currentLangCode) {
+                    "hi" -> "वैदिक समस्या व समाधान"
+                    "hgl" -> "Vedic Problem Solutions"
+                    else -> "Vedic Solutions"
+                },
+                fontFamily = AppFontFamily,
+                fontSize = 17.5.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF2B2B2B)
+            )
 
             Surface(
-                color = Color(0xFFFAFAFA),
-                shape = RoundedCornerShape(999.dp),
-                border = BorderStroke(1.dp, BorderLight)
+                color = Color(0xFFF5F5F5),
+                shape = RoundedCornerShape(999.dp)
             ) {
                 Text(
                     text = when (currentLangCode) {
@@ -644,77 +1005,130 @@ fun BentoEditorialToolsGrid(
                         "hgl" -> "5 Topics"
                         else -> "5 Topics"
                     },
-                    fontSize = 10.sp,
+                    fontSize = 11.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Saffron,
-                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.5.dp)
+                    color = Color(0xFFB83A0E),
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
                 )
             }
         }
 
-        Spacer(modifier = Modifier.height(4.dp))
+        Spacer(modifier = Modifier.height(10.dp))
 
-        // Horizontal Row for Problem Cards (All 5 visible)
-        LazyRow(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 2.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            contentPadding = PaddingValues(horizontal = 16.dp)
+        // Horizontal Row for 5 Solution Cards (Compact, Balanced & Fully Visible)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
-            item {
-                BentoProblemCategoryCard(
-                    title = if (currentLangCode == "hi") "पारिवारिक समस्या" else "Family",
-                    subtitle = if (currentLangCode == "hi") "शांति उपाय" else "Harmony",
-                    emoji = "👨‍👩‍👧‍👦",
-                    badge = if (currentLangCode == "hi") "समाधान" else "Remedies",
-                    isSelected = currentView == "kundli",
-                    onClick = onKundliClick,
-                    modifier = Modifier.width(120.dp)
-                )
+            BentoProblemCategoryCard(
+                title = if (currentLangCode == "hi") "परिवार" else "Family",
+                subtitle = if (currentLangCode == "hi") "शांति" else "Peace",
+                icon = Icons.Outlined.People,
+                isSelected = false,
+                onClick = { onCategoryClick("family") },
+                modifier = Modifier.weight(1f)
+            )
+            BentoProblemCategoryCard(
+                title = if (currentLangCode == "hi") "करियर" else "Career",
+                subtitle = if (currentLangCode == "hi") "उन्नति" else "Growth",
+                icon = Icons.Outlined.WorkOutline,
+                isSelected = false,
+                onClick = { onCategoryClick("career") },
+                modifier = Modifier.weight(1f)
+            )
+            BentoProblemCategoryCard(
+                title = if (currentLangCode == "hi") "विवाह" else "Marriage",
+                subtitle = if (currentLangCode == "hi") "संबंध" else "Match",
+                icon = Icons.Outlined.FavoriteBorder,
+                isSelected = false,
+                onClick = { onCategoryClick("marriage") },
+                modifier = Modifier.weight(1f)
+            )
+            BentoProblemCategoryCard(
+                title = if (currentLangCode == "hi") "स्वास्थ्य" else "Health",
+                subtitle = if (currentLangCode == "hi") "आरोग्य" else "Cure",
+                icon = Icons.Outlined.FitnessCenter,
+                isSelected = false,
+                onClick = { onCategoryClick("health") },
+                modifier = Modifier.weight(1f)
+            )
+            BentoProblemCategoryCard(
+                title = if (currentLangCode == "hi") "मानसिक" else "Peace",
+                subtitle = if (currentLangCode == "hi") "ध्यान" else "Zen",
+                icon = Icons.Outlined.SelfImprovement,
+                isSelected = false,
+                onClick = { onCategoryClick("peace") },
+                modifier = Modifier.weight(1f)
+            )
+        }
+    }
+}
+
+/**
+ * Standardized Quick Action Card for the 2x2 Grid
+ * Enhanced with soft warm container, increased icon size & touch area, subtle border and depth.
+ */
+@Composable
+private fun BentoQuickActionCard(
+    title: String,
+    subtitle: String,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        shape = RoundedCornerShape(20.dp),
+        color = Color.White,
+        shadowElevation = 3.dp,
+        border = BorderStroke(1.dp, Color(0xFFF1EDE6)),
+        modifier = modifier
+            .height(98.dp)
+            .clip(RoundedCornerShape(20.dp))
+            .clickable { onClick() }
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 14.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            // Soft light-orange/light-grey circular wrapped container
+            Surface(
+                shape = CircleShape,
+                color = Color(0xFFFFF2E8), // soft warm light-orange background
+                border = BorderStroke(1.dp, Color(0xFFFFD8BF)),
+                modifier = Modifier.size(48.dp)
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = title,
+                        tint = Color(0xFFB83A0E),
+                        modifier = Modifier.size(26.dp) // increased icon size
+                    )
+                }
             }
-            item {
-                BentoProblemCategoryCard(
-                    title = if (currentLangCode == "hi") "स्वास्थ्य समस्या" else "Health",
-                    subtitle = if (currentLangCode == "hi") "रोग निवारण" else "Healing",
-                    emoji = "🩺",
-                    badge = if (currentLangCode == "hi") "आरोग्य" else "Healing",
-                    isSelected = currentView == "tarot",
-                    onClick = onTarotClick,
-                    modifier = Modifier.width(120.dp)
+
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = title,
+                    fontSize = 15.5.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF2B2B2B),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
-            }
-            item {
-                BentoProblemCategoryCard(
-                    title = if (currentLangCode == "hi") "धन समस्या" else "Money",
-                    subtitle = if (currentLangCode == "hi") "कर्ज मुक्ति" else "Wealth",
-                    emoji = "💰",
-                    badge = if (currentLangCode == "hi") "समृद्धि" else "Wealth",
-                    isSelected = currentView == "match",
-                    onClick = onMatchClick,
-                    modifier = Modifier.width(120.dp)
-                )
-            }
-            item {
-                BentoProblemCategoryCard(
-                    title = if (currentLangCode == "hi") "नकारात्मकता" else "Negativity",
-                    subtitle = if (currentLangCode == "hi") "बुरी नज़र" else "Shield",
-                    emoji = "🧿",
-                    badge = if (currentLangCode == "hi") "सुरक्षा" else "Shield",
-                    isSelected = currentView == "habits",
-                    onClick = onHabitsClick,
-                    modifier = Modifier.width(120.dp)
-                )
-            }
-            item {
-                BentoProblemCategoryCard(
-                    title = if (currentLangCode == "hi") "पितृ दोष" else "Pitr Dosh",
-                    subtitle = if (currentLangCode == "hi") "पूर्वज शांति" else "Blessings",
-                    emoji = "🪔",
-                    badge = if (currentLangCode == "hi") "तर्पण" else "Tarpan",
-                    isSelected = currentView == "timer",
-                    onClick = onTimerClick,
-                    modifier = Modifier.width(120.dp)
+                Spacer(modifier = Modifier.height(3.dp))
+                Text(
+                    text = subtitle,
+                    fontSize = 12.sp,
+                    color = Color(0xFF6E6E6E),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
         }
@@ -722,214 +1136,447 @@ fun BentoEditorialToolsGrid(
 }
 
 /**
- * Promo Banner positioned right above Experts on Call
- * Redesigned as a modern, high-contrast voucher coupon card (Pure White, Black, Saffron accent)
+ * Promotional Coupon Card: Luxury Gold-Saffron Perforated Voucher Banner with 2D Namaste Woman Illustration.
+ * Left: "🎉 विशेष प्रस्ताव • 100% मुफ्त", "पहले 15 मिनट मुफ्त", "केवल प्रथम परामर्श पर लागू", DEV15 copy box and "अभी बात करें" button.
+ * Right: Glowing halo 2D Namaste vector illustration with verified rating badge.
+ * Includes subtle entrance animation (fade + scale + slide-up + golden light sheen) for an engaging interactive feel.
  */
 @Composable
 fun BentoEditorialPromoBanner(
     isOfferClaimed: Boolean,
     onClaimOffer: () -> Unit,
+    onTalkNowClick: () -> Unit = onClaimOffer,
     isHindi: Boolean = false,
     language: String = if (isHindi) "hi" else "en",
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
+    val clipboardManager = androidx.compose.ui.platform.LocalClipboardManager.current
+    val haptic = androidx.compose.ui.platform.LocalHapticFeedback.current
     val currentLangCode = when {
         language.lowercase() in listOf("hgl", "hinglish") -> "hgl"
         language.lowercase() in listOf("hi", "hindi") || isHindi -> "hi"
         else -> "en"
     }
 
+    var isCopied by remember { mutableStateOf(false) }
+
+    // Entrance animation states: smooth spring scale & fade-in slide
+    val entranceAnim = remember { androidx.compose.animation.core.Animatable(0f) }
+    val sheenSweep = remember { androidx.compose.animation.core.Animatable(0f) }
+
+    LaunchedEffect(Unit) {
+        kotlinx.coroutines.coroutineScope {
+            // Trigger entrance animation with pleasant spring
+            launch {
+                entranceAnim.animateTo(
+                    targetValue = 1f,
+                    animationSpec = androidx.compose.animation.core.spring(
+                        dampingRatio = 0.78f,
+                        stiffness = androidx.compose.animation.core.Spring.StiffnessMediumLow
+                    )
+                )
+            }
+            // Subtle golden sheen light sweep on entrance
+            launch {
+                kotlinx.coroutines.delay(200)
+                sheenSweep.animateTo(
+                    targetValue = 1f,
+                    animationSpec = androidx.compose.animation.core.tween(
+                        durationMillis = 900,
+                        easing = androidx.compose.animation.core.FastOutSlowInEasing
+                    )
+                )
+            }
+        }
+    }
+
+    LaunchedEffect(isCopied) {
+        if (isCopied) {
+            kotlinx.coroutines.delay(2500)
+            isCopied = false
+        }
+    }
+
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 6.dp)
+            .padding(horizontal = 14.dp, vertical = 6.dp)
+            .graphicsLayer {
+                val progress = entranceAnim.value
+                alpha = progress.coerceIn(0f, 1f)
+                scaleX = 0.94f + (0.06f * progress)
+                scaleY = 0.94f + (0.06f * progress)
+                translationY = (1f - progress) * 28f
+            }
     ) {
         Surface(
-            shape = RoundedCornerShape(18.dp),
-            color = Color.White,
+            shape = RoundedCornerShape(24.dp),
+            shadowElevation = (4.dp + (2.dp * entranceAnim.value)),
             border = BorderStroke(
-                1.2.dp,
-                if (isOfferClaimed) Color(0xFF16A34A).copy(alpha = 0.5f) else Saffron.copy(alpha = 0.5f)
+                1.5.dp,
+                Brush.horizontalGradient(
+                    listOf(
+                        Color(0xFFFEF08A),
+                        Color(0xFFF59E0B),
+                        Color(0xFFFDE047),
+                        Color(0xFFEA580C)
+                    )
+                )
             ),
-            shadowElevation = 2.dp,
             modifier = Modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(18.dp))
-                .clickable {
-                    onClaimOffer()
-                    if (!isOfferClaimed) {
-                        Toast.makeText(
-                            context,
-                            if (currentLangCode == "hi") "🎉 कूपन DEV100 सक्रिय! 15 मिनट मुफ़्त परामर्श मिला" else "🎉 Coupon DEV100 applied! 15 mins free consultation activated",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
-                }
+                .clip(RoundedCornerShape(24.dp))
         ) {
-            Row(
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 14.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                // Left Column: Details & Coupon Code Tag
-                Column(modifier = Modifier.weight(1f)) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        // Badge Tag
-                        Surface(
-                            color = if (isOfferClaimed) Color(0xFFDCFCE7) else Color(0xFFFFF7ED),
-                            border = BorderStroke(
-                                1.dp,
-                                if (isOfferClaimed) Color(0xFF86EFAC) else Saffron.copy(alpha = 0.35f)
+                    .background(
+                        Brush.linearGradient(
+                            colors = listOf(
+                                Color(0xFF9A1C0E), // Deep Vedic Crimson/Saffron
+                                Color(0xFFC2410C), // Rich Orange
+                                Color(0xFFEA580C), // Saffron Flame
+                                Color(0xFFD97706)  // Warm Amber Gold
                             ),
-                            shape = RoundedCornerShape(6.dp)
-                        ) {
-                            Text(
-                                text = when (currentLangCode) {
-                                    "hi" -> if (isOfferClaimed) "✓ सक्रिय कूपन • 15 MIN" else "🎁 स्वागत कूपन • 100% मुफ़्त"
-                                    "hgl" -> if (isOfferClaimed) "✓ ACTIVE COUPON • 15 MIN" else "🎁 WELCOME OFFER • 100% FREE"
-                                    else -> if (isOfferClaimed) "✓ ACTIVE COUPON • 15 MIN" else "🎁 WELCOME PASS • 100% FREE"
-                                },
-                                fontSize = 9.5.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = if (isOfferClaimed) Color(0xFF16A34A) else Saffron,
-                                modifier = Modifier.padding(horizontal = 7.dp, vertical = 3.dp)
-                            )
-                        }
+                            start = Offset(0f, 0f),
+                            end = Offset(1000f, 1000f)
+                        )
+                    )
+            ) {
+                // Background subtle sacred pattern overlay (dots/stars & entrance sheen sweep)
+                Canvas(modifier = Modifier.matchParentSize()) {
+                    val width = size.width
+                    val height = size.height
 
-                        // Code Tag
+                    // Decorative light glow on top right
+                    drawCircle(
+                        brush = Brush.radialGradient(
+                            colors = listOf(Color(0x33FDE047), Color.Transparent),
+                            center = Offset(width * 0.85f, height * 0.3f),
+                            radius = width * 0.35f
+                        )
+                    )
+
+                    // Subtle golden sheen beam sweep on entrance
+                    val sheenPos = sheenSweep.value
+                    if (sheenPos > 0.01f && sheenPos < 0.99f) {
+                        val sweepX = width * (sheenPos * 1.4f - 0.2f)
+                        drawLine(
+                            brush = Brush.horizontalGradient(
+                                colors = listOf(
+                                    Color.Transparent,
+                                    Color.White.copy(alpha = 0.22f),
+                                    Color(0xFFFEF08A).copy(alpha = 0.35f),
+                                    Color.White.copy(alpha = 0.22f),
+                                    Color.Transparent
+                                ),
+                                startX = sweepX - 80f,
+                                endX = sweepX + 80f
+                            ),
+                            start = Offset(sweepX - 40f, 0f),
+                            end = Offset(sweepX + 40f, height),
+                            strokeWidth = 90f
+                        )
+                    }
+                }
+
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 14.dp)
+                ) {
+                    // Top row: Header Offer Tag & Urgency Chip
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
                         Surface(
-                            color = Color(0xFFFAFAFA),
-                            border = BorderStroke(1.dp, BorderLight),
-                            shape = RoundedCornerShape(6.dp)
+                            shape = RoundedCornerShape(12.dp),
+                            color = Color.Black.copy(alpha = 0.22f),
+                            border = BorderStroke(1.dp, Color(0xFFFEF08A).copy(alpha = 0.5f))
                         ) {
                             Row(
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
                                 verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 3.dp)
+                                horizontalArrangement = Arrangement.spacedBy(4.dp)
                             ) {
                                 Text(
-                                    text = "DEV100",
-                                    fontFamily = FontFamily.Monospace,
-                                    fontSize = 10.sp,
-                                    fontWeight = FontWeight.ExtraBold,
-                                    letterSpacing = 1.sp,
-                                    color = Color.Black
+                                    text = "🎉",
+                                    fontSize = 11.sp
                                 )
-                                Spacer(modifier = Modifier.width(3.dp))
-                                Icon(
-                                    imageVector = Icons.Filled.ContentCopy,
-                                    contentDescription = "Copy Code",
-                                    tint = Saffron,
-                                    modifier = Modifier.size(11.dp)
+                                Text(
+                                    text = when (currentLangCode) {
+                                        "hi" -> "विशेष स्वागत प्रस्ताव"
+                                        "hgl" -> "Special Welcome Offer"
+                                        else -> "Special Welcome Offer"
+                                    },
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color(0xFFFEF08A)
+                                )
+                            }
+                        }
+
+                        // Urgency / Highlight Badge
+                        Surface(
+                            shape = RoundedCornerShape(12.dp),
+                            color = Color(0xFFFEF08A),
+                            shadowElevation = 2.dp
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(3.dp)
+                            ) {
+                                Text(
+                                    text = "⚡ 100% FREE",
+                                    fontSize = 10.5.sp,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    color = Color(0xFF9A1C0E)
                                 )
                             }
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(7.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
 
-                    // Title
-                    Text(
-                        text = when (currentLangCode) {
-                            "hi" -> if (isOfferClaimed) "15 निःशुल्क मिनट सक्रिय हैं ✨" else "प्रथम 15 मिनट परामर्श 100% मुफ़्त"
-                            "hgl" -> if (isOfferClaimed) "15 Free Mins Active ✨" else "First 15 Mins 100% Free Consult"
-                            else -> if (isOfferClaimed) "15 Free Mins Active ✨" else "First 15 Mins 100% Free Consult"
-                        },
-                        fontSize = 14.5.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.Black
-                    )
-
-                    Spacer(modifier = Modifier.height(2.dp))
-
-                    // Subtitle
-                    Text(
-                        text = when (currentLangCode) {
-                            "hi" -> if (isOfferClaimed) "किसी भी साधक से तुरंत बात करें • बैलेंस में जुड़ा" else "सत्यापित वैदिक साधक से बात करें • कार्ड की ज़रूरत नहीं"
-                            "hgl" -> if (isOfferClaimed) "Kisi bhi sadhak se baat karein • Balance added" else "Verified sadhaks se connect karein • No card needed"
-                            else -> if (isOfferClaimed) "Connect with any verified sadhak • Added to balance" else "Connect with verified sadhaks • No card needed"
-                        },
-                        fontSize = 11.sp,
-                        color = Color(0xFF737373)
-                    )
-                }
-
-                Spacer(modifier = Modifier.width(12.dp))
-
-                // Dashed Vertical Divider
-                Canvas(
-                    modifier = Modifier
-                        .height(48.dp)
-                        .width(1.dp)
-                ) {
-                    drawLine(
-                        color = Color(0xFFE5E5E5),
-                        start = Offset(0f, 0f),
-                        end = Offset(0f, size.height),
-                        strokeWidth = 1.dp.toPx(),
-                        pathEffect = PathEffect.dashPathEffect(floatArrayOf(6f, 6f), 0f)
-                    )
-                }
-
-                Spacer(modifier = Modifier.width(12.dp))
-
-                // Right CTA Button / Claimed Pill
-                if (isOfferClaimed) {
-                    Surface(
-                        shape = RoundedCornerShape(12.dp),
-                        color = Color(0xFFF0FDF4),
-                        border = BorderStroke(1.dp, Color(0xFF86EFAC)),
-                        modifier = Modifier.height(38.dp)
+                    // Middle Section: Content + 2D Namaste Artwork
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(4.dp),
-                            modifier = Modifier.padding(horizontal = 10.dp)
+                        Column(
+                            modifier = Modifier.weight(1f),
+                            verticalArrangement = Arrangement.spacedBy(3.dp)
                         ) {
-                            Icon(
-                                imageVector = Icons.Filled.CheckCircle,
-                                contentDescription = "Active",
-                                tint = Color(0xFF16A34A),
-                                modifier = Modifier.size(16.dp)
-                            )
+                            // Large bold text: पहले 15 मिनट मुफ्त
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                Text(
+                                    text = when (currentLangCode) {
+                                        "hi" -> "पहले 15 मिनट मुफ्त"
+                                        "hgl" -> "First 15 Mins Free"
+                                        else -> "First 15 Mins Free"
+                                    },
+                                    fontFamily = AppFontFamily,
+                                    fontSize = 20.sp,
+                                    fontWeight = FontWeight.Black,
+                                    color = Color.White,
+                                    letterSpacing = 0.3.sp
+                                )
+                            }
+
+                            // Subtext: केवल प्रथम परामर्श पर लागू
                             Text(
-                                text = if (currentLangCode == "hi") "सक्रिय" else "Active",
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = Color(0xFF16A34A)
+                                text = when (currentLangCode) {
+                                    "hi" -> "सत्यापित साधक से व्यक्तिगत मार्गदर्शन • ₹350 मूल्य मुफ्त"
+                                    "hgl" -> "Verified Sadhak consultation • Worth ₹350 Free"
+                                    else -> "Verified Sadhak consultation • Worth ₹350 Free"
+                                },
+                                fontSize = 11.5.sp,
+                                color = Color(0xFFFFF7ED),
+                                lineHeight = 15.sp
                             )
+
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            // Interactive Action Buttons: DEV15 Copy Pill & Talk Now CTA
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                // DEV15 Copy Box (Perforated ticket style with copy feedback)
+                                Surface(
+                                    shape = RoundedCornerShape(10.dp),
+                                    color = if (isCopied) Color(0xFF15803D) else Color.White.copy(alpha = 0.20f),
+                                    border = BorderStroke(
+                                        1.3.dp,
+                                        if (isCopied) Color(0xFF86EFAC) else Color.White.copy(alpha = 0.9f)
+                                    ),
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(10.dp))
+                                        .clickable {
+                                            HapticFeedbackHelper.playSuccess(haptic)
+                                            clipboardManager.setText(androidx.compose.ui.text.AnnotatedString("DEV15"))
+                                            isCopied = true
+                                            onClaimOffer()
+                                            Toast.makeText(
+                                                context,
+                                                if (currentLangCode == "hi") "कूपन कोड DEV15 कॉपी हो गया! ✨" else "Coupon code DEV15 copied! ✨",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        }
+                                ) {
+                                    Row(
+                                        modifier = Modifier.padding(horizontal = 9.dp, vertical = 7.dp),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(5.dp)
+                                    ) {
+                                        Text(
+                                            text = if (isCopied) "COPIED" else "DEV15",
+                                            fontFamily = FontFamily.Monospace,
+                                            fontSize = 12.sp,
+                                            fontWeight = FontWeight.ExtraBold,
+                                            color = Color.White,
+                                            letterSpacing = 0.8.sp
+                                        )
+                                        Icon(
+                                            imageVector = if (isCopied) Icons.Filled.Check else Icons.Filled.ContentCopy,
+                                            contentDescription = if (isCopied) "Copied" else "Copy Code",
+                                            tint = if (isCopied) Color(0xFF86EFAC) else Color.White,
+                                            modifier = Modifier.size(13.dp)
+                                        )
+                                    }
+                                }
+
+                                // CTA Button: अभी बात करें [phone icon]
+                                Surface(
+                                    shape = RoundedCornerShape(10.dp),
+                                    color = Color.White,
+                                    shadowElevation = 4.dp,
+                                    border = BorderStroke(1.dp, Color(0xFFFEF08A)),
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(10.dp))
+                                        .clickable {
+                                            HapticFeedbackHelper.playClick(haptic)
+                                            onTalkNowClick()
+                                        }
+                                ) {
+                                    Row(
+                                        modifier = Modifier.padding(horizontal = 11.dp, vertical = 7.dp),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(5.dp)
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Filled.Phone,
+                                            contentDescription = "Phone",
+                                            tint = Color(0xFFC2410C),
+                                            modifier = Modifier.size(14.dp)
+                                        )
+                                        Text(
+                                            text = when (currentLangCode) {
+                                                "hi" -> "अभी बात करें"
+                                                "hgl" -> "Talk Now"
+                                                else -> "Talk Now"
+                                            },
+                                            fontSize = 12.sp,
+                                            fontWeight = FontWeight.ExtraBold,
+                                            color = Color(0xFFC2410C)
+                                        )
+                                        Icon(
+                                            imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                                            contentDescription = null,
+                                            tint = Color(0xFFC2410C),
+                                            modifier = Modifier.size(12.dp)
+                                        )
+                                    }
+                                }
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.width(8.dp))
+
+                        // Right: 2D Vector Illustration inside circular glowing ring + rating badge
+                        Box(
+                            contentAlignment = Alignment.BottomCenter,
+                            modifier = Modifier.size(98.dp)
+                        ) {
+                            // Glowing halo circle behind the avatar
+                            Surface(
+                                shape = CircleShape,
+                                color = Color.White.copy(alpha = 0.15f),
+                                border = BorderStroke(1.5.dp, Color(0xFFFEF08A).copy(alpha = 0.8f)),
+                                modifier = Modifier
+                                    .size(92.dp)
+                                    .align(Alignment.Center)
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .background(
+                                            Brush.radialGradient(
+                                                listOf(
+                                                    Color(0xFFFEF08A).copy(alpha = 0.45f),
+                                                    Color(0xFFF59E0B).copy(alpha = 0.15f),
+                                                    Color.Transparent
+                                                )
+                                            )
+                                        )
+                                )
+                            }
+
+                            // 2D Vector Illustration: Friendly young Indian woman in maroon kurta with Namaste gesture
+                            Image(
+                                painter = painterResource(id = R.drawable.ic_woman_namaste_vector),
+                                contentDescription = "Devbhasha Welcoming Sadhak",
+                                modifier = Modifier
+                                    .size(90.dp)
+                                    .clip(CircleShape)
+                                    .align(Alignment.Center)
+                            )
+
+                            // Rating Chip overlay at the bottom of the avatar
+                            Surface(
+                                shape = RoundedCornerShape(8.dp),
+                                color = Color(0xFF1C1917),
+                                border = BorderStroke(0.8.dp, Color(0xFFF59E0B)),
+                                shadowElevation = 3.dp,
+                                modifier = Modifier
+                                    .align(Alignment.BottomCenter)
+                                    .offset(y = 4.dp)
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(2.dp)
+                                ) {
+                                    Text(
+                                        text = "⭐ 4.9",
+                                        fontSize = 9.5.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color(0xFFFDE047)
+                                    )
+                                }
+                            }
                         }
                     }
-                } else {
-                    Surface(
-                        shape = RoundedCornerShape(12.dp),
-                        color = Saffron,
-                        shadowElevation = 2.dp,
-                        modifier = Modifier.height(38.dp)
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    // Bottom Guarantee & Security strip
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(Color.Black.copy(alpha = 0.15f), RoundedCornerShape(8.dp))
+                            .padding(horizontal = 10.dp, vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(4.dp),
-                            modifier = Modifier.padding(horizontal = 12.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Filled.Bolt,
-                                contentDescription = "Claim",
-                                tint = Color.White,
-                                modifier = Modifier.size(15.dp)
-                            )
-                            Text(
-                                text = if (currentLangCode == "hi") "क्लेम करें" else "Claim",
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = Color.White
-                            )
-                        }
+                        Text(
+                            text = when (currentLangCode) {
+                                "hi" -> "🔒 100% सुरक्षित एवं गोपनीय"
+                                "hgl" -> "🔒 100% Private & Confidential"
+                                else -> "🔒 100% Private & Confidential"
+                            },
+                            fontSize = 10.sp,
+                            color = Color(0xFFFEF08A).copy(alpha = 0.95f),
+                            fontWeight = FontWeight.Medium
+                        )
+                        Text(
+                            text = when (currentLangCode) {
+                                "hi" -> "⚡ तुरंत लाइव कॉल/चैट"
+                                "hgl" -> "⚡ Instant Live Call/Chat"
+                                else -> "⚡ Instant Live Call/Chat"
+                            },
+                            fontSize = 10.sp,
+                            color = Color.White.copy(alpha = 0.9f),
+                            fontWeight = FontWeight.Medium
+                        )
                     }
                 }
             }
@@ -941,69 +1588,75 @@ fun BentoEditorialPromoBanner(
 private fun BentoProblemCategoryCard(
     title: String,
     subtitle: String,
-    emoji: String,
-    badge: String,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
     isSelected: Boolean = false,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+    val scale by androidx.compose.animation.core.animateFloatAsState(
+        targetValue = if (isPressed) 0.95f else 1f,
+        label = "scale"
+    )
+
     Surface(
-        shape = RoundedCornerShape(24.dp),
-        color = if (isSelected) Color(0xFF4C1D95) else Color.White, // Deep Purple for selected
-        border = if (isSelected) null else BorderStroke(1.dp, BorderLight),
-        shadowElevation = if (isSelected) 4.dp else 1.5.dp,
+        shape = RoundedCornerShape(20.dp),
+        color = Color.White,
+        shadowElevation = if (isPressed) 1.dp else 4.dp,
+        border = BorderStroke(1.2.dp, if (isSelected) Color(0xFFB83A0E) else Color(0xFFFFEDD5)),
         modifier = modifier
-            .size(140.dp)
-            .clip(RoundedCornerShape(24.dp))
-            .clickable { onClick() }
+            .graphicsLayer {
+                scaleX = scale
+                scaleY = scale
+            }
+            .clip(RoundedCornerShape(20.dp))
+            .clickable(
+                interactionSource = interactionSource,
+                indication = ripple(color = Color(0xFFB83A0E)),
+                onClick = onClick
+            )
     ) {
         Column(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(20.dp),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
+                .fillMaxWidth()
+                .padding(horizontal = 4.dp, vertical = 10.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
             Surface(
                 shape = CircleShape,
-                color = if (isSelected) Color(0xFF6D28D9) else Color(0xFFFAFAFA),
-                border = if (isSelected) null else BorderStroke(1.dp, BorderLight),
-                modifier = Modifier.size(40.dp).drawBehind {
-                    // Subtle Golden Shimmer Effect
-                    val strokeWidth = 2.dp.toPx()
-                    drawCircle(
-                        brush = Brush.radialGradient(
-                            listOf(Color(0xFFFFD700).copy(alpha = 0.3f), Color.Transparent),
-                            radius = size.width
-                        )
-                    )
-                }
+                color = Color(0xFFFFF7ED),
+                border = BorderStroke(0.8.dp, Color(0xFFFFEDD5)),
+                modifier = Modifier.size(36.dp)
             ) {
                 Box(contentAlignment = Alignment.Center) {
-                    Text(text = emoji, fontSize = 20.sp)
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = title,
+                        tint = Color(0xFFB83A0E),
+                        modifier = Modifier.size(19.dp)
+                    )
                 }
             }
-            
-            Spacer(modifier = Modifier.height(8.dp))
-
+            Spacer(modifier = Modifier.height(6.dp))
             Text(
                 text = title,
-                fontFamily = FontFamily.SansSerif,
-                fontSize = 11.sp, // Reduced font size
+                fontSize = 12.sp,
                 fontWeight = FontWeight.Bold,
-                color = if (isSelected) Color.White else Color(0xFF1F2937), // Better contrast
-                maxLines = 1, // Single line
-                overflow = TextOverflow.Ellipsis,
-                textAlign = TextAlign.Center
+                color = Color(0xFF2B2B2B),
+                textAlign = TextAlign.Center,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(1.dp))
             Text(
                 text = subtitle,
-                fontSize = 10.sp, 
-                color = if (isSelected) Color(0xFFDDD6FE) else Color(0xFF6B7280), // Better contrast
-                maxLines = 1, // Single line
-                overflow = TextOverflow.Ellipsis,
-                textAlign = TextAlign.Center
+                fontSize = 10.sp,
+                color = Color(0xFF6E6E6E),
+                textAlign = TextAlign.Center,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
         }
     }
@@ -1028,10 +1681,12 @@ fun BentoEditorialExpertsSection(
         else -> "en"
     }
 
-    Column(modifier = modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 6.dp)) {
-        // Section Rule Header
+    Column(modifier = modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 6.dp)) {
+        // Section Header: Verified Astrologers + Online Badge + See All
         Row(
-            modifier = Modifier.fillMaxWidth().padding(vertical = 10.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
@@ -1041,25 +1696,28 @@ fun BentoEditorialExpertsSection(
             ) {
                 Text(
                     text = when (currentLangCode) {
-                        "hi" -> "ऑनलाइन साधक"
-                        "hgl" -> "Online Sadhak"
-                        else -> "Experts on call"
+                        "hi" -> "सत्यापित साधक"
+                        "hgl" -> "Verified Sadhak"
+                        else -> "Verified Sadhak"
                     },
-                    fontFamily = FontFamily.Serif,
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = Ink
+                    fontFamily = AppFontFamily,
+                    fontSize = 19.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF2B2B2B)
                 )
                 val liveCount = sadhaks.count { it.isOnline }
-                Text(
-                    text = when (currentLangCode) {
-                        "hi" -> if (liveCount > 0) "$liveCount लाइव" else "सत्यापित साधक"
-                        "hgl" -> if (liveCount > 0) "$liveCount live" else "Verified sadhak"
-                        else -> if (liveCount > 0) "$liveCount online" else "Verified guides"
-                    },
-                    fontSize = 11.sp,
-                    color = InkSoft
-                )
+                Surface(
+                    shape = RoundedCornerShape(999.dp),
+                    color = Color(0xFFDCFCE7)
+                ) {
+                    Text(
+                        text = if (liveCount > 0) "🟢 $liveCount ऑनलाइन" else "🟢 ऑनलाइन",
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF16A34A),
+                        modifier = Modifier.padding(horizontal = 7.dp, vertical = 2.5.dp)
+                    )
+                }
             }
 
             Text(
@@ -1068,10 +1726,13 @@ fun BentoEditorialExpertsSection(
                     "hgl" -> "Sabhi dekhein →"
                     else -> "See all →"
                 },
-                fontSize = 11.5.sp,
+                fontSize = 13.sp,
                 fontWeight = FontWeight.Bold,
-                color = Terra,
-                modifier = Modifier.clickable { onSeeAllClick() }
+                color = Color(0xFFB83A0E),
+                modifier = Modifier
+                    .clip(RoundedCornerShape(6.dp))
+                    .clickable { onSeeAllClick() }
+                    .padding(horizontal = 4.dp, vertical = 4.dp)
             )
         }
 
@@ -1096,37 +1757,180 @@ fun BentoEditorialExpertsSection(
                 onActionClick = onSeeAllClick
             )
         } else {
-            // Featured Expert Card (Elevated Style)
+            // Horizontal list of Astrologers with photo, rating, and online badge (Trust Factor)
+            LazyRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                items(sadhaks) { sadhak ->
+                    val infiniteTransition = rememberInfiniteTransition(label = "pulse")
+                    val pulseAlpha by infiniteTransition.animateFloat(
+                        initialValue = 0.4f,
+                        targetValue = 1f,
+                        animationSpec = infiniteRepeatable(
+                            animation = tween(800, easing = LinearEasing),
+                            repeatMode = RepeatMode.Reverse
+                        ),
+                        label = "pulse_alpha"
+                    )
+
+                    Surface(
+                        shape = RoundedCornerShape(18.dp),
+                        color = Color.White,
+                        shadowElevation = 2.dp,
+                        border = BorderStroke(1.dp, Color(0xFFFED7AA).copy(alpha = 0.6f)),
+                        modifier = Modifier
+                            .width(155.dp)
+                            .clip(RoundedCornerShape(18.dp))
+                            .clickable { onChatClick(sadhak) }
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(12.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            // Avatar with Pulsing Online Badge
+                            Box {
+                                Surface(
+                                    shape = CircleShape,
+                                    color = Color(0xFFFFF7ED),
+                                    border = BorderStroke(1.dp, Color(0xFFFFEDD5)),
+                                    modifier = Modifier.size(54.dp)
+                                ) {
+                                    Box(contentAlignment = Alignment.Center) {
+                                        Text(
+                                            text = if (currentLangCode == "hi") sadhak.initialHi.ifEmpty { "सा" } else sadhak.initialEn.take(2).ifEmpty { "AS" },
+                                            fontFamily = AppFontFamily,
+                                            fontSize = 18.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = Color(0xFFB83A0E)
+                                        )
+                                    }
+                                }
+                                if (sadhak.isOnline) {
+                                    Box(
+                                        modifier = Modifier
+                                            .align(Alignment.BottomEnd)
+                                            .size(14.dp)
+                                            .clip(CircleShape)
+                                            .background(Color(0xFF16A34A).copy(alpha = pulseAlpha))
+                                            .border(2.dp, Color.White, CircleShape)
+                                    )
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.height(7.dp))
+
+                            Text(
+                                text = if (currentLangCode == "hi") sadhak.nameHi else sadhak.nameEn,
+                                fontFamily = AppFontFamily,
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF2B2B2B),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+
+                            Text(
+                                text = if (currentLangCode == "hi") sadhak.titleHi else sadhak.titleEn,
+                                fontSize = 11.sp,
+                                color = Color(0xFF6E6E6E),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+
+                            Spacer(modifier = Modifier.height(5.dp))
+
+                            // Rating & Price
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(3.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Filled.Star,
+                                    contentDescription = null,
+                                    tint = Color(0xFFF59E0B),
+                                    modifier = Modifier.size(12.dp)
+                                )
+                                Text(
+                                    text = "${sadhak.rating} ★",
+                                    fontSize = 11.5.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color(0xFF2B2B2B)
+                                )
+                                Text(
+                                    text = "• ₹19/मिनट",
+                                    fontSize = 11.sp,
+                                    color = Color(0xFFB83A0E),
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            // Action Button: Call & Chat
+                            Button(
+                                onClick = { onCallClick(sadhak) },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(32.dp),
+                                contentPadding = PaddingValues(0.dp),
+                                shape = RoundedCornerShape(999.dp),
+                                colors = ButtonDefaults.buttonColors(containerColor = SaffronPrimary)
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Filled.Phone,
+                                        contentDescription = null,
+                                        tint = Color.White,
+                                        modifier = Modifier.size(12.dp)
+                                    )
+                                    Text(
+                                        text = "बातचीत करें",
+                                        fontSize = 11.5.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color.White
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(14.dp))
+
+            // Featured Card with the SINGLE PRIMARY FILLED BUTTON ("बातचीत करें") on the entire screen
             val featuredSadhak = sadhaks.first()
 
-            ElevatedCard(
-                shape = RoundedCornerShape(28.dp),
-                colors = CardDefaults.elevatedCardColors(containerColor = Color.White),
-                elevation = CardDefaults.elevatedCardElevation(defaultElevation = 6.dp),
+            Surface(
+                shape = RoundedCornerShape(20.dp),
+                color = Color.White,
+                shadowElevation = 2.dp,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { onChatClick(featuredSadhak) }
+                    .clip(RoundedCornerShape(20.dp))
             ) {
                 Row(
-                    modifier = Modifier.padding(18.dp),
+                    modifier = Modifier.padding(16.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(14.dp)
                 ) {
-                    // Avatar with 2px saffron ring only if online
                     Box {
                         Surface(
                             shape = CircleShape,
-                            color = Color(0xFFFAFAFA),
-                            border = if (featuredSadhak.isOnline) BorderStroke(2.dp, Saffron) else BorderStroke(1.dp, BorderLight),
+                            color = Color(0xFFFAF7F2),
                             modifier = Modifier.size(54.dp)
                         ) {
                             Box(contentAlignment = Alignment.Center) {
                                 Text(
                                     text = if (currentLangCode == "hi") featuredSadhak.initialHi.ifEmpty { "सा" } else featuredSadhak.initialEn.take(2).ifEmpty { "SR" },
-                                    fontFamily = FontFamily.Serif,
-                                    fontSize = 17.sp,
+                                    fontFamily = AppFontFamily,
+                                    fontSize = 18.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = Color(0xFF000000)
+                                    color = Color(0xFF2B2B2B)
                                 )
                             }
                         }
@@ -1134,100 +1938,72 @@ fun BentoEditorialExpertsSection(
                             Box(
                                 modifier = Modifier
                                     .align(Alignment.BottomEnd)
-                                    .size(12.dp)
+                                    .size(13.dp)
                                     .clip(CircleShape)
-                                    .background(Saffron)
+                                    .background(Color(0xFF16A34A))
                                     .border(2.dp, Color.White, CircleShape)
                             )
                         }
                     }
 
                     Column(modifier = Modifier.weight(1f)) {
-                        // Stamp "TODAY'S PICK"
-                        Surface(
-                            color = SaffronLight,
-                            shape = RoundedCornerShape(6.dp)
-                        ) {
-                            Text(
-                                text = when (currentLangCode) {
-                                    "hi" -> "विशेष साधक"
-                                    "hgl" -> "FEATURED EXPERT"
-                                    else -> "FEATURED EXPERT"
-                                },
-                                fontSize = 9.sp,
-                                fontWeight = FontWeight.Bold,
-                                letterSpacing = 0.5.sp,
-                                color = Saffron,
-                                modifier = Modifier.padding(horizontal = 7.dp, vertical = 2.5.dp)
-                            )
-                        }
-
-                        Spacer(modifier = Modifier.height(4.dp))
                         Text(
                             text = if (currentLangCode == "hi") featuredSadhak.nameHi else featuredSadhak.nameEn,
-                            fontFamily = FontFamily.Serif,
-                            fontSize = 16.5.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            color = Color(0xFF000000)
+                            fontFamily = AppFontFamily,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF2B2B2B)
                         )
+                        Spacer(modifier = Modifier.height(2.dp))
                         Text(
-                            text = when (currentLangCode) {
-                                "hi" -> "${featuredSadhak.titleHi} · ₹19/मिनट"
-                                "hgl" -> "${featuredSadhak.titleHi} · ₹19/min"
-                                else -> "${featuredSadhak.titleEn} · ₹19/min"
-                            },
-                            fontSize = 11.5.sp,
-                            color = Color(0xFF737373),
+                            text = "${if (currentLangCode == "hi") featuredSadhak.titleHi else featuredSadhak.titleEn} • ${featuredSadhak.rating} ★",
+                            fontSize = 12.5.sp,
+                            color = Color(0xFF6E6E6E),
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
                     }
 
-                    // Action Buttons: Saffron Chat + White Call
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                    // The ONLY filled primary button on the screen: "बातचीत करें"
+                    Button(
+                        onClick = { onChatClick(featuredSadhak) },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFFB83A0E),
+                            contentColor = Color.White
+                        ),
+                        shape = RoundedCornerShape(999.dp),
+                        contentPadding = PaddingValues(horizontal = 14.dp, vertical = 8.dp)
                     ) {
-                        val saffronBrush = Brush.horizontalGradient(
-                            listOf(SaffronGradientStart, SaffronGradientEnd)
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.Chat,
+                            contentDescription = null,
+                            modifier = Modifier.size(15.dp)
                         )
-                        Surface(
-                            shape = CircleShape,
-                            color = Color.Transparent,
-                            shadowElevation = 2.dp,
-                            modifier = Modifier
-                                .size(40.dp)
-                                .clip(CircleShape)
-                                .background(saffronBrush)
-                                .clickable { onChatClick(featuredSadhak) }
-                        ) {
-                            Box(contentAlignment = Alignment.Center) {
-                                Icon(
-                                    imageVector = Icons.AutoMirrored.Outlined.Chat,
-                                    contentDescription = "Chat",
-                                    tint = Color.White,
-                                    modifier = Modifier.size(17.dp)
-                                )
-                            }
-                        }
+                        Spacer(modifier = Modifier.width(5.dp))
+                        Text(
+                            text = "बातचीत करें",
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
 
-                        Surface(
-                            shape = CircleShape,
-                            color = Color.White,
-                            border = BorderStroke(1.dp, Color(0xFF000000)),
-                            modifier = Modifier
-                                .size(40.dp)
-                                .clip(CircleShape)
-                                .clickable { onCallClick(featuredSadhak) }
-                        ) {
-                            Box(contentAlignment = Alignment.Center) {
-                                Icon(
-                                    imageVector = Icons.Outlined.Phone,
-                                    contentDescription = "Call",
-                                    tint = Color(0xFF000000),
-                                    modifier = Modifier.size(17.dp)
-                                )
-                            }
+                    // Secondary Outlined Call Button
+                    Surface(
+                        shape = CircleShape,
+                        color = Color.Transparent,
+                        border = BorderStroke(1.dp, Color(0xFFD1D5DB)),
+                        modifier = Modifier
+                            .size(38.dp)
+                            .clip(CircleShape)
+                            .clickable { onCallClick(featuredSadhak) }
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(
+                                imageVector = Icons.Outlined.Phone,
+                                contentDescription = "Call",
+                                tint = Color(0xFF2B2B2B),
+                                modifier = Modifier.size(16.dp)
+                            )
                         }
                     }
                 }
@@ -1241,9 +2017,8 @@ fun BentoEditorialExpertsSection(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(20.dp))
+                    .clip(RoundedCornerShape(18.dp))
                     .background(Color.White)
-                    .border(1.dp, Color(0xFFF1F1F1), RoundedCornerShape(20.dp))
             ) {
                 displayExperts.take(3).forEach { expert ->
                     BentoEditorialExpertRow(
@@ -1279,25 +2054,23 @@ fun BentoEditorialExpertRow(
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable { onChatClick() }
-                .padding(vertical = 12.dp, horizontal = 2.dp),
+                .padding(vertical = 12.dp, horizontal = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // Avatar with 2px saffron ring only if online
             Box {
                 Surface(
                     shape = CircleShape,
-                    color = Color(0xFFFAFAFA),
-                    border = if (sadhak.isOnline) BorderStroke(2.dp, Saffron) else BorderStroke(1.dp, BorderLight),
+                    color = Color(0xFFFAF7F2),
                     modifier = Modifier.size(46.dp)
                 ) {
                     Box(contentAlignment = Alignment.Center) {
                         Text(
                             text = if (currentLangCode == "hi") sadhak.initialHi.ifEmpty { "सा" } else sadhak.initialEn.take(2).ifEmpty { "EX" },
-                            fontFamily = FontFamily.Serif,
+                            fontFamily = AppFontFamily,
                             fontSize = 15.sp,
                             fontWeight = FontWeight.Bold,
-                            color = Color(0xFF000000)
+                            color = Color(0xFF2B2B2B)
                         )
                     }
                 }
@@ -1308,7 +2081,7 @@ fun BentoEditorialExpertRow(
                             .align(Alignment.BottomEnd)
                             .size(11.dp)
                             .clip(CircleShape)
-                            .background(Saffron)
+                            .background(Color(0xFF16A34A))
                             .border(2.dp, Color.White, CircleShape)
                     )
                 }
@@ -1317,15 +2090,15 @@ fun BentoEditorialExpertRow(
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = if (currentLangCode == "hi") sadhak.nameHi else sadhak.nameEn,
-                    fontFamily = FontFamily.Serif,
+                    fontFamily = AppFontFamily,
                     fontSize = 15.sp,
                     fontWeight = FontWeight.Medium,
-                    color = Ink
+                    color = Color(0xFF2B2B2B)
                 )
                 Text(
-                    text = if (currentLangCode == "hi") sadhak.titleHi else (if (currentLangCode == "hgl") sadhak.titleHi else sadhak.titleEn),
-                    fontSize = 10.5.sp,
-                    color = InkSoft,
+                    text = if (currentLangCode == "hi") sadhak.titleHi else sadhak.titleEn,
+                    fontSize = 11.sp,
+                    color = Color(0xFF6E6E6E),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -1336,15 +2109,15 @@ fun BentoEditorialExpertRow(
                 Icon(
                     imageVector = Icons.Filled.Star,
                     contentDescription = null,
-                    tint = Color(0xFFF59E0B), // Material 3 Amber
-                    modifier = Modifier.size(14.dp)
+                    tint = Color(0xFFD4AF37),
+                    modifier = Modifier.size(13.dp)
                 )
                 Spacer(modifier = Modifier.width(2.dp))
                 Text(
                     text = sadhak.rating,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Ink
+                    color = Color(0xFF2B2B2B)
                 )
             }
 
@@ -1353,15 +2126,15 @@ fun BentoEditorialExpertRow(
                 text = "₹${when(sadhak.id) { "am" -> 12; "ri" -> 19; else -> 25 }}/${if (currentLangCode == "hi") "मिनट" else "min"}",
                 fontSize = 11.sp,
                 fontWeight = FontWeight.Bold,
-                color = Ink
+                color = Color(0xFFB83A0E)
             )
 
-            // Mini Actions: Call & Accent Chat Button
+            // Outline Actions (No filled orange button)
             Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 Surface(
                     shape = CircleShape,
                     color = Color.Transparent,
-                    border = BorderStroke(1.dp, EditorialLineStrong),
+                    border = BorderStroke(1.dp, Color(0xFFD1D5DB)),
                     modifier = Modifier
                         .size(34.dp)
                         .clip(CircleShape)
@@ -1371,7 +2144,7 @@ fun BentoEditorialExpertRow(
                         Icon(
                             imageVector = Icons.Outlined.Phone,
                             contentDescription = "Call",
-                            tint = Ink,
+                            tint = Color(0xFF2B2B2B),
                             modifier = Modifier.size(14.dp)
                         )
                     }
@@ -1379,7 +2152,8 @@ fun BentoEditorialExpertRow(
 
                 Surface(
                     shape = CircleShape,
-                    color = Terra,
+                    color = Color.Transparent,
+                    border = BorderStroke(1.dp, Color(0xFFB83A0E)),
                     modifier = Modifier
                         .size(34.dp)
                         .clip(CircleShape)
@@ -1389,19 +2163,20 @@ fun BentoEditorialExpertRow(
                         Icon(
                             imageVector = Icons.AutoMirrored.Outlined.Chat,
                             contentDescription = "Chat",
-                            tint = Color.White,
+                            tint = Color(0xFFB83A0E),
                             modifier = Modifier.size(14.dp)
                         )
                     }
                 }
             }
         }
-        HorizontalDivider(color = EditorialLine, thickness = 1.dp)
+        HorizontalDivider(color = Color(0xFFF1F5F9), thickness = 1.dp)
     }
 }
 
 /**
- * Floating Pill Bottom Dock (Clean Pure White container with soft shadow & Saffron highlights)
+ * 4 Navigation Tabs Dock: होम, साधक, स्वप्न (Dream), शॉप
+ * Active tab has filled icon and primary deep saffron color.
  */
 @Composable
 fun BentoEditorialDock(
@@ -1418,39 +2193,80 @@ fun BentoEditorialDock(
         else -> "en"
     }
 
+    val primaryColor = Saffron
+    val inactiveColor = Color(0xFF6E6E6E)
+
     NavigationBar(
         modifier = modifier.fillMaxWidth(),
-        containerColor = Color.White,
-        tonalElevation = 8.dp
+        containerColor = Color(0xFFF8FAFC),
+        tonalElevation = 4.dp
     ) {
         val tabs = listOf(
-            Triple("today", if (currentLangCode == "hi") "आज" else "Today", Icons.Outlined.Home),
-            Triple("sadhak", if (currentLangCode == "hi") "साधक" else "Sadhak", Icons.AutoMirrored.Outlined.Chat),
-            Triple("remedy", if (currentLangCode == "hi") "उपाय" else "Remedy", Icons.Outlined.ShoppingBag),
-            Triple("profile", if (currentLangCode == "hi") "प्रोफ़ाइल" else "Profile", Icons.Outlined.Person)
+            Triple(
+                "today",
+                when (currentLangCode) {
+                    "hi" -> "होम"
+                    "hgl" -> "Home"
+                    else -> "Home"
+                },
+                Pair(Icons.Filled.Home, Icons.Outlined.Home)
+            ),
+            Triple(
+                "sadhak",
+                when (currentLangCode) {
+                    "hi" -> "साधक"
+                    "hgl" -> "Sadhak"
+                    else -> "Sadhak"
+                },
+                Pair(Icons.Filled.SelfImprovement, Icons.Outlined.SelfImprovement)
+            ),
+            Triple(
+                "dreams",
+                when (currentLangCode) {
+                    "hi" -> "स्वप्न"
+                    "hgl" -> "Dream"
+                    else -> "Dream"
+                },
+                Pair(Icons.Filled.Bedtime, Icons.Outlined.Bedtime)
+            ),
+            Triple(
+                "remedy",
+                when (currentLangCode) {
+                    "hi" -> "उपाय"
+                    "hgl" -> "Remedy"
+                    else -> "Remedy"
+                },
+                Pair(Icons.Filled.AutoFixHigh, Icons.Outlined.AutoFixHigh)
+            )
         )
 
-        tabs.forEach { (tab, label, icon) ->
-            val selectedIcon = when(tab) {
-                "today" -> Icons.Filled.Home
-                "sadhak" -> Icons.AutoMirrored.Filled.Chat
-                "remedy" -> Icons.Filled.ShoppingBag
-                else -> Icons.Filled.Person
-            }
+        tabs.forEach { (tab, label, iconsPair) ->
+            val isSelected = currentTab == tab
             NavigationBarItem(
-                selected = currentTab == tab,
+                selected = isSelected,
                 onClick = { onTabSelect(tab) },
                 icon = {
-                    Icon(
-                        imageVector = if (currentTab == tab) selectedIcon else icon,
-                        contentDescription = label
+                    Box(modifier = Modifier.padding(bottom = 2.dp)) {
+                        Icon(
+                            imageVector = if (isSelected) iconsPair.first else iconsPair.second,
+                            contentDescription = label,
+                            modifier = Modifier.size(22.dp)
+                        )
+                    }
+                },
+                label = {
+                    Text(
+                        text = label,
+                        fontSize = 11.sp,
+                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
                     )
                 },
-                label = { Text(label) },
                 colors = NavigationBarItemDefaults.colors(
-                    indicatorColor = GoogleBlue.copy(alpha = 0.2f),
-                    selectedIconColor = GoogleBlue,
-                    selectedTextColor = GoogleBlue
+                    indicatorColor = primaryColor.copy(alpha = 0.12f),
+                    selectedIconColor = primaryColor,
+                    selectedTextColor = primaryColor,
+                    unselectedIconColor = inactiveColor,
+                    unselectedTextColor = inactiveColor
                 )
             )
         }

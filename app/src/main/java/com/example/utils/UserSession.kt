@@ -108,6 +108,19 @@ class UserSession(context: Context) {
         prefs.edit().putFloat("cached_wallet_balance", balance.toFloat()).apply()
     }
 
+    // चयनित अवतार आईडी
+    fun getAvatarId(): String {
+        return prefs.getString("user_avatar_id", "sadhak_dhyan") ?: "sadhak_dhyan"
+    }
+
+    fun setAvatarId(avatarId: String) {
+        prefs.edit().putString("user_avatar_id", avatarId).apply()
+        val uid = getUserId()
+        if (uid.isNotBlank()) {
+            UserManager.updateAvatarPreference(uid, avatarId)
+        }
+    }
+
     // लॉग आउट करने के लिए
     fun clearSession() {
         prefs.edit().clear().apply()
