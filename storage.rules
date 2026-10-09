@@ -1,0 +1,61 @@
+rules_version = '2';
+
+// Devbhasha Cloud Storage rules.
+// Users write only under their own uid. Admin (custom claim admin == true)
+// can read everything. Anything not matched is denied.
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    function isOwner(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+    function isAdmin() {
+      return isSignedIn() && request.auth.token.admin == true;
+    }
+    function isImage(maxMb) {
+      return request.resource.size < maxMb * 1024 * 1024
+          && request.resource.contentType.matches('image/(jpeg|jpg|png|webp)');
+    }
+    function isImageOrPdf(maxMb) {
+      return request.resource.size < maxMb * 1024 * 1024
+          && (request.resource.contentType.matches('image/(jpeg|jpg|png|webp)')
+              || request.resource.contentType == 'application/pdf');
+    }
+
+    // Admin read anywhere.
+    match /{allPaths=**} {
+      allow read: if isAdmin();
+    }
+
+    // Seeker private files (avatar, journal images): owner only.
+    match /users/{uid}/{allPaths=**} {
+      allow read: if isOwner(uid);
+      allow create, update: if isOwner(uid) && isImage(5);
+      allow delete: if isOwner(uid);
+    }
+
+    // Sadhak public profile media (shown in the directory): signed-in read.
+    match /providers/{uid}/public/{allPaths=**} {
+      allow read: if isSignedIn();
+      allow create, update: if isOwner(uid) && isImage(5);
+      allow delete: if isOwner(uid);
+    }
+
+    // Sadhak private documents (KYC, certificates): owner + admin only.
+    match /providers/{uid}/private/{allPaths=**} {
+      allow read: if isOwner(uid);
+      allow create, update: if isOwner(uid) && isImageOrPdf(10);
+      allow delete: if isOwner(uid);
+    }
+
+    // Public app content (card art etc.): anyone reads, admin writes.
+    match /public/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAdmin() && isImage(10);
+    }
+  }
+}

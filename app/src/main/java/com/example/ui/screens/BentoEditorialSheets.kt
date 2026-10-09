@@ -1,5 +1,7 @@
 package com.example.ui.screens
 
+import com.example.utils.PriceLabels
+
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.BorderStroke
@@ -97,7 +99,7 @@ fun BentoEditorialRechargeSheet(
                     border = BorderStroke(1.dp, Color(0xFFFDE68A))
                 ) {
                     Text(
-                        text = "✨ 100% Welcome Bonus",
+                        text = "🔒 Secure Razorpay",
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color(0xFF92400E),
@@ -125,32 +127,25 @@ fun BentoEditorialRechargeSheet(
 
             Spacer(modifier = Modifier.height(14.dp))
 
-            // First-time bonus highlight banner
+            // Price list (display labels only — amounts are decided by the server)
             Surface(
                 shape = RoundedCornerShape(14.dp),
                 color = Color(0xFFFFFBEB),
                 border = BorderStroke(1.2.dp, Color(0xFFF59E0B)),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Row(
-                    modifier = Modifier.padding(12.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
-                    Text(text = "🎁", fontSize = 24.sp)
-                    Column {
-                        Text(
-                            text = "प्रथम रीचार्ज पर ₹100 बोनस!",
-                            fontSize = 13.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color(0xFF92400E)
-                        )
-                        Text(
-                            text = "₹100 या अधिक ऐड करने पर वॉलेट में तुरंत ₹100 अतिरिक्त जुड़ेंगे।",
-                            fontSize = 11.sp,
-                            color = Color(0xFF78350F)
-                        )
-                    }
+                Column(modifier = Modifier.padding(12.dp)) {
+                    Text(
+                        text = "परामर्श सत्र ${PriceLabels.SESSION} · समय बढ़ाएँ ${PriceLabels.EXTEND}",
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF92400E)
+                    )
+                    Text(
+                        text = "स्वप्न अर्थ चैट ${PriceLabels.DREAM_CHAT} · स्वप्न कॉल ${PriceLabels.DREAM_CALL}",
+                        fontSize = 11.sp,
+                        color = Color(0xFF78350F)
+                    )
                 }
             }
 
@@ -183,13 +178,6 @@ fun BentoEditorialRechargeSheet(
                                 color = if (isSel) Color.White else Ink,
                                 textAlign = TextAlign.Center
                             )
-                            Text(
-                                text = "+₹$amt Bonus",
-                                fontSize = 9.5.sp,
-                                fontWeight = FontWeight.SemiBold,
-                                color = if (isSel) Color(0xFFFDE68A) else Color(0xFFB83A0E),
-                                textAlign = TextAlign.Center
-                            )
                         }
                     }
                 }
@@ -212,21 +200,13 @@ fun BentoEditorialRechargeSheet(
                         Text(text = "Recharge Amount:", fontSize = 12.sp, color = Color(0xFF64748B))
                         Text(text = "₹$selectedAmount", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1E293B))
                     }
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text(text = "First-Time Welcome Bonus:", fontSize = 12.sp, color = Color(0xFFB83A0E))
-                        Text(text = "+₹$selectedAmount", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color(0xFFB83A0E))
-                    }
                     HorizontalDivider(modifier = Modifier.padding(vertical = 6.dp), color = Color(0xFFE2E8F0))
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text(text = "Total Credited in Wallet:", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1E293B))
-                        Text(text = "₹${selectedAmount * 2}", fontSize = 14.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF16A34A))
+                        Text(text = "₹$selectedAmount", fontSize = 14.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF16A34A))
                     }
                 }
             }
@@ -1103,7 +1083,7 @@ fun BentoEditorialBookingSheet(
                                 }
 
                                 Text(
-                                    text = "₹19/min",
+                                    text = PriceLabels.SESSION,
                                     fontSize = 11.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = Ink
@@ -1445,7 +1425,7 @@ fun PoochhoProblemConsultSheet(
                                     color = Color(0xFF000000)
                                 )
                                 Text(
-                                    text = "₹19/min · ⭐ ${sadhak.rating}",
+                                    text = "${PriceLabels.SESSION} · ⭐ ${sadhak.rating}",
                                     fontSize = 10.5.sp,
                                     color = Color(0xFF737373)
                                 )

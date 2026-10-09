@@ -1,11 +1,15 @@
 rules_version = '2';
 
-// Devbhasha & Devsadhak merged Firestore security rules.
-// Client is untrusted. Money/financial fields are server-writable only.
+// Devbhasha & Devsadhak Firestore security rules.
+// Client is untrusted. Money, pricing, sessions and verification are written
+// only by Cloud Functions (Admin SDK bypasses these rules).
+// Admin = custom claim request.auth.token.admin == true.
+// Anything not matched below is denied.
 
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    // ---------------------------------------------------------------- helpers
     function isSignedIn() {
       return request.auth != null;
     }
@@ -14,53 +18,143 @@ service cloud.firestore {
       return isSignedIn() && request.auth.uid == uid;
     }
 
-    // /users, /payments, /paymentOrders, /walletLedger — uid-scoped read, server-only write
-    match /users/{uid} {
-      allow read: if isSelf(uid);
-      allow write: if false;
+    function isAdmin() {
+      return isSignedIn() && request.auth.token.admin == true;
     }
 
+    function changedKeys() {
+      return request.resource.data.diff(resource.data).affectedKeys();
+    }
+
+    // Seeker profile fields the client may never set.
+    function userProtectedKeys() {
+      return ['walletBalance', 'balance', 'referralCode', 'referredBy',
+              'referralBonusClaimed', 'totalReferralEarnings', 'freeTrialUsed',
+              'role', 'admin', 'isAdmin', 'roles', 'verified', 'blocked'];
+    }
+
+    // Provider/sadhak fields the client may never set.
+    function providerProtectedKeys() {
+      return ['verified', 'verificationStatus', 'verifiedAt', 'verifiedBy',
+              'rating', 'ratingCount', 'ratingSum', 'reviewCount',
+              'earnings', 'totalEarnings', 'balance', 'walletBalance',
+              'payout', 'payouts', 'payoutBalance', 'pendingPayout', 'payoutStatus',
+              'totalPayout', 'totalPaidOut', 'lastPayoutAt', 'payoutAmount',
+              'role', 'admin', 'isAdmin', 'roles', 'blocked', 'disabled', 'approved'];
+    }
+
+    // Admins may read everything (writes are granted per collection below;
+    // money collections stay functions-only even for admins).
+    match /{document=**} {
+      allow read: if isAdmin();
+    }
+
+    // ----------------------------------------------------------- seekers
+    // Self read. Self may create/update profile fields, never wallet/referral/role.
+    match /users/{uid} {
+      allow read: if isSelf(uid);
+      allow create: if isSelf(uid)
+                    && !request.resource.data.keys().hasAny(userProtectedKeys());
+      allow update: if isSelf(uid)
+                    && !changedKeys().hasAny(userProtectedKeys());
+      allow delete: if false;
+    }
+
+    // ------------------------------------------------ money (functions only)
     match /payments/{id} {
       allow read: if isSignedIn() && resource.data.uid == request.auth.uid;
       allow write: if false;
     }
-
     match /paymentOrders/{id} {
       allow read: if isSignedIn() && resource.data.uid == request.auth.uid;
       allow write: if false;
     }
-
     match /walletLedger/{id} {
       allow read: if isSignedIn() && resource.data.uid == request.auth.uid;
       allow write: if false;
     }
+    // Generic wallets/transactions collections, if ever used: functions only.
+    match /wallets/{uid} {
+      allow read: if isSelf(uid);
+      allow write: if false;
+    }
+    match /transactions/{id} {
+      allow read: if isSignedIn() && resource.data.uid == request.auth.uid;
+      allow write: if false;
+    }
+    // freeTrialClaims/{phone}: no client access at all (default deny).
 
-    // /sadhaks — signed-in read; sadhak may update only name/bio/photo/rate/availability
-    // of their own doc, never verified/rating/earnings
-    match /sadhaks/{sadhakId} {
-      allow read: if isSignedIn();
-      allow create, delete: if false;
-      allow update: if isSelf(sadhakId)
-                    && request.resource.data.diff(resource.data).affectedKeys()
-                        .hasOnly(['name', 'bio', 'photo', 'rate', 'availability']);
+    // ---------------------------------------------------------- sessions
+    // Created/extended/ended only by functions (startSession etc.).
+    match /sessions/{sessionId} {
+      allow read: if isSignedIn() && request.auth.uid in resource.data.participants;
+      allow write: if false;
     }
 
-    // /questions — seeker creates own; assigned provider (providerId == auth.uid) may
-    // update only answer, status, answeredAt; earningAmount server-only
+    // ------------------------------------------------------------- chats
+    // chats/{sessionId} is created by startSession with participants[2].
+    // Only participants read; messages only while the session is paid/active.
+    match /chats/{chatId} {
+      function chatParticipants() {
+        return get(/databases/$(database)/documents/chats/$(chatId)).data.participants;
+      }
+      function isParticipant() {
+        return isSignedIn() && request.auth.uid in chatParticipants();
+      }
+      function sessionIsLive() {
+        let s = get(/databases/$(database)/documents/sessions/$(chatId)).data;
+        return s.status == 'active' && request.time < s.endsAt;
+      }
+
+      allow read: if isSignedIn() && request.auth.uid in resource.data.participants;
+      allow create, delete: if false;
+      allow update: if isSignedIn() && request.auth.uid in resource.data.participants
+                    && changedKeys().hasOnly(['lastMessage', 'lastMessageAt', 'lastSenderId']);
+
+      match /messages/{messageId} {
+        allow read: if isParticipant();
+        allow create: if isParticipant()
+                      && exists(/databases/$(database)/documents/sessions/$(chatId))
+                      && sessionIsLive()
+                      && request.resource.data.senderId == request.auth.uid
+                      && request.resource.data.text is string
+                      && request.resource.data.text.size() > 0
+                      && request.resource.data.text.size() <= 4000
+                      && request.resource.data.keys().hasOnly(
+                           ['id', 'senderId', 'senderName', 'text', 'timestamp', 'type', 'imageUrl',
+                            'fromUser', 'isFromUser', 'formattedTime']);
+        allow update, delete: if false;
+      }
+    }
+
+    // --------------------------------------------------------- questions
+    // Only the asking seeker and the assigned sadhak can read.
     match /questions/{questionId} {
-      allow read: if isSignedIn();
+      allow read: if isSignedIn() && (
+        resource.data.userId == request.auth.uid ||
+        resource.data.providerId == request.auth.uid
+      );
       allow create: if isSignedIn()
                     && request.resource.data.userId == request.auth.uid
-                    && !request.resource.data.keys().hasAny(['earningAmount']);
+                    && request.resource.data.status == 'pending'
+                    && request.resource.data.providerId != request.auth.uid
+                    && !request.resource.data.keys().hasAny(
+                         ['earningAmount', 'amountPaise', 'chargedPaise', 'settled',
+                          'settledAt', 'settlementStatus', 'answer', 'answeredAt']);
       allow update: if isSignedIn()
                     && resource.data.providerId == request.auth.uid
-                    && request.resource.data.diff(resource.data).affectedKeys()
-                        .hasOnly(['answer', 'status', 'answeredAt']);
+                    && resource.data.userId != request.auth.uid
+                    && changedKeys().hasOnly(['answer', 'status', 'answeredAt'])
+                    && request.resource.data.status in ['assigned', 'answered'];
       allow delete: if false;
+
+      match /{sub=**} {
+        allow read, write: if false;
+      }
     }
 
-    // /active_calls — only callerId or providerId can read; caller creates with status 'ringing';
-    // either party may update status/durationSeconds; earnedAmount server-only
+    // -------------------------------------------------------- live calls
+    // Signalling only; no money is computed from this collection any more.
     match /active_calls/{callId} {
       allow read: if isSignedIn() && (
         resource.data.callerId == request.auth.uid ||
@@ -69,28 +163,37 @@ service cloud.firestore {
       allow create: if isSignedIn()
                     && request.resource.data.callerId == request.auth.uid
                     && request.resource.data.status == 'ringing'
-                    && !request.resource.data.keys().hasAny(['earnedAmount']);
+                    && !request.resource.data.keys().hasAny(
+                         ['earnedAmount', 'settled', 'settledAt', 'agoraToken']);
       allow update: if isSignedIn() && (
         resource.data.callerId == request.auth.uid ||
         resource.data.providerId == request.auth.uid
-      ) && request.resource.data.diff(resource.data).affectedKeys()
-            .hasOnly(['status', 'durationSeconds']);
+      ) && changedKeys().hasOnly(['status', 'durationSeconds']);
       allow delete: if false;
     }
 
-    // /chats/{chatId}/messages — participants read/write
-    match /chats/{chatId} {
-      allow read, write: if isSignedIn();
-      match /messages/{messageId} {
-        allow read, write: if isSignedIn();
-      }
+    // ----------------------------------------------- sadhak directory
+    match /sadhaks/{sadhakId} {
+      allow read: if isSignedIn();
+      allow create, delete: if isAdmin();
+      allow update: if isAdmin() || (
+        isSelf(sadhakId)
+        && changedKeys().hasOnly(['name', 'bio', 'photo', 'rate', 'availability'])
+      );
     }
 
-    // /providers/{providerId}/{jobs,remedies,payout_requests} — owner read/write
-    // /providers/{providerId}/{wallet,transactions} — owner read, server-only write
+    // ------------------------------------------------- provider profiles
     match /providers/{providerId} {
       allow read: if isSignedIn();
-      allow write: if isSelf(providerId);
+      allow create: if isAdmin() || (
+        isSelf(providerId)
+        && !request.resource.data.keys().hasAny(providerProtectedKeys())
+      );
+      allow update: if isAdmin() || (
+        isSelf(providerId)
+        && !changedKeys().hasAny(providerProtectedKeys())
+      );
+      allow delete: if isAdmin();
 
       match /jobs/{jobId} {
         allow read, write: if isSelf(providerId);
@@ -100,8 +203,17 @@ service cloud.firestore {
         allow read, write: if isSelf(providerId);
       }
 
+      // Provider may file a request; only admin/functions change its status.
       match /payout_requests/{requestId} {
-        allow read, write: if isSelf(providerId);
+        allow read: if isSelf(providerId);
+        allow create: if isSelf(providerId)
+                      && request.resource.data.status == 'pending'
+                      && request.resource.data.amountPaise is int
+                      && request.resource.data.amountPaise > 0
+                      && !request.resource.data.keys().hasAny(
+                           ['processedAt', 'processedBy', 'paidAt', 'utr', 'approvedBy']);
+        allow update: if isAdmin();
+        allow delete: if false;
       }
 
       match /wallet/{docId} {
@@ -115,9 +227,26 @@ service cloud.firestore {
       }
     }
 
-    // Default deny
-    match /{document=**} {
-      allow read, write: if false;
+    // ------------------------------------------------- content & comments
+    match /card_contents/{cardId} {
+      allow read: if true;
+      allow write: if isAdmin();
     }
+
+    match /card_comments/{commentId} {
+      allow read: if true;
+      allow create: if isSignedIn()
+                    && request.resource.data.keys().hasOnly(
+                         ['cardId', 'userName', 'commentText', 'timestamp', 'userId'])
+                    && request.resource.data.cardId is string
+                    && request.resource.data.commentText is string
+                    && request.resource.data.commentText.size() > 0
+                    && request.resource.data.commentText.size() <= 1000
+                    && request.resource.data.get('userId', request.auth.uid) == request.auth.uid;
+      allow update: if false;
+      allow delete: if isAdmin();
+    }
+
+    // Everything else: denied by default (no matching allow).
   }
 }

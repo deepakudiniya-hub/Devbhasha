@@ -493,7 +493,7 @@ private fun AstrotalkServiceItem(
  * Astrotalk Signature Astrologer Card (Used in Consultation Tab & Home Tab)
  * Left: Photo with green online badge & verified check
  * Center: Name, Specialization, Languages, Experience, Rating
- * Right: Price per min + Green "Chat" / "Call" button
+ * Right: Session price label + Green "Chat" / "Call" button
  */
 @Composable
 fun AstrotalkAstrologerCard(
@@ -627,7 +627,7 @@ fun AstrotalkAstrologerCard(
                 verticalArrangement = Arrangement.Center
             ) {
                 Text(
-                    text = "₹${sadhak.consultationFee.filter { it.isDigit() }.toIntOrNull() ?: 21}/min",
+                    text = com.example.utils.PriceLabels.SESSION,
                     fontSize = 13.sp,
                     fontWeight = FontWeight.Bold,
                     color = primaryColor

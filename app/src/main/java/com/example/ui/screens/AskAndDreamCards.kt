@@ -38,7 +38,8 @@ import com.example.utils.DreamSubmitResult
 import com.example.utils.DreamSubmitter
 import com.example.utils.RazorpayPaymentManager
 import com.example.utils.UserSession
-import com.example.utils.WalletRepository
+import com.example.utils.PriceLabels
+import com.example.utils.SessionType
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
@@ -539,105 +540,58 @@ fun DreamMeaningBottomSheet(
 
         isSubmitting = true
         coroutineScope.launch {
-            if (!freeDreamUsed) {
-                // Free First submission
-                val res = DreamSubmitter.submitDreamToRandomSadhak(
-                    userId = effectiveUserId,
-                    userName = effectiveUserName,
-                    dreamText = clean,
-                    paid = false,
-                    amount = 0.0,
-                    paymentMode = "free",
-                    freeFirst = true
-                )
-                isSubmitting = false
-                when (res) {
-                    is DreamSubmitResult.Success -> {
-                        val newEntry = UserDreamQuestion(
-                            id = res.questionId,
-                            questionText = clean,
-                            sadhakName = res.sadhakName,
-                            status = "Pending",
-                            providerAnswer = "",
-                            timestamp = System.currentTimeMillis()
-                        )
-                        userDreamsList = listOf(newEntry) + userDreamsList
-                        assignedSadhakBanner = res.sadhakName
-                        dreamInputText = ""
-                        onDreamSubmitted?.invoke(res.sadhakName)
-                        val msg = if (isHindi)
-                            "आपका सपना ${res.sadhakName} जी के पास भेज दिया गया है ✨"
-                        else
-                            "Dream sent to ${res.sadhakName} for Vedic guidance ✨"
-                        Toast.makeText(context, msg, Toast.LENGTH_LONG).show()
-                    }
-                    is DreamSubmitResult.NoVerifiedSadhak -> {
-                        Toast.makeText(context, res.message, Toast.LENGTH_LONG).show()
-                    }
-                    is DreamSubmitResult.Error -> {
-                        Toast.makeText(context, "त्रुटि: ${res.message}", Toast.LENGTH_LONG).show()
-                    }
-                }
-            } else if (walletBalance >= 99.0) {
-                // Wallet deduction — server-side and idempotent.
-                val chargeRef = "dream_wallet_${System.currentTimeMillis()}"
-                WalletRepository.spend(99.0, "dream_matlab", chargeRef) { }
-                val res = DreamSubmitter.submitDreamToRandomSadhak(
-                    userId = effectiveUserId,
-                    userName = effectiveUserName,
-                    dreamText = clean,
-                    paid = true,
-                    amount = 99.0,
-                    paymentMode = "wallet"
-                )
-                isSubmitting = false
-                when (res) {
-                    is DreamSubmitResult.Success -> {
-                        val newEntry = UserDreamQuestion(
-                            id = res.questionId,
-                            questionText = clean,
-                            sadhakName = res.sadhakName,
-                            status = "Pending",
-                            providerAnswer = "",
-                            timestamp = System.currentTimeMillis()
-                        )
-                        userDreamsList = listOf(newEntry) + userDreamsList
-                        assignedSadhakBanner = res.sadhakName
-                        dreamInputText = ""
-                        onDreamSubmitted?.invoke(res.sadhakName)
-                        val msg = if (isHindi)
-                            "सपना सुरक्षित हुआ — ${res.sadhakName} जी के पास भेजा गया ✨"
-                        else
-                            "Dream sent to ${res.sadhakName} ✨"
-                        Toast.makeText(context, msg, Toast.LENGTH_LONG).show()
-                    }
-                    is DreamSubmitResult.NoVerifiedSadhak -> {
-                        WalletRepository.refund(99.0, "dream_matlab_refund", "${chargeRef}_refund") { }
-                        Toast.makeText(context, res.message, Toast.LENGTH_LONG).show()
-                    }
-                    is DreamSubmitResult.Error -> {
-                        WalletRepository.refund(99.0, "dream_matlab_refund", "${chargeRef}_refund") { }
-                        Toast.makeText(context, "त्रुटि: ${res.message}", Toast.LENGTH_LONG).show()
-                    }
-                }
-            } else {
-                // Razorpay payment flow
-                isSubmitting = false
-                val activity = context as? Activity
-                if (activity != null) {
-                    val started = RazorpayPaymentManager.startRechargePayment(
-                        activity = activity,
-                        amount = 99.0,
-                        userId = effectiveUserId,
-                        userName = effectiveUserName,
-                        purpose = "dream_matlab",
-                        dreamText = clean
+            // Server decides price, free-trial eligibility and debits the wallet.
+            val res = DreamSubmitter.submitDream(
+                userName = effectiveUserName,
+                dreamText = clean,
+                type = SessionType.DREAM_CHAT
+            )
+            isSubmitting = false
+            when (res) {
+                is DreamSubmitResult.Success -> {
+                    val newEntry = UserDreamQuestion(
+                        id = res.questionId,
+                        questionText = clean,
+                        sadhakName = res.sadhakName,
+                        status = "Pending",
+                        providerAnswer = "",
+                        timestamp = System.currentTimeMillis()
                     )
-                    if (started) {
-                        dreamInputText = ""
+                    userDreamsList = listOf(newEntry) + userDreamsList
+                    assignedSadhakBanner = res.sadhakName
+                    dreamInputText = ""
+                    onDreamSubmitted?.invoke(res.sadhakName)
+                    val freeNote = if (res.isFreeTrial) {
+                        if (isHindi) " (${PriceLabels.FREE_TRIAL_BADGE})" else " (${PriceLabels.FREE_TRIAL_BADGE_EN})"
+                    } else ""
+                    val msg = if (isHindi)
+                        "आपका सपना ${res.sadhakName} जी के पास भेज दिया गया है ✨$freeNote"
+                    else
+                        "Dream sent to ${res.sadhakName} for Vedic guidance ✨$freeNote"
+                    Toast.makeText(context, msg, Toast.LENGTH_LONG).show()
+                }
+                is DreamSubmitResult.InsufficientBalance -> {
+                    // Top up the wallet; the server bills the session after the payment is verified.
+                    val activity = context as? Activity
+                    if (activity != null) {
+                        val started = RazorpayPaymentManager.startRechargePayment(
+                            activity = activity,
+                            amount = 99.0,
+                            userId = effectiveUserId,
+                            userName = effectiveUserName,
+                            purpose = "dream_matlab",
+                            dreamText = clean
+                        )
+                        if (started) dreamInputText = ""
+                    } else {
+                        Toast.makeText(context, res.message, Toast.LENGTH_LONG).show()
                     }
-                } else {
-                    Toast.makeText(context, "कृपया दोबारा प्रयास करें", Toast.LENGTH_SHORT).show()
+                }
+                is DreamSubmitResult.NoVerifiedSadhak -> {
+                    Toast.makeText(context, res.message, Toast.LENGTH_LONG).show()
+                }
+                is DreamSubmitResult.Error -> {
+                    Toast.makeText(context, "त्रुटि: ${res.message}", Toast.LENGTH_LONG).show()
                 }
             }
         }
@@ -784,11 +738,7 @@ fun DreamMeaningBottomSheet(
                     Icon(Icons.AutoMirrored.Filled.Send, contentDescription = null, modifier = Modifier.size(16.dp))
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = when {
-                            !freeDreamUsed -> if (isHindi) "सपना साधक को भेजें · पहला मुफ़्त (FREE)" else "Send to Sadhak · 1st Free"
-                            walletBalance >= 99.0 -> if (isHindi) "साधक को भेजें · फल जानें (₹99)" else "Send to Sadhak (₹99)"
-                            else -> if (isHindi) "साधक को भेजें · ₹99 पे करें" else "Send to Sadhak · Pay ₹99"
-                        },
+                        text = if (isHindi) "साधक को भेजें · ${PriceLabels.DREAM_CHAT}" else "Send to Sadhak · ${PriceLabels.DREAM_CHAT}",
                         fontWeight = FontWeight.Bold,
                         fontSize = 13.5.sp
                     )

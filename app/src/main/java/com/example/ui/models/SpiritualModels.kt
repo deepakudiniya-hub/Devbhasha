@@ -313,7 +313,7 @@ data class SadhakItem(
     val initialHi: String = "सा",
     val initialEn: String = "S",
     val isOnline: Boolean = true,
-    val consultationFee: String = "₹21",
+    val consultationFee: String = "₹499 / 20 min",
     val bio: String = "वैदिक परंपरा के अनुसार सटीक मार्गदर्शन और अचूक उपाय प्रदान करते हैं।",
     val phone: String = ""
 )
@@ -360,7 +360,7 @@ fun Seeker.toSadhakItem(): SadhakItem {
         initialHi = displayName.firstOrNull()?.toString() ?: "सा",
         initialEn = displayName.firstOrNull()?.uppercase() ?: "S",
         isOnline = checkOnline,
-        consultationFee = "₹21",
+        consultationFee = "₹499 / 20 min",
         bio = if (status.isNotBlank()) status else "वैदिक परंपरा अनुसार मार्गदर्शन।"
     )
 }

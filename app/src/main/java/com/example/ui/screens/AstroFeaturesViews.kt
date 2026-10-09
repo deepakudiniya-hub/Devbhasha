@@ -44,7 +44,7 @@ import java.util.Locale
 
 /**
  * 1. Radiant Hero Promo Banner Inspired by Top Astrology Apps
- * (Golden/Saffron gradient, Diya/Sun rays, ₹20 First Consultation Offer)
+ * (Golden/Saffron gradient, Diya/Sun rays, ₹499 / 20 min consultation)
  */
 @Composable
 fun HeroAstroPromoBanner(
@@ -124,7 +124,7 @@ fun HeroAstroPromoBanner(
                         shape = RoundedCornerShape(10.dp)
                     ) {
                         Text(
-                            text = if (isHindi) "मात्र ₹20" else "@ ₹20 Only",
+                            text = if (isHindi) "₹499 / 20 मिनट" else "₹499 / 20 min",
                             color = Color(0xFF854D0E),
                             fontWeight = FontWeight.Black,
                             fontSize = 12.sp,
@@ -824,7 +824,7 @@ fun FreeKundliBottomSheet(
                         colors = ButtonDefaults.buttonColors(containerColor = Saffron),
                         modifier = Modifier.weight(1.5f)
                     ) {
-                        Text(if (isHindi) "साधक से परामर्श (₹20)" else "Consult Sadhak (₹20)")
+                        Text(if (isHindi) "साधक से परामर्श (₹499)" else "Consult Sadhak (₹499)")
                     }
                 }
             }

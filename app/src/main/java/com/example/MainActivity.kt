@@ -18,6 +18,7 @@ import com.example.ui.theme.DevbhashaTheme
 import com.example.utils.RazorpayPaymentManager
 import com.example.utils.UserSession
 import com.google.firebase.FirebaseApp
+import com.google.firebase.auth.FirebaseAuth
 import com.razorpay.PaymentData
 import com.razorpay.PaymentResultWithDataListener
 
@@ -51,13 +52,29 @@ class MainActivity : ComponentActivity(), PaymentResultWithDataListener {
                         AppScreen.SPLASH -> {
                             SplashScreen(
                                 onTimeout = {
+                                    // Firebase Auth persists its session on device; trust it, not a prefs flag.
+                                    val firebaseUser = FirebaseAuth.getInstance().currentUser
                                     val loggedIn = userSession.isLoggedIn()
                                     val uid = userSession.getUserId()
-                                    if (loggedIn && uid.isNotBlank()) {
+                                    if (firebaseUser != null) {
+                                        if (uid != firebaseUser.uid || !loggedIn) {
+                                            userSession.saveUserSession(
+                                                userName = userSession.getUserName(),
+                                                isLoggedIn = true,
+                                                userId = firebaseUser.uid,
+                                                phoneNumber = firebaseUser.phoneNumber ?: userSession.getPhoneNumber()
+                                            )
+                                        }
+                                        currentUserName = userSession.getUserName()
+                                        currentUserId = firebaseUser.uid
+                                        currentScreen = AppScreen.USER_HOME
+                                    } else if (loggedIn && uid == "guest_explorer") {
+                                        // Guest browse mode (no paid features; server rejects unauthenticated calls)
                                         currentUserName = userSession.getUserName()
                                         currentUserId = uid
                                         currentScreen = AppScreen.USER_HOME
                                     } else {
+                                        if (loggedIn) userSession.clearSession()
                                         currentScreen = AppScreen.LOGIN
                                     }
                                 }
@@ -101,6 +118,7 @@ class MainActivity : ComponentActivity(), PaymentResultWithDataListener {
                                 userName = currentUserName,
                                 userId = currentUserId,
                                 onLogoutClick = {
+                                    FirebaseAuth.getInstance().signOut()
                                     userSession.clearSession()
                                     currentUserId = ""
                                     currentUserName = "साधक"

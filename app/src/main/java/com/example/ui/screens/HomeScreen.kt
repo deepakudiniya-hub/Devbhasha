@@ -42,6 +42,8 @@ import com.example.utils.RazorpayPaymentManager
 import com.example.utils.UserManager
 import com.example.utils.UserSession
 import com.example.utils.WalletRepository
+import com.example.utils.PriceLabels
+import com.example.utils.SessionType
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -77,7 +79,7 @@ fun HomeScreen(
         }
         onDispose { reg.remove() }
     }
-    var freeMins by remember { mutableIntStateOf(0) }
+    val freeMins = 0 // free time is server-owned; never tracked or granted on device
     var freeDreamUsed by remember { mutableStateOf(false) }
     var isOfferClaimed by remember { mutableStateOf(false) }
     var isHindi by remember { mutableStateOf(userSession.isHindi()) } // Keep for logic compatibility
@@ -238,30 +240,25 @@ fun HomeScreen(
                     if (RazorpayPaymentManager.pendingPurpose == "dream_matlab") {
                         val text = RazorpayPaymentManager.pendingDreamText.trim()
                         if (text.isNotBlank()) {
-                            val submitRes = DreamSubmitter.submitDreamToRandomSadhak(
-                                userId = targetUserDocId,
+                            // Wallet was credited by the verified payment; the server
+                            // now bills the dream session itself (no client amount).
+                            val submitRes = DreamSubmitter.submitDream(
                                 userName = userDisplayName,
                                 dreamText = text,
-                                paid = true,
-                                amount = 99.0,
-                                paymentMode = "razorpay",
-                                paymentId = event.transactionId
+                                type = SessionType.DREAM_CHAT
                             )
-                            // Charge server-side (idempotent by payment id).
-                            WalletRepository.spend(
-                                amountRupees = 99.0,
-                                purpose = "dream_matlab",
-                                ref = "dream_${event.transactionId}"
-                            ) { }
                             when (submitRes) {
                                 is DreamSubmitResult.Success -> {
                                     showToast("पेमेंट सफल! सपना साधक '${submitRes.sadhakName}' को भेज दिया गया ✨")
                                 }
                                 is DreamSubmitResult.NoVerifiedSadhak -> {
-                                    showToast("पेमेंट सफल! सपना दर्ज हो गया है, शीघ्र ही सत्यापित साधक को सौंपा जाएगा।")
+                                    showToast("पेमेंट सफल! राशि वॉलेट में जुड़ गई। अभी कोई साधक उपलब्ध नहीं है।")
+                                }
+                                is DreamSubmitResult.InsufficientBalance -> {
+                                    showToast("पेमेंट सफल! राशि वॉलेट में जुड़ गई। कृपया दोबारा सपना भेजें।")
                                 }
                                 is DreamSubmitResult.Error -> {
-                                    showToast("पेमेंट सफल! सपना सुरक्षित कर लिया गया।")
+                                    showToast("पेमेंट सफल! राशि वॉलेट में जुड़ गई। सपना भेजने में त्रुटि: ${submitRes.message}")
                                 }
                             }
                         }
@@ -276,40 +273,23 @@ fun HomeScreen(
         }
     }
 
-    // Call / Chat Session Starter (₹20 deduction + session request)
+    // Call / Chat Session Starter. Price, balance check and debit happen on the
+    // server in startSession (see SessionBilling); the client sends no amounts.
     val handleStartConsultation: (SadhakItem, String) -> Unit = { sadhak, type ->
         HapticFeedbackHelper.playClick(haptic)
-        if (walletBalance < 20.0 && freeMins <= 0) {
-            showRechargeSheet = true
-            showToast("Low balance. Please recharge ₹100")
+        if (type == "chat") {
+            activeChatSadhak = sadhak
         } else {
-            if (freeMins > 0) {
-                freeMins -= 1
-                showToast("Used 1 free minute with ${sadhak.nameEn}")
-            } else {
-                // Charge server-side; the mirror updates via observeBalance.
-                WalletRepository.spend(
-                    amountRupees = 20.0,
-                    purpose = "consultation",
-                    ref = "consult_${sadhak.id}_${System.currentTimeMillis()}"
-                ) { }
-            }
-
-            if (type == "chat") {
-                activeChatSadhak = sadhak
-            } else {
-                activeCallingSadhak = sadhak
-            }
+            activeCallingSadhak = sadhak
         }
     }
 
     fun handleClaimTicket() {
         HapticFeedbackHelper.playClick(haptic)
-        if (!isOfferClaimed) {
-            isOfferClaimed = true
-            freeMins = 15
-            showToast("Offer claimed — 15 free minutes added")
-        }
+        // Free trial (first dream chat, 5 min, once per phone number) is granted
+        // only by the server; nothing is credited on the device.
+        isOfferClaimed = true
+        showToast("${PriceLabels.FREE_TRIAL_BADGE} — पात्रता सत्र शुरू होने पर जाँची जाएगी")
     }
 
     // Log Dream Dialog

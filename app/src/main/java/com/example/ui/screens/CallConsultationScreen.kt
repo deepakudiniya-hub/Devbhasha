@@ -1,6 +1,12 @@
 package com.example.ui.screens
 
 import com.example.utils.AgoraVoiceManager
+import com.example.utils.SessionBilling
+import com.example.utils.SessionType
+import com.example.utils.PriceLabels
+import com.example.ui.components.rememberSessionController
+import com.example.ui.components.SessionStatusBar
+import com.example.ui.components.sessionErrorText
 import android.widget.Toast
 import androidx.compose.animation.*
 import androidx.compose.foundation.BorderStroke
@@ -73,11 +79,8 @@ fun CallConsultationScreen(
             onFilterSelected = { selectedFilter = it },
             walletBalance = walletBalance,
             onStartCall = { sadhak ->
-                if (walletBalance < 20.0) {
-                    onLowBalance()
-                } else {
-                    activeCallingSadhak = sadhak
-                }
+                // Balance & price are checked by the server in startSession.
+                activeCallingSadhak = sadhak
             },
             onStartChat = onStartChat,
             modifier = modifier
@@ -160,8 +163,8 @@ private fun CallAstrologerListScreen(
                             )
                         }
                         Text(
-                            text = if (isHindi) "सीधे फ़ोन पर बात करें • ₹20 मात्र दक्षिणा"
-                            else "Direct phone consultation • Just ₹20 fee",
+                            text = if (isHindi) "सीधे फ़ोन पर बात करें • ${PriceLabels.SESSION}"
+                            else "Direct phone consultation • ${PriceLabels.SESSION}",
                             fontSize = 11.5.sp,
                             color = Color(0xFF64748B)
                         )
@@ -427,13 +430,13 @@ fun CallAstrologerCard(
                 Column {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
-                            text = "₹20",
+                            text = "₹499",
                             fontWeight = FontWeight.Black,
                             fontSize = 16.sp,
                             color = Color(0xFF15803D)
                         )
                         Text(
-                            text = if (isHindi) " /सत्र" else " /session",
+                            text = if (isHindi) " / 20 मिनट" else " / 20 min",
                             fontSize = 11.sp,
                             color = Color(0xFF64748B)
                         )
@@ -500,7 +503,8 @@ fun LiveAudioCallScreen(
     userId: String,
     userName: String,
     walletBalance: Double,
-    onEndCall: () -> Unit
+    onEndCall: () -> Unit,
+    sessionType: SessionType = SessionType.SESSION
 ) {
     val context = LocalContext.current
 
@@ -509,19 +513,46 @@ fun LiveAudioCallScreen(
     var isMuted by remember { mutableStateOf(false) }
     var isSpeakerOn by remember { mutableStateOf(true) }
     var showReviewDialog by remember { mutableStateOf(false) }
+    var callError by remember { mutableStateOf<String?>(null) }
 
-    // Start voice call session
-    LaunchedEffect(sadhak.id) {
-        val channel = "devsaadhak_" + (if (userId.isNotBlank()) userId else "guest") + "_" + System.currentTimeMillis()
-        try {
-            AgoraVoiceManager.initEngine(context)
-            AgoraVoiceManager.join(channel, "")
-        } catch (e: Exception) {
-            e.printStackTrace()
+    // Server-billed session: price, duration and debit are decided by Cloud Functions.
+    val sessionController = rememberSessionController(
+        type = sessionType,
+        providerId = sadhak.id,
+        onExpired = {
+            AgoraVoiceManager.leave()
+            showReviewDialog = true
         }
-        // Fallback for simulation/errors
-        delay(3000)
-        if (!isCallConnected) isCallConnected = true
+    )
+
+    // Once the server has started the session, fetch an RTC token and join.
+    LaunchedEffect(sessionController.sessionId) {
+        val sessionId = sessionController.sessionId
+        if (sessionId.isBlank()) return@LaunchedEffect
+        SessionBilling.getAgoraToken(sessionId)
+            .onSuccess { info ->
+                val ready = AgoraVoiceManager.initEngine(context, info.appId)
+                val joined = ready && AgoraVoiceManager.join(info.channel, info.token, info.uid)
+                if (!joined) {
+                    callError = if (isHindi) "कॉल कनेक्ट नहीं हो सकी" else "Could not connect the call"
+                }
+            }
+            .onFailure {
+                callError = if (isHindi) "कॉल टोकन प्राप्त नहीं हुआ" else "Could not get call token"
+            }
+    }
+
+    // Session failed to start (e.g. low balance): leave the screen.
+    LaunchedEffect(sessionController.error, sessionController.session) {
+        val err = sessionController.error
+        if (err != null && sessionController.session == null) {
+            Toast.makeText(context, sessionErrorText(err, isHindi), Toast.LENGTH_LONG).show()
+            onEndCall()
+        }
+    }
+
+    LaunchedEffect(callError) {
+        callError?.let { Toast.makeText(context, it, Toast.LENGTH_LONG).show() }
     }
 
     LaunchedEffect(Unit) {
@@ -529,7 +560,15 @@ fun LiveAudioCallScreen(
         AgoraVoiceManager.onRemoteLeft = { showReviewDialog = true }
     }
 
-    // Call Duration Timer
+    DisposableEffect(Unit) {
+        onDispose {
+            AgoraVoiceManager.leave()
+            AgoraVoiceManager.onRemoteJoined = null
+            AgoraVoiceManager.onRemoteLeft = null
+        }
+    }
+
+    // Call Duration Timer (display only; billing is server-side)
     LaunchedEffect(isCallConnected) {
         if (isCallConnected) {
             while (true) {
@@ -566,9 +605,9 @@ fun LiveAudioCallScreen(
                 Column {
                     Text(
                         text = if (isHindi)
-                            "साधक ${sadhak.nameHi} के साथ आपकी $formattedDuration की वार्ता सफल रही। ₹20 दक्षिणा समर्पित हुई।"
+                            "साधक ${sadhak.nameHi} के साथ आपकी $formattedDuration की वार्ता सफल रही।"
                         else
-                            "Your consultation of $formattedDuration with ${sadhak.nameEn} completed. ₹20 fee dedicated.",
+                            "Your consultation of $formattedDuration with ${sadhak.nameEn} completed.",
                         fontSize = 13.5.sp,
                         color = Color(0xFF334155),
                         lineHeight = 19.sp
@@ -647,6 +686,17 @@ fun LiveAudioCallScreen(
                     text = "🔒 100% End-to-End Encrypted Vedic Audio",
                     fontSize = 11.sp,
                     color = Color(0xFF94A3B8)
+                )
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                SessionStatusBar(
+                    controller = sessionController,
+                    isHindi = isHindi,
+                    darkBackground = true,
+                    onExtendFailed = { e ->
+                        Toast.makeText(context, sessionErrorText(e, isHindi), Toast.LENGTH_LONG).show()
+                    }
                 )
             }
 
@@ -763,6 +813,7 @@ fun LiveAudioCallScreen(
                         IconButton(
                             onClick = {
                                 AgoraVoiceManager.leave()
+                                sessionController.end()
                                 showReviewDialog = true
                             },
                             modifier = Modifier

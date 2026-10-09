@@ -24,3 +24,7 @@ functions/lib/
 .firebase/
 firebase-debug.log
 *-debug.log
+
+# Never commit built APKs (they embed keys)
+public/*.apk
+*.apk

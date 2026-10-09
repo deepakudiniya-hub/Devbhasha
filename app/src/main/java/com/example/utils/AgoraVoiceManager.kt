@@ -19,9 +19,13 @@ object AgoraVoiceManager {
     var onRemoteLeft: (() -> Unit)? = null
     var onJoined: (() -> Unit)? = null
 
-    fun initEngine(context: Context): Boolean {
-        // App ID comes from config (.env / BuildConfig), not hardcoded in logic.
-        val appId = BuildConfig.AGORA_APP_ID
+    /**
+     * @param serverAppId App ID returned by the `getAgoraToken` callable. Falls back to
+     * BuildConfig only if the server didn't send one.
+     */
+    fun initEngine(context: Context, serverAppId: String? = null): Boolean {
+        // App ID comes from the server (or config), never hardcoded in logic.
+        val appId = serverAppId?.takeIf { it.isNotBlank() } ?: BuildConfig.AGORA_APP_ID
 
         if (!appId.trim().matches(Regex("^[0-9a-fA-F]{32}$"))) {
             Log.w(TAG, "Invalid Agora App ID — simulation mode")
@@ -50,9 +54,17 @@ object AgoraVoiceManager {
         }
     }
 
-    fun join(channelName: String, token: String): Boolean {
+    /**
+     * Join with a server-issued RTC token. Token, channel and uid must all come
+     * from the `getAgoraToken` callable; joining without a token is not allowed.
+     */
+    fun join(channelName: String, token: String, uid: Int = 0): Boolean {
         val engine = rtcEngine ?: return false
-        return engine.joinChannel(token, channelName.trim(), "", 0) == 0
+        if (token.isBlank() || channelName.isBlank()) {
+            Log.w(TAG, "Refusing to join Agora channel without a server-issued token")
+            return false
+        }
+        return engine.joinChannel(token, channelName.trim(), "", uid) == 0
     }
 
     fun leave() {
