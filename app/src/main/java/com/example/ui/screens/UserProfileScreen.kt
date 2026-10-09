@@ -2066,7 +2066,7 @@ fun UserProfileScreen(
                                 color = SaffronDeep
                             )
                             Text(
-                                text = "support@devbhasha.org",
+                                text = "support@devbhasha.com",
                                 fontSize = 13.sp,
                                 fontWeight = FontWeight.SemiBold,
                                 color = TextDark
