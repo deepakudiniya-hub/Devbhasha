@@ -737,3 +737,141 @@ exports.adminSettleSession = onCall(async (request) => {
   const sessionId = requireId((request.data || {}).sessionId, "sessionId");
   return settleSession(sessionId, `admin:${request.auth.uid}`);
 });
+
+// ---------------------------------------------------------------------------
+// Website (devbhasha.com) <-> Dev Panel bridge
+// ---------------------------------------------------------------------------
+const { onRequest } = require("firebase-functions/v2/https");
+
+const WEBSITE_ORIGINS = new Set([
+  "https://devbhasha.com",
+  "https://www.devbhasha.com",
+]);
+
+function applyCors(req, res) {
+  const origin = req.get("origin") || "";
+  if (WEBSITE_ORIGINS.has(origin) || /^https:\/\/[a-z0-9-]+\.vercel\.app$/.test(origin)) {
+    res.set("Access-Control-Allow-Origin", origin);
+    res.set("Vary", "Origin");
+  }
+  res.set("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+  res.set("Access-Control-Allow-Headers", "Content-Type");
+  res.set("Access-Control-Max-Age", "3600");
+  if (req.method === "OPTIONS") {
+    res.status(204).send("");
+    return true;
+  }
+  return false;
+}
+
+function pickStr(d, keys, max = 300) {
+  for (const k of keys) {
+    const v = d[k];
+    if (typeof v === "string" && v.trim()) return v.trim().slice(0, max);
+    if (Array.isArray(v) && v.length) return v.filter((x) => typeof x === "string").join(", ").slice(0, max);
+  }
+  return "";
+}
+
+function isApprovedProvider(d) {
+  if (d.blocked === true || d.disabled === true) return false;
+  const st = String(d.verificationStatus || d.status || "").toLowerCase();
+  return d.verified === true || d.approved === true || st === "approved" || st === "verified";
+}
+
+/**
+ * GET https://<region>-devbhasha-d9e22.cloudfunctions.net/publicSadhaks
+ * Public list of approved sadhaks (public profile fields only, never phone,
+ * email, wallet, KYC or earnings) plus the server price table, for the website.
+ */
+exports.publicSadhaks = onRequest({ cors: false, maxInstances: 5, invoker: "public" }, async (req, res) => {
+  if (applyCors(req, res)) return;
+  if (req.method !== "GET") { res.status(405).json({ error: "method" }); return; }
+  try {
+    const snap = await db.collection("providers").limit(200).get();
+    const sadhaks = [];
+    snap.forEach((doc) => {
+      const d = doc.data() || {};
+      if (!isApprovedProvider(d)) return;
+      const ratingSum = Number(d.ratingSum), ratingCount = Number(d.ratingCount);
+      let rating = Number(d.rating);
+      if (!Number.isFinite(rating) && ratingCount > 0) rating = ratingSum / ratingCount;
+      sadhaks.push({
+        id: doc.id,
+        name: pickStr(d, ["displayName", "name", "fullName", "nameHi", "nameEn"], 80),
+        title: pickStr(d, ["title", "titleHi", "expertise", "specialization", "skills", "category"], 120),
+        experience: pickStr(d, ["experience", "experienceYears", "experienceHi"], 40) ||
+          (Number.isFinite(Number(d.experienceYears)) ? `${Number(d.experienceYears)}+ वर्ष` : ""),
+        languages: pickStr(d, ["languages", "language"], 80),
+        bio: pickStr(d, ["bio", "about", "description"], 300),
+        photoUrl: pickStr(d, ["photoUrl", "profileImage", "imageUrl", "avatarUrl", "photoURL"], 500),
+        rating: Number.isFinite(rating) ? Math.round(rating * 10) / 10 : null,
+        isOnline: d.isOnline === true || d.online === true,
+      });
+    });
+    sadhaks.sort((a, b) => Number(b.isOnline) - Number(a.isOnline) || (b.rating || 0) - (a.rating || 0));
+    res.set("Cache-Control", "public, max-age=60, s-maxage=120");
+    res.json({
+      sadhaks,
+      prices: {
+        session: { rupees: PRICE_TABLE.SESSION.amountPaise / 100, minutes: PRICE_TABLE.SESSION.durationMinutes },
+        extension: { rupees: PRICE_TABLE.EXTENSION.amountPaise / 100, minutes: PRICE_TABLE.EXTENSION.durationMinutes },
+        dreamChat: { rupees: PRICE_TABLE.DREAM_CHAT.amountPaise / 100, minutes: PRICE_TABLE.DREAM_CHAT.durationMinutes },
+        dreamCall: { rupees: PRICE_TABLE.DREAM_CALL.amountPaise / 100, minutes: PRICE_TABLE.DREAM_CALL.durationMinutes },
+      },
+      updatedAt: new Date().toISOString(),
+    });
+  } catch (e) {
+    console.error("publicSadhaks", e);
+    res.status(500).json({ error: "internal" });
+  }
+});
+
+/**
+ * POST https://<region>-devbhasha-d9e22.cloudfunctions.net/websiteEnquiry
+ * Body JSON: { name, phone, email?, message, sadhakId?, topic?, page?, website? (honeypot) }
+ * Stores in /websiteEnquiries for the Dev Panel. Throttled per IP and phone.
+ */
+exports.websiteEnquiry = onRequest({ cors: false, maxInstances: 5, invoker: "public" }, async (req, res) => {
+  if (applyCors(req, res)) return;
+  if (req.method !== "POST") { res.status(405).json({ error: "method" }); return; }
+  try {
+    const b = typeof req.body === "object" && req.body ? req.body : {};
+    if (typeof b.website === "string" && b.website.trim()) { res.json({ ok: true }); return; } // bot
+    const s = (v, max) => (typeof v === "string" ? v.trim().slice(0, max) : "");
+    const name = s(b.name, 80);
+    const phoneDigits = s(b.phone, 20).replace(/\D/g, "");
+    const phone = phoneDigits.length === 12 && phoneDigits.startsWith("91") ? phoneDigits.slice(2) : phoneDigits;
+    const email = s(b.email, 120);
+    const message = s(b.message, 1500);
+    if (name.length < 2) { res.status(400).json({ error: "name" }); return; }
+    if (!/^[6-9]\d{9}$/.test(phone)) { res.status(400).json({ error: "phone" }); return; }
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { res.status(400).json({ error: "email" }); return; }
+    if (message.length < 2) { res.status(400).json({ error: "message" }); return; }
+
+    const ip = String(req.get("x-forwarded-for") || req.ip || "").split(",")[0].trim();
+    const ipHash = crypto.createHash("sha256").update(ip).digest("hex").slice(0, 32);
+    const sinceMs = Date.now() - 60 * 60 * 1000;
+    const recent = await db.collection("websiteEnquiries").where("ipHash", "==", ipHash).limit(50).get();
+    let lastHour = 0;
+    recent.forEach((d) => { const t = d.get("createdAt"); if (t && t.toMillis && t.toMillis() >= sinceMs) lastHour++; });
+    if (lastHour >= 5) { res.status(429).json({ error: "rate" }); return; }
+
+    const ref = await db.collection("websiteEnquiries").add({
+      name, phone, email, message,
+      sadhakId: s(b.sadhakId, 128),
+      sadhakName: s(b.sadhakName, 80),
+      topic: s(b.topic, 60),
+      page: s(b.page, 200),
+      source: "website",
+      status: "new",
+      ipHash,
+      userAgent: s(req.get("user-agent"), 200),
+      createdAt: FieldValue.serverTimestamp(),
+    });
+    res.json({ ok: true, id: ref.id });
+  } catch (e) {
+    console.error("websiteEnquiry", e);
+    res.status(500).json({ error: "internal" });
+  }
+});

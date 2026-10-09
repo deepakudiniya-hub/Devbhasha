@@ -247,6 +247,12 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
+    // Website (devbhasha.com) enquiries: written only by the websiteEnquiry
+    // Cloud Function; Dev Panel admin can read, mark handled, or delete.
+    match /websiteEnquiries/{enquiryId} {
+      allow read, update, delete: if isAdmin();
+    }
+
     // Everything else: denied by default (no matching allow).
   }
 }
