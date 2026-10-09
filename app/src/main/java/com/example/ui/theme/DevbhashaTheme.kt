@@ -42,9 +42,9 @@ val TextTertiary = Color(0xFF5F6368)
 
 // Accent (ONLY FOR CTA):
 // Soothing Muted Terracotta (#E76F51) & Soft Peach (#F4A261) - Easier on the eyes
-val Saffron = Color(0xFFE76F51)
+val Saffron = Color(0xFFE46228)
 val SaffronGradientStart = Color(0xFFF4A261)
-val SaffronGradientEnd = Color(0xFFE76F51)
+val SaffronGradientEnd = Color(0xFFE46228)
 val SaffronLight = Color(0xFFFFFFFF)
 
 // Neutral:
@@ -75,15 +75,15 @@ val TextDark = Color(0xFF000000)
 val TextLight = Color(0xFFFFFFFF)
 val TextMuted = Color(0xFF737373)
 
-val Terra = Color(0xFFE76F51)
-val TerraDeep = Color(0xFFE76F51)
-val DevOrange = Color(0xFFE76F51)
-val SaffronPrimary = Color(0xFFE76F51)
-val SaffronDeep = Color(0xFFE76F51)
+val Terra = Color(0xFFE46228)
+val TerraDeep = Color(0xFFC24E1B)
+val DevOrange = Color(0xFFE46228)
+val SaffronPrimary = Color(0xFFE46228)
+val SaffronDeep = Color(0xFFC24E1B)
 val SaffronGold = Color(0xFFF4A261)
-val SaffronSoftBg = Color(0xFFFFFFFF)
-val GoldStamp = Color(0xFFE76F51)
-val GoldStampSoft = Color(0xFFFFFFFF)
+val SaffronSoftBg = Color(0xFFFDF0E8)
+val GoldStamp = Color(0xFFE46228)
+val GoldStampSoft = Color(0xFFFDF0E8)
 val Sage = Color(0xFF16A34A)
 val SageDeep = Color(0xFF15803D)
 val GreenPrimary = Color(0xFF16A34A)
@@ -95,8 +95,6 @@ val Border = Color(0xFFEFEFEF)
 // Legacy Brand Palette
 val CosmicBlack = Color(0xFF000000)
 val CosmicIndigo = Color(0xFF000000)
-val NeonViolet = Color(0xFFFF6B00)
-val NeonIndigo = Color(0xFFFF6B00)
 val GlassBackground = Color.White
 val GlassBorder = Color(0xFFEFEFEF)
 
@@ -113,7 +111,7 @@ val BorderColor = Color(0xFFE0E0E0)
 val TextColor = Color(0xFF202124) // Google-like dark text
 
 private val DevbhashaColorScheme = lightColorScheme(
-    primary = GoogleBlue,
+    primary = DevOrange,
     onPrimary = Color.White,
     background = BackgroundColor,
     onBackground = TextColor,
@@ -125,7 +123,7 @@ private val DevbhashaColorScheme = lightColorScheme(
 )
 
 private val DarkColorScheme = darkColorScheme(
-    primary = GoogleBlue,
+    primary = DevOrange,
     onPrimary = Color.Black,
     background = Color.Black,
     onBackground = Color.White,
@@ -133,7 +131,6 @@ private val DarkColorScheme = darkColorScheme(
     onSurface = Color.White,
     outline = Color(0xFF444444)
 )
-// ... (rest of the file remains same, keeping the AppTypography defined earlier)
 
 val AppFontFamily = FontFamily(
     Font(R.font.poppins, FontWeight.Normal),
@@ -230,7 +227,7 @@ private val AppTypography = Typography(
 @Composable
 fun DevbhashaTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    dynamicColor: Boolean = true,
+    dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
@@ -271,10 +268,10 @@ val SurfaceAlt   = Color(0xFFFAFAFA)
 val BorderSoft   = Color(0xFFE5E5E5)
 
 // Brand — Muted Terracotta & Soft Peach
-val SaffronBase = Color(0xFFE76F51)
-val SaffronDeep2 = Color(0xFFE76F51)
-val SaffronSoft = Color(0xFFFDF6F0)
-val SaffronSoftAlt = Color(0xFFFAF0E6)
+val SaffronBase = Color(0xFFE46228)
+val SaffronDeep2 = Color(0xFFC24E1B)
+val SaffronSoft = Color(0xFFFDF0E8)
+val SaffronSoftAlt = Color(0xFFFDF0E8)
 
 // Success — green
 val GreenBase = Color(0xFF16A34A)
