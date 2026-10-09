@@ -381,7 +381,7 @@ fun AstrotalkOtpScreen(
         Spacer(modifier = Modifier.height(6.dp))
 
         Text(
-            text = "Enter the 4-digit code sent to your mobile number +91 ${phoneNumber.take(2)}•••• ••${phoneNumber.takeLast(2)}",
+            text = "Enter the 6-digit code sent to your mobile number +91 ${phoneNumber.take(2)}•••• ••${phoneNumber.takeLast(2)}",
             fontFamily = AppFontFamily,
             fontSize = 13.sp,
             lineHeight = 18.sp,
@@ -390,12 +390,12 @@ fun AstrotalkOtpScreen(
 
         Spacer(modifier = Modifier.height(30.dp))
 
-        // 4 Separate Square OTP Digit Boxes (matching Astrotalk design)
+        // 6 Separate Square OTP Digit Boxes (matching Astrotalk design)
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(14.dp, Alignment.CenterHorizontally)
+            horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally)
         ) {
-            for (i in 0 until 4) {
+            for (i in 0 until 6) {
                 val digit = if (i < otpCode.length) otpCode[i].toString() else ""
                 val isCurrent = i == otpCode.length
 
@@ -407,7 +407,7 @@ fun AstrotalkOtpScreen(
                         width = if (isCurrent) 2.dp else 1.dp,
                         color = if (isCurrent) primaryColor else if (digit.isNotBlank()) primaryColor.copy(alpha = 0.5f) else Color(0xFFE2E8F0)
                     ),
-                    modifier = Modifier.size(58.dp)
+                    modifier = Modifier.size(46.dp)
                 ) {
                     Box(contentAlignment = Alignment.Center) {
                         Text(
@@ -492,7 +492,7 @@ fun AstrotalkOtpScreen(
                                                 if (otpCode.isNotEmpty()) onOtpChange(otpCode.dropLast(1))
                                             }
                                             else -> {
-                                                if (otpCode.length < 4) onOtpChange(otpCode + key)
+                                                if (otpCode.length < 6) onOtpChange(otpCode + key)
                                             }
                                         }
                                     }
@@ -524,7 +524,7 @@ fun AstrotalkOtpScreen(
         // Verify Button
         Button(
             onClick = onVerifyClick,
-            enabled = !isLoading && otpCode.length >= 4,
+            enabled = !isLoading && otpCode.length == 6,
             shape = RoundedCornerShape(14.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = primaryColor,

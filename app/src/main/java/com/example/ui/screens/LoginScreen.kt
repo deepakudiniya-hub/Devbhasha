@@ -117,21 +117,55 @@ fun LoginScreen(
     }
 
     val auth = FirebaseAuth.getInstance()
-    // verificationId defined above in remember block
+    var resendToken by remember { mutableStateOf<PhoneAuthProvider.ForceResendingToken?>(null) }
+
+    // Persistent login: if Firebase already has a signed-in user, never force re-login.
+    LaunchedEffect(Unit) {
+        val existing = auth.currentUser
+        if (existing != null) {
+            val name = existing.displayName?.takeIf { it.isNotBlank() } ?: enteredUserName
+            onLoginSuccess(existing.uid, name, existing.phoneNumber ?: "", "user")
+        }
+    }
+
+    fun authErrorMessage(e: Exception?): String = when (e) {
+        is com.google.firebase.auth.FirebaseAuthInvalidCredentialsException -> "गलत OTP या नंबर। कृपया दोबारा जाँचें।"
+        is com.google.firebase.FirebaseTooManyRequestsException -> "बहुत अधिक प्रयास। कृपया कुछ देर बाद कोशिश करें।"
+        is com.google.firebase.FirebaseNetworkException -> "नेटवर्क त्रुटि। इंटरनेट कनेक्शन जाँचें।"
+        else -> "सत्यापन विफल: " + (e?.localizedMessage ?: "अज्ञात त्रुटि")
+    }
+
+    fun signInWithPhoneCredential(credential: com.google.firebase.auth.PhoneAuthCredential) {
+        isLoading = true
+        auth.signInWithCredential(credential)
+            .addOnCompleteListener { task ->
+                isLoading = false
+                if (task.isSuccessful && auth.currentUser != null) {
+                    viewState = LoginViewState.LANGUAGE_SELECT
+                    showToast("OTP verified successfully! ✨")
+                } else {
+                    // Never fall through to success on failure.
+                    otpCode = ""
+                    showToast(authErrorMessage(task.exception))
+                }
+            }
+    }
+
     val callbacks = remember {
-        object : com.google.firebase.auth.PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
+        object : PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
             override fun onVerificationCompleted(credential: com.google.firebase.auth.PhoneAuthCredential) {
-                // Auto-verification
+                // Instant verification / SMS auto-retrieval
+                credential.smsCode?.let { otpCode = it }
+                signInWithPhoneCredential(credential)
             }
             override fun onVerificationFailed(e: com.google.firebase.FirebaseException) {
                 isLoading = false
-                verificationId = "demo_verification_id"
-                viewState = LoginViewState.OTP_VERIFY
-                startTimer()
-                showToast("Demo OTP Activated: 123456")
+                verificationId = ""
+                showToast(authErrorMessage(e))
             }
-            override fun onCodeSent(id: String, token: com.google.firebase.auth.PhoneAuthProvider.ForceResendingToken) {
+            override fun onCodeSent(id: String, token: PhoneAuthProvider.ForceResendingToken) {
                 verificationId = id
+                resendToken = token
                 isLoading = false
                 viewState = LoginViewState.OTP_VERIFY
                 startTimer()
@@ -139,86 +173,68 @@ fun LoginScreen(
         }
     }
 
-    fun triggerSendOtp() {
-        if (phoneNumber.length != 10) {
+    fun triggerSendOtp(isResend: Boolean = false) {
+        if (phoneNumber.length != 10 || !phoneNumber.all { it.isDigit() }) {
             showToast("Please enter a valid 10-digit mobile number")
+            return
+        }
+        val activity = context as? Activity
+        if (activity == null) {
+            showToast("OTP नहीं भेजा जा सका। ऐप दोबारा खोलें।")
             return
         }
 
         isLoading = true
         try {
-            val options = com.google.firebase.auth.PhoneAuthOptions.newBuilder(auth)
+            val builder = com.google.firebase.auth.PhoneAuthOptions.newBuilder(auth)
                 .setPhoneNumber("+91$phoneNumber")
-                .setTimeout(30L, java.util.concurrent.TimeUnit.SECONDS)
-                .setActivity(context as Activity)
+                .setTimeout(60L, TimeUnit.SECONDS)
+                .setActivity(activity)
                 .setCallbacks(callbacks)
-                .build()
-            PhoneAuthProvider.verifyPhoneNumber(options)
+            val token = resendToken
+            if (isResend && token != null) builder.setForceResendingToken(token)
+            PhoneAuthProvider.verifyPhoneNumber(builder.build())
         } catch (e: Exception) {
             isLoading = false
-            verificationId = "demo_verification_id"
-            viewState = LoginViewState.OTP_VERIFY
-            startTimer()
-            showToast("Demo OTP Sent: 123456")
+            showToast(authErrorMessage(e))
         }
     }
 
     fun triggerVerifyOtp() {
-        if (otpCode.length < 4) {
-            showToast("Please enter 4-digit code")
+        if (otpCode.length != 6 || !otpCode.all { it.isDigit() }) {
+            showToast("Please enter the 6-digit code")
             return
         }
-
-        isLoading = true
-        if (otpCode == "123456" || otpCode == "111111" || verificationId == "demo_verification_id") {
-            coroutineScope.launch {
-                delay(250)
-                isLoading = false
-                viewState = LoginViewState.LANGUAGE_SELECT
-                showToast("OTP verified successfully! ✨")
-            }
-        } else if (verificationId.isNotBlank() && otpCode.length == 6) {
-            val credential = com.google.firebase.auth.PhoneAuthProvider.getCredential(verificationId, otpCode)
-            auth.signInWithCredential(credential)
-                .addOnCompleteListener { task ->
-                    isLoading = false
-                    if (task.isSuccessful) {
-                        viewState = LoginViewState.LANGUAGE_SELECT
-                        showToast("OTP verified successfully!")
-                    } else {
-                        // Fallback to allow demo verification if Firebase auth fails
-                        viewState = LoginViewState.LANGUAGE_SELECT
-                        showToast("OTP verified successfully! ✨")
-                    }
-                }
-        } else {
-            coroutineScope.launch {
-                delay(250)
-                isLoading = false
-                viewState = LoginViewState.LANGUAGE_SELECT
-                showToast("OTP verified successfully! ✨")
-            }
+        if (verificationId.isBlank()) {
+            showToast("कृपया पहले OTP भेजें")
+            return
         }
+        val credential = PhoneAuthProvider.getCredential(verificationId, otpCode)
+        signInWithPhoneCredential(credential)
     }
 
-    fun loginAsGoogleDevotee(email: String, name: String, overrideUid: String? = null) {
+    fun completeFirebaseLogin(email: String, name: String) {
         isLoading = false
-        val uid = overrideUid ?: ("user_g_" + (email.ifBlank { name }).hashCode().let { kotlin.math.abs(it) })
-        val finalName = name.ifBlank { "साधक" }
+        val user = auth.currentUser
+        if (user == null) {
+            showToast("लॉगिन विफल। कृपया दोबारा कोशिश करें।")
+            return
+        }
+        val finalName = name.ifBlank { user.displayName ?: "साधक" }
         UserManager.initializeOrSyncUser(
-            uid = uid,
+            uid = user.uid,
             userName = finalName,
-            phoneNumber = "",
-            email = email
+            phoneNumber = user.phoneNumber ?: "",
+            email = email.ifBlank { user.email ?: "" }
         )
         showToast("लॉगिन सफल: $finalName ✨")
-        onLoginSuccess(uid, finalName, "", "user")
+        onLoginSuccess(user.uid, finalName, user.phoneNumber ?: "", "user")
     }
 
     fun triggerGoogleSignIn() {
         val activity = context as? Activity
         if (activity == null) {
-            loginAsGoogleDevotee("Deepakudiniya@gmail.com", "दीपक जी")
+            showToast("Google लॉगिन उपलब्ध नहीं है")
             return
         }
 
@@ -238,32 +254,31 @@ fun LoginScreen(
 
                 val result = credentialManager.getCredential(activity, request)
                 val credential = result.credential
-                if (credential is androidx.credentials.CustomCredential && 
+                if (credential is androidx.credentials.CustomCredential &&
                     credential.type == com.google.android.libraries.identity.googleid.GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
                     val googleIdTokenCredential = com.google.android.libraries.identity.googleid.GoogleIdTokenCredential.createFrom(credential.data)
                     val email = googleIdTokenCredential.id
-                    val name = googleIdTokenCredential.displayName ?: "दीपक जी"
+                    val name = googleIdTokenCredential.displayName ?: ""
                     val idToken = googleIdTokenCredential.idToken
-                    if (!idToken.isNullOrBlank()) {
+                    if (idToken.isNotBlank()) {
                         val firebaseCredential = com.google.firebase.auth.GoogleAuthProvider.getCredential(idToken, null)
                         auth.signInWithCredential(firebaseCredential)
-                            .addOnSuccessListener { authResult ->
-                                val user = authResult.user
-                                val uid = user?.uid ?: ("user_g_" + (email.ifBlank { name }).hashCode().let { kotlin.math.abs(it) })
-                                loginAsGoogleDevotee(email, name, uid)
-                            }
-                            .addOnFailureListener {
-                                loginAsGoogleDevotee(email, name)
+                            .addOnSuccessListener { completeFirebaseLogin(email, name) }
+                            .addOnFailureListener { e ->
+                                isLoading = false
+                                showToast(authErrorMessage(e))
                             }
                     } else {
-                        loginAsGoogleDevotee(email, name)
+                        isLoading = false
+                        showToast("Google लॉगिन विफल")
                     }
                 } else {
-                    loginAsGoogleDevotee("Deepakudiniya@gmail.com", "दीपक जी")
+                    isLoading = false
+                    showToast("Google लॉगिन विफल")
                 }
             } catch (e: Exception) {
-                // In emulator or without Play Services signed-in account, gracefully log in directly
-                loginAsGoogleDevotee("Deepakudiniya@gmail.com", "दीपक जी")
+                isLoading = false
+                showToast("Google लॉगिन विफल: " + (e.localizedMessage ?: ""))
             }
         }
     }
@@ -293,8 +308,8 @@ fun LoginScreen(
                             triggerSendOtp()
                         },
                         onGoogleLoginClick = { triggerGoogleSignIn() },
-                        onAppleLoginClick = { loginAsGoogleDevotee("apple_dev@icloud.com", "साधक (Apple)") },
-                        onFacebookLoginClick = { loginAsGoogleDevotee("fb_dev@dev.org", "साधक (Facebook)") },
+                        onAppleLoginClick = { showToast("Apple लॉगिन जल्द आ रहा है") },
+                        onFacebookLoginClick = { showToast("Facebook लॉगिन जल्द आ रहा है") },
                         onSkip = {
                             if (onSkip != null) {
                                 onSkip("user")
@@ -312,7 +327,7 @@ fun LoginScreen(
                         otpCode = otpCode,
                         onOtpChange = {
                             otpCode = it
-                            if (it.length == 4) {
+                            if (it.length == 6) {
                                 focusManager.clearFocus()
                             }
                         },
@@ -323,8 +338,8 @@ fun LoginScreen(
                             viewState = LoginViewState.PHONE_INPUT
                         },
                         onResendClick = {
+                            triggerSendOtp(isResend = true)
                             showToast("Code resent to +91 $phoneNumber")
-                            startTimer()
                         },
                         onVerifyClick = {
                             focusManager.clearFocus()
@@ -369,7 +384,13 @@ fun LoginScreen(
                 LoginViewState.ALL_SET_SUCCESS -> {
                     AstrotalkAllSetScreen(
                         onLetsGo = {
-                            val uid = auth.currentUser?.uid ?: ("user_" + (if (phoneNumber.isNotBlank()) phoneNumber else (100000..999999).random().toString()))
+                            val firebaseUser = auth.currentUser
+                            if (firebaseUser == null) {
+                                showToast("सत्र समाप्त। कृपया दोबारा लॉगिन करें।")
+                                viewState = LoginViewState.PHONE_INPUT
+                                return@AstrotalkAllSetScreen
+                            }
+                            val uid = firebaseUser.uid
                             val finalName = enteredUserName.trim().ifBlank { "दीपक जी" }
                             UserManager.initializeOrSyncUser(
                                 uid = uid,
@@ -730,7 +751,7 @@ private fun BentoOtpVerifyView(
             border = BorderStroke(1.dp, Color(0xFFFDE68A))
         ) {
             Text(
-                text = "💡 Demo OTP: 123456 (यदि SMS न पहुँचे)",
+                text = "💡 SMS न पहुँचे तो 30 सेकंड बाद दोबारा भेजें",
                 fontSize = 11.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color(0xFF92400E),
