@@ -80,8 +80,9 @@ class SessionBillingException(
 ) : Exception(message, cause) {
     /** Server rejected because the wallet doesn't cover the price. */
     val isInsufficientBalance: Boolean
-        get() = code == FirebaseFunctionsException.Code.FAILED_PRECONDITION ||
-            code == FirebaseFunctionsException.Code.RESOURCE_EXHAUSTED
+        get() = code == FirebaseFunctionsException.Code.RESOURCE_EXHAUSTED ||
+            (code == FirebaseFunctionsException.Code.FAILED_PRECONDITION &&
+                (message ?: "").contains("insufficient", ignoreCase = true))
     val isUnauthenticated: Boolean
         get() = code == FirebaseFunctionsException.Code.UNAUTHENTICATED
 }
