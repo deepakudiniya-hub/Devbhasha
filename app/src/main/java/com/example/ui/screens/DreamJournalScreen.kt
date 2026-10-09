@@ -44,7 +44,7 @@ import com.example.utils.UserSession
 import java.text.SimpleDateFormat
 import java.util.*
 
-private val SaffronOrange = Color(0xFFE46228)
+private val SaffronOrange = Color(0xFF0D656C)
 private val SoftGreyBorder = Color(0xFFEFEFEF)
 private val CardBackground = Color(0xFFFFFFFF)
 

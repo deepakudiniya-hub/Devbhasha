@@ -228,7 +228,7 @@ fun UserProfileScreen(
                     .testTag("user_profile_card"),
                 shape = RoundedCornerShape(22.dp),
                 colors = CardDefaults.cardColors(containerColor = Color.White),
-                border = BorderStroke(1.5.dp, Color(0xFFFDF0E8)),
+                border = BorderStroke(1.5.dp, Color(0xFFFAF6EA)),
                 elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
             ) {
                 Column(
@@ -331,8 +331,8 @@ fun UserProfileScreen(
                                     Brush.sweepGradient(
                                         listOf(
                                             Color(0xFFF59E0B),
-                                            Color(0xFFE46228),
-                                            Color(0xFFE46228),
+                                            Color(0xFF0D656C),
+                                            Color(0xFF0D656C),
                                             Color(0xFFF59E0B)
                                         )
                                     )
@@ -470,7 +470,7 @@ fun UserProfileScreen(
                                             text = "फ़ोन नंबर जोड़ें (+)",
                                             fontSize = 11.sp,
                                             fontWeight = FontWeight.Bold,
-                                            color = Color(0xFFC24E1B)
+                                            color = Color(0xFF125157)
                                         )
                                     }
                                 }
@@ -502,7 +502,7 @@ fun UserProfileScreen(
                     Surface(
                         shape = RoundedCornerShape(14.dp),
                         color = Color(0xFFFFFBEB),
-                        border = BorderStroke(1.dp, Color(0xFFFDF0E8).copy(alpha = 0.7f)),
+                        border = BorderStroke(1.dp, Color(0xFFFAF6EA).copy(alpha = 0.7f)),
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Column(modifier = Modifier.padding(vertical = 10.dp, horizontal = 12.dp)) {
@@ -740,7 +740,7 @@ fun UserProfileScreen(
                                 .testTag("edit_profile_button"),
                             shape = RoundedCornerShape(12.dp),
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = if (isProfileIncomplete) Color(0xFFE46228) else SaffronPrimary
+                                containerColor = if (isProfileIncomplete) Color(0xFF0D656C) else SaffronPrimary
                             ),
                             elevation = ButtonDefaults.buttonElevation(defaultElevation = 2.dp)
                         ) {
@@ -827,13 +827,13 @@ fun UserProfileScreen(
                                 text = "प्रोफ़ाइल विवरण पूर्ण करें",
                                 fontSize = 13.5.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = Color(0xFFC24E1B)
+                                color = Color(0xFF125157)
                             )
                             Spacer(modifier = Modifier.height(2.dp))
                             Text(
                                 text = "सटीक कुंडली विचार, वैदिक परामर्श कॉल व अनुष्ठान हेतु अपना नाम व फ़ोन नंबर दर्ज करें।",
                                 fontSize = 11.5.sp,
-                                color = Color(0xFFC24E1B),
+                                color = Color(0xFF125157),
                                 lineHeight = 16.sp
                             )
                         }
@@ -868,7 +868,7 @@ fun UserProfileScreen(
                     .testTag("consultation_history_card"),
                 shape = RoundedCornerShape(20.dp),
                 colors = CardDefaults.cardColors(containerColor = Color.White),
-                border = BorderStroke(1.dp, Color(0xFFFDF0E8)),
+                border = BorderStroke(1.dp, Color(0xFFFAF6EA)),
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
@@ -883,7 +883,7 @@ fun UserProfileScreen(
                                 modifier = Modifier
                                     .size(36.dp)
                                     .clip(CircleShape)
-                                    .background(Color(0xFFFDF0E8)),
+                                    .background(Color(0xFFFAF6EA)),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(text = "📜", fontSize = 18.sp)
@@ -1019,7 +1019,7 @@ fun UserProfileScreen(
                                                     text = if (isAnswered) "समाधान प्राप्त ✓" else "प्रतीक्षारत ⏳",
                                                     fontSize = 10.5.sp,
                                                     fontWeight = FontWeight.Bold,
-                                                    color = if (isAnswered) GreenPrimary else Color(0xFFC24E1B),
+                                                    color = if (isAnswered) GreenPrimary else Color(0xFF125157),
                                                     modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                                                 )
                                             }
@@ -1062,7 +1062,7 @@ fun UserProfileScreen(
                     .testTag("saved_mantras_card"),
                 shape = RoundedCornerShape(20.dp),
                 colors = CardDefaults.cardColors(containerColor = Color.White),
-                border = BorderStroke(1.dp, Color(0xFFFDF0E8)),
+                border = BorderStroke(1.dp, Color(0xFFFAF6EA)),
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
@@ -1077,7 +1077,7 @@ fun UserProfileScreen(
                                 modifier = Modifier
                                     .size(36.dp)
                                     .clip(CircleShape)
-                                    .background(Color(0xFFFDF0E8)),
+                                    .background(Color(0xFFFAF6EA)),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(text = "📿", fontSize = 18.sp)
@@ -1113,7 +1113,7 @@ fun UserProfileScreen(
                                 color = if (isSaved) Color(0xFFFFFDF8) else Color(0xFFFAFAFA),
                                 border = BorderStroke(
                                     1.dp,
-                                    if (isSaved) Color(0xFFFDF0E8) else Color(0xFFE2E8F0)
+                                    if (isSaved) Color(0xFFFAF6EA) else Color(0xFFE2E8F0)
                                 ),
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -1184,7 +1184,7 @@ fun UserProfileScreen(
                                                 modifier = Modifier
                                                     .fillMaxWidth()
                                                     .clip(RoundedCornerShape(8.dp))
-                                                    .background(Color(0xFFFDF0E8))
+                                                    .background(Color(0xFFFAF6EA))
                                                     .padding(10.dp)
                                             ) {
                                                 Text(
@@ -1240,7 +1240,7 @@ fun UserProfileScreen(
                     .testTag("settings_support_card"),
                 shape = RoundedCornerShape(20.dp),
                 colors = CardDefaults.cardColors(containerColor = Color.White),
-                border = BorderStroke(1.dp, Color(0xFFFDF0E8)),
+                border = BorderStroke(1.dp, Color(0xFFFAF6EA)),
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
@@ -1485,7 +1485,7 @@ fun UserProfileScreen(
                     Surface(
                         shape = RoundedCornerShape(14.dp),
                         color = Color(0xFFFFFBEB),
-                        border = BorderStroke(1.dp, Color(0xFFFDF0E8))
+                        border = BorderStroke(1.dp, Color(0xFFFAF6EA))
                     ) {
                         Column(modifier = Modifier.padding(10.dp)) {
                             Row(
@@ -1799,7 +1799,7 @@ fun UserProfileScreen(
                                             listOf(
                                                 Color(0xFFF59E0B),
                                                 previewAvatar.bgColor,
-                                                Color(0xFFE46228),
+                                                Color(0xFF0D656C),
                                                 Color(0xFFF59E0B)
                                             )
                                         )
@@ -2055,8 +2055,8 @@ fun UserProfileScreen(
 
                     Surface(
                         shape = RoundedCornerShape(12.dp),
-                        color = Color(0xFFFDF0E8),
-                        border = BorderStroke(1.dp, Color(0xFFFDF0E8))
+                        color = Color(0xFFFAF6EA),
+                        border = BorderStroke(1.dp, Color(0xFFFAF6EA))
                     ) {
                         Column(modifier = Modifier.padding(12.dp)) {
                             Text(

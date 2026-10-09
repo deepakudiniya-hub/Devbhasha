@@ -93,10 +93,10 @@ fun FestivalPromoCouponCard(
     // Radiant Solar Sunset & Saffron Gradient
     val cardGradient = Brush.linearGradient(
         colors = listOf(
-            Color(0xFFE46228), // Vibrant Coral Saffron
+            Color(0xFF0D656C), // Vibrant Coral Saffron
             Color(0xFFFFA000), // Rich Golden Amber
             Color(0xFFFFD54F), // Sunburst Yellow
-            Color(0xFFE46228)  // Deep Sacred Orange
+            Color(0xFF0D656C)  // Deep Sacred Orange
         ),
         start = Offset(0f, 0f),
         end = Offset(800f, 600f)
@@ -116,7 +116,7 @@ fun FestivalPromoCouponCard(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 6.dp)
-            .shadow(14.dp, RoundedCornerShape(24.dp), spotColor = Color(0xFFE46228))
+            .shadow(14.dp, RoundedCornerShape(24.dp), spotColor = Color(0xFF0D656C))
             .background(cardGradient, RoundedCornerShape(24.dp))
             .border(BorderStroke(1.5.dp, foilBorder), RoundedCornerShape(24.dp))
             .clip(RoundedCornerShape(24.dp))
@@ -256,7 +256,7 @@ fun FestivalPromoCouponCard(
                         )
                         Surface(
                             shape = RoundedCornerShape(4.dp),
-                            color = Color(0xFFC24E1B)
+                            color = Color(0xFF125157)
                         ) {
                             Text(
                                 text = "FREE",
@@ -365,7 +365,7 @@ fun FestivalPromoCouponCard(
                     },
                     colors = ButtonDefaults.buttonColors(
                         containerColor = if (isClaimed) Color(0xFF1B5E20) else Color.White,
-                        contentColor = if (isClaimed) Color.White else Color(0xFFC24E1B)
+                        contentColor = if (isClaimed) Color.White else Color(0xFF125157)
                     ),
                     shape = RoundedCornerShape(12.dp),
                     elevation = ButtonDefaults.buttonElevation(defaultElevation = 5.dp),
@@ -380,7 +380,7 @@ fun FestivalPromoCouponCard(
                         Icon(
                             imageVector = if (isClaimed) Icons.Default.CheckCircle else Icons.Default.Bolt,
                             contentDescription = null,
-                            tint = if (isClaimed) Color(0xFF81C784) else Color(0xFFE46228),
+                            tint = if (isClaimed) Color(0xFF81C784) else Color(0xFF0D656C),
                             modifier = Modifier.size(18.dp)
                         )
                         Text(

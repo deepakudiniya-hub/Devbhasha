@@ -21,14 +21,14 @@ import androidx.compose.ui.unit.sp
 import com.example.R
 
 // ==========================================
-// PURE WHITE + BLACK + SAFFRON DESIGN SYSTEM
+// DEVBHASHA BRAND: TEAL #0D656C + GOLD #D0BF75 + CREAM #FAF6EA
 // ==========================================
 
 // Backgrounds:
 // --bg-primary: #FFFFFF (pure white, all screens)
 // --bg-secondary: #FAFAFA (search bars, input fields, inactive pills)
 // --bg-card: #FFFFFF with 1px border #EFEFEF and shadow 0 2px 12px rgba(0,0,0,0.05)
-val BgPrimary = Color(0xFFFFFFFF)
+val BgPrimary = Color(0xFFFAF6EA)
 val BgSecondary = Color(0xFFFAFAFA)
 val BgCard = Color(0xFFFFFFFF)
 
@@ -42,9 +42,9 @@ val TextTertiary = Color(0xFF5F6368)
 
 // Accent (ONLY FOR CTA):
 // Soothing Muted Terracotta (#E76F51) & Soft Peach (#F4A261) - Easier on the eyes
-val Saffron = Color(0xFFE46228)
-val SaffronGradientStart = Color(0xFFF4A261)
-val SaffronGradientEnd = Color(0xFFE46228)
+val Saffron = Color(0xFF0D656C)
+val SaffronGradientStart = Color(0xFFD0BF75)
+val SaffronGradientEnd = Color(0xFF0D656C)
 val SaffronLight = Color(0xFFFFFFFF)
 
 // Neutral:
@@ -58,12 +58,12 @@ val BorderMedium = Color(0xFFDBDBDB)
 val GrayNavPill = Color(0xFFF5F5F5)
 
 // Compatibility tokens mapped strictly to Pure White + Black + Saffron
-val StageBg = Color(0xFFFFFFFF)
-val PaperBg = Color(0xFFFFFFFF)
+val StageBg = Color(0xFFFAF6EA)
+val PaperBg = Color(0xFFFAF6EA)
 val PaperDeep = Color(0xFFFAFAFA)
 val PaperCard = Color(0xFFFFFFFF)
 val CardBg = Color(0xFFFFFFFF)
-val Background = Color(0xFFFFFFFF)
+val Background = Color(0xFFFAF6EA)
 val PageBg = Color(0xFFFAFAFA)
 
 val Ink = Color(0xFF000000)
@@ -75,15 +75,15 @@ val TextDark = Color(0xFF000000)
 val TextLight = Color(0xFFFFFFFF)
 val TextMuted = Color(0xFF737373)
 
-val Terra = Color(0xFFE46228)
-val TerraDeep = Color(0xFFC24E1B)
-val DevOrange = Color(0xFFE46228)
-val SaffronPrimary = Color(0xFFE46228)
-val SaffronDeep = Color(0xFFC24E1B)
-val SaffronGold = Color(0xFFF4A261)
-val SaffronSoftBg = Color(0xFFFDF0E8)
-val GoldStamp = Color(0xFFE46228)
-val GoldStampSoft = Color(0xFFFDF0E8)
+val Terra = Color(0xFF0D656C)
+val TerraDeep = Color(0xFF125157)
+val DevOrange = Color(0xFF0D656C)
+val SaffronPrimary = Color(0xFF0D656C)
+val SaffronDeep = Color(0xFF125157)
+val SaffronGold = Color(0xFFD0BF75)
+val SaffronSoftBg = Color(0xFFFAF6EA)
+val GoldStamp = Color(0xFF0D656C)
+val GoldStampSoft = Color(0xFFFAF6EA)
 val Sage = Color(0xFF16A34A)
 val SageDeep = Color(0xFF15803D)
 val GreenPrimary = Color(0xFF16A34A)
@@ -105,7 +105,7 @@ val ShapePill = RoundedCornerShape(9999.dp)
 val ShapeChip = RoundedCornerShape(12.dp)
 
 val GoogleBlue = Color(0xFF4285F4)
-val BackgroundColor = Color(0xFFFFFFFF)
+val BackgroundColor = Color(0xFFFAF6EA)
 val SurfaceColor = Color(0xFFFFFFFF)
 val BorderColor = Color(0xFFE0E0E0)
 val TextColor = Color(0xFF202124) // Google-like dark text
@@ -268,10 +268,10 @@ val SurfaceAlt   = Color(0xFFFAFAFA)
 val BorderSoft   = Color(0xFFE5E5E5)
 
 // Brand — Muted Terracotta & Soft Peach
-val SaffronBase = Color(0xFFE46228)
-val SaffronDeep2 = Color(0xFFC24E1B)
-val SaffronSoft = Color(0xFFFDF0E8)
-val SaffronSoftAlt = Color(0xFFFDF0E8)
+val SaffronBase = Color(0xFF0D656C)
+val SaffronDeep2 = Color(0xFF125157)
+val SaffronSoft = Color(0xFFFAF6EA)
+val SaffronSoftAlt = Color(0xFFFAF6EA)
 
 // Success — green
 val GreenBase = Color(0xFF16A34A)

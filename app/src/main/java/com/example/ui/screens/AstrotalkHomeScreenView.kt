@@ -50,7 +50,7 @@ fun AstrotalkHomeHeader(
     onLanguageToggle: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val primaryColor = Color(0xFFE46228)
+    val primaryColor = Color(0xFF0D656C)
     val textColor = Color(0xFF2B2B2B)
     val textSub = Color(0xFF6E6E6E)
 
@@ -73,7 +73,7 @@ fun AstrotalkHomeHeader(
                 modifier = Modifier
                     .size(44.dp)
                     .clip(CircleShape)
-                    .background(Color(0xFFFDF0E8))
+                    .background(Color(0xFFFAF6EA))
                     .border(1.5.dp, primaryColor, CircleShape),
                 contentAlignment = Alignment.Center
             ) {
@@ -273,7 +273,7 @@ fun AstrotalkLiveStoriesStrip(
                     ) {
                         Surface(
                             shape = CircleShape,
-                            color = Color(0xFFFDF0E8),
+                            color = Color(0xFFFAF6EA),
                             border = BorderStroke(2.dp, Color(0xFF16A34A)),
                             shadowElevation = 3.dp,
                             modifier = Modifier.size(54.dp)
@@ -341,7 +341,7 @@ fun AstrotalkQuickServicesGrid(
     onPanchangClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val primaryColor = Color(0xFFE46228)
+    val primaryColor = Color(0xFF0D656C)
     val textColor = Color(0xFF2B2B2B)
 
     Column(
@@ -374,7 +374,7 @@ fun AstrotalkQuickServicesGrid(
                 title = if (isHindi) "चैट करें" else "Chat Astrologer",
                 subtitle = if (isHindi) "तुरंत उत्तर" else "Instant Chat",
                 iconText = "💬",
-                iconColor = Color(0xFFE46228),
+                iconColor = Color(0xFF0D656C),
                 onClick = onChatClick,
                 modifier = Modifier.weight(1f)
             )
@@ -407,7 +407,7 @@ fun AstrotalkQuickServicesGrid(
                 title = if (isHindi) "दैनिक राशिफल" else "Horoscope",
                 subtitle = if (isHindi) "12 राशियां" else "Daily Forecast",
                 iconText = "♈",
-                iconColor = Color(0xFFE46228),
+                iconColor = Color(0xFF0D656C),
                 onClick = onHoroscopeClick,
                 modifier = Modifier.weight(1f)
             )
@@ -503,7 +503,7 @@ fun AstrotalkAstrologerCard(
     onCallClick: (SadhakItem) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val primaryColor = Color(0xFFE46228)
+    val primaryColor = Color(0xFF0D656C)
     val onlineGreen = Color(0xFF16A34A)
 
     Surface(
@@ -528,7 +528,7 @@ fun AstrotalkAstrologerCard(
             ) {
                 Surface(
                     shape = CircleShape,
-                    color = Color(0xFFFDF0E8),
+                    color = Color(0xFFFAF6EA),
                     border = BorderStroke(2.dp, if (sadhak.isOnline) onlineGreen else Color(0xFFCBD5E1)),
                     modifier = Modifier.size(60.dp)
                 ) {

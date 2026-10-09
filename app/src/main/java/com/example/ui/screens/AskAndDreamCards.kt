@@ -308,7 +308,7 @@ fun DreamMeaningCard(
                         modifier = Modifier
                             .size(34.dp)
                             .clip(CircleShape)
-                            .background(Color(0xFFFDF0E8)),
+                            .background(Color(0xFFFAF6EA)),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
@@ -456,8 +456,8 @@ fun AskAnythingBottomSheet(
                         .fillMaxWidth()
                         .padding(top = 18.dp),
                     shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFFFDF0E8)),
-                    border = BorderStroke(1.dp, Color(0xFFFDF0E8))
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFFFAF6EA)),
+                    border = BorderStroke(1.dp, Color(0xFFFAF6EA))
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -803,7 +803,7 @@ fun DreamMeaningBottomSheet(
                         Surface(
                             shape = RoundedCornerShape(14.dp),
                             color = Color(0xFFFFFDF9),
-                            border = BorderStroke(1.dp, if (isAnswered) Color(0xFFA7F3D0) else Color(0xFFFDF0E8)),
+                            border = BorderStroke(1.dp, if (isAnswered) Color(0xFFA7F3D0) else Color(0xFFFAF6EA)),
                             shadowElevation = 1.dp,
                             modifier = Modifier.fillMaxWidth()
                         ) {
