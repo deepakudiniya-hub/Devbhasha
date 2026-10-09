@@ -363,7 +363,7 @@ fun SadhakDirectoryCard(
                             color = Color(0xFFECFDF5)
                         ) {
                             Text(
-                                text = "₹20/min",
+                                text = com.example.utils.PriceLabels.SESSION,
                                 fontSize = 11.5.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = Color(0xFF047857),

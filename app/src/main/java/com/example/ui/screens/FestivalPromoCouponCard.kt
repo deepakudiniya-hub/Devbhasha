@@ -199,7 +199,7 @@ fun FestivalPromoCouponCard(
                                 .background(if (isClaimed) Color(0xFF69F0AE) else Color(0xFFFFD54F), CircleShape)
                         )
                         Text(
-                            text = if (isClaimed) "✓ ACTIVE" else "⚡ 15 MIN FREE",
+                            text = "⚡ 5 MIN FREE*",
                             color = Color.White,
                             fontSize = 9.5.sp,
                             fontWeight = FontWeight.Bold
@@ -270,7 +270,7 @@ fun FestivalPromoCouponCard(
 
                     Spacer(modifier = Modifier.height(2.dp))
                     Text(
-                        text = if (isHindi) "पहला 15 मिनट परामर्श निःशुल्क पाएं" else "Get 15 min free with verified sadhaks",
+                        text = if (isHindi) "पहली स्वप्न अर्थ चैट 5 मिनट निःशुल्क (प्रति फ़ोन नंबर एक बार)" else "First dream chat free for 5 min (once per phone number)",
                         color = Color.White,
                         fontSize = 13.5.sp,
                         fontWeight = FontWeight.Bold,
@@ -385,7 +385,7 @@ fun FestivalPromoCouponCard(
                         )
                         Text(
                             text = when {
-                                isClaimed -> if (isHindi) "15 मिनट जोड़े गए ✓" else "15 Mins Added ✓"
+                                isClaimed -> if (isHindi) "पात्रता सत्र में जाँची जाएगी ✓" else "Eligibility checked at session start ✓"
                                 isHindi -> "तुरंत क्लेम करें ⚡"
                                 else -> "Claim Offer ⚡"
                             },

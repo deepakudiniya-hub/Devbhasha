@@ -1,13 +1,24 @@
 package com.example.utils
 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import java.util.UUID
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FieldValue
+import kotlinx.coroutines.tasks.await
 
 sealed class DreamSubmitResult {
-    data class Success(val sadhakName: String, val questionId: String) : DreamSubmitResult()
+    data class Success(
+        val sadhakName: String,
+        val questionId: String,
+        /** True only when the SERVER granted the one-time free dream chat. */
+        val isFreeTrial: Boolean = false,
+        /** Amount the server charged (display only). */
+        val amountPaise: Long = 0L
+    ) : DreamSubmitResult()
     data class NoVerifiedSadhak(
         val message: String = "अभी कोई सत्यापित साधक उपलब्ध नहीं है, कृपया थोड़ी देर बाद प्रयास करें।"
+    ) : DreamSubmitResult()
+    /** Server refused because the wallet can't cover the price; prompt a recharge. */
+    data class InsufficientBalance(
+        val message: String = "वॉलेट में पर्याप्त राशि नहीं है। कृपया रिचार्ज करें।"
     ) : DreamSubmitResult()
     data class Error(val message: String) : DreamSubmitResult()
 }
@@ -17,43 +28,74 @@ data class VerifiedSadhakInfo(
     val name: String
 )
 
+/**
+ * Submits a dream for interpretation.
+ *
+ * Billing is server-authoritative: the app calls `startSession` with only the
+ * session type and provider. The server decides price, duration, whether this is
+ * the one-time free dream chat (once per phone number), and debits the wallet.
+ * The client never sends an amount.
+ */
 object DreamSubmitter {
 
-    private val defaultSadhaks = listOf(
-        VerifiedSadhakInfo(id = "sadhak_1", name = "आचार्य देव शर्मा (Acharya Dev Sharma)"),
-        VerifiedSadhakInfo(id = "sadhak_2", name = "पं. रामानंद शास्त्री (Pt. Ramanand Shastri)"),
-        VerifiedSadhakInfo(id = "sadhak_3", name = "योगी आनंद नाथ (Yogi Ananda Nath)"),
-        VerifiedSadhakInfo(id = "sadhak_4", name = "डॉ. राधिका वशिष्ठ (Dr. Radhika Vashishta)"),
-        VerifiedSadhakInfo(id = "sadhak_5", name = "स्वामी प्रज्ञानंद (Swami Pragyanand)")
-    )
+    private suspend fun pickVerifiedSadhak(): VerifiedSadhakInfo? {
+        val snap = FirestoreProvider.get()
+            .collection("sadhaks")
+            .whereEqualTo("verified", true)
+            .limit(25)
+            .get()
+            .await()
+        val available = snap.documents.filter { it.getBoolean("availability") != false }
+        val doc = (available.ifEmpty { snap.documents }).randomOrNull() ?: return null
+        return VerifiedSadhakInfo(
+            id = doc.getString("sadhakId")?.takeIf { it.isNotBlank() } ?: doc.id,
+            name = doc.getString("name") ?: "साधक"
+        )
+    }
 
-    /**
-     * Assigns the dream to ONE randomly selected verified sadhak locally.
-     */
-    suspend fun submitDreamToRandomSadhak(
-        db: Any? = null,
-        userId: String,
+    suspend fun submitDream(
         userName: String,
         dreamText: String,
-        paid: Boolean,
-        amount: Double,
-        paymentMode: String,
-        paymentId: String = "",
-        freeFirst: Boolean = false
-    ): DreamSubmitResult = withContext(Dispatchers.IO) {
-        try {
-            val cleanText = dreamText.trim()
-            if (cleanText.isBlank()) {
-                return@withContext DreamSubmitResult.Error("सपना खाली नहीं हो सकता।")
+        type: SessionType = SessionType.DREAM_CHAT
+    ): DreamSubmitResult {
+        val cleanText = dreamText.trim()
+        if (cleanText.isBlank()) return DreamSubmitResult.Error("सपना खाली नहीं हो सकता।")
+        val uid = FirebaseAuth.getInstance().currentUser?.uid
+            ?: return DreamSubmitResult.Error("कृपया पहले लॉगिन करें।")
+
+        return try {
+            val sadhak = pickVerifiedSadhak() ?: return DreamSubmitResult.NoVerifiedSadhak()
+
+            val started = SessionBilling.startSession(type, sadhak.id).getOrElse { e ->
+                val be = e as? SessionBillingException
+                return if (be?.isInsufficientBalance == true) DreamSubmitResult.InsufficientBalance()
+                else DreamSubmitResult.Error(e.localizedMessage ?: "सत्र शुरू नहीं हो सका")
             }
 
-            val chosenSadhak = defaultSadhaks.random()
-            val questionId = "q_" + UUID.randomUUID().toString().take(8)
+            // Record the question (no money fields — earningAmount is server-only).
+            val questionRef = FirestoreProvider.get().collection("questions").document()
+            questionRef.set(
+                mapOf(
+                    "questionText" to cleanText,
+                    "userId" to uid,
+                    "userName" to userName,
+                    "category" to "Dream",
+                    "providerId" to sadhak.id,
+                    "sadhakName" to sadhak.name,
+                    "status" to "assigned",
+                    "sessionId" to started.sessionId,
+                    "createdAt" to FieldValue.serverTimestamp()
+                )
+            ).await()
 
             DreamSubmitResult.Success(
-                sadhakName = chosenSadhak.name,
-                questionId = questionId
+                sadhakName = sadhak.name,
+                questionId = questionRef.id,
+                isFreeTrial = started.isFreeTrial,
+                amountPaise = started.amountPaise
             )
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            throw e
         } catch (e: Exception) {
             DreamSubmitResult.Error(e.localizedMessage ?: "सपना भेजने में त्रुटि आई")
         }

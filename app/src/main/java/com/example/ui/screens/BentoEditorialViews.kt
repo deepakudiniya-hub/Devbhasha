@@ -1137,7 +1137,7 @@ private fun BentoQuickActionCard(
 
 /**
  * Promotional Coupon Card: Luxury Gold-Saffron Perforated Voucher Banner with 2D Namaste Woman Illustration.
- * Left: "🎉 विशेष प्रस्ताव • 100% मुफ्त", "पहले 15 मिनट मुफ्त", "केवल प्रथम परामर्श पर लागू", DEV15 copy box and "अभी बात करें" button.
+ * Left: "🎉 विशेष प्रस्ताव • 100% मुफ्त", "पहली स्वप्न चैट 5 मिनट मुफ्त" (server-decided) and "अभी बात करें" button.
  * Right: Glowing halo 2D Namaste vector illustration with verified rating badge.
  * Includes subtle entrance animation (fade + scale + slide-up + golden light sheen) for an engaging interactive feel.
  */
@@ -1359,9 +1359,9 @@ fun BentoEditorialPromoBanner(
                             ) {
                                 Text(
                                     text = when (currentLangCode) {
-                                        "hi" -> "पहले 15 मिनट मुफ्त"
-                                        "hgl" -> "First 15 Mins Free"
-                                        else -> "First 15 Mins Free"
+                                        "hi" -> "पहली स्वप्न चैट 5 मिनट मुफ्त*"
+                                        "hgl" -> "First Dream Chat 5 Min Free*"
+                                        else -> "First Dream Chat 5 Min Free*"
                                     },
                                     fontFamily = AppFontFamily,
                                     fontSize = 20.sp,
@@ -1374,9 +1374,9 @@ fun BentoEditorialPromoBanner(
                             // Subtext: केवल प्रथम परामर्श पर लागू
                             Text(
                                 text = when (currentLangCode) {
-                                    "hi" -> "सत्यापित साधक से व्यक्तिगत मार्गदर्शन • ₹350 मूल्य मुफ्त"
-                                    "hgl" -> "Verified Sadhak consultation • Worth ₹350 Free"
-                                    else -> "Verified Sadhak consultation • Worth ₹350 Free"
+                                    "hi" -> "*प्रति फ़ोन नंबर एक बार • पात्रता सर्वर तय करता है"
+                                    "hgl" -> "*Once per phone number • eligibility checked by server"
+                                    else -> "*Once per phone number • eligibility checked by server"
                                 },
                                 fontSize = 11.5.sp,
                                 color = Color(0xFFFFF7ED),
@@ -1858,7 +1858,7 @@ fun BentoEditorialExpertsSection(
                                     color = Color(0xFF2B2B2B)
                                 )
                                 Text(
-                                    text = "• ₹19/मिनट",
+                                    text = "• " + com.example.utils.PriceLabels.SESSION,
                                     fontSize = 11.sp,
                                     color = Color(0xFFB83A0E),
                                     fontWeight = FontWeight.Bold

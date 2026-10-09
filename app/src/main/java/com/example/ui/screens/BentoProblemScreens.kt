@@ -792,7 +792,7 @@ private fun GenericProblemScreenTemplate(
                                     Icon(Icons.AutoMirrored.Outlined.Chat, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
                                     Spacer(modifier = Modifier.width(6.dp))
                                     Text(
-                                        text = if (currentLangCode == "hi") "चैट (₹20)" else "Chat (₹20)",
+                                        text = if (currentLangCode == "hi") "चैट (₹499)" else "Chat (₹499)",
                                         color = Color.White,
                                         fontWeight = FontWeight.Bold,
                                         fontSize = 13.sp

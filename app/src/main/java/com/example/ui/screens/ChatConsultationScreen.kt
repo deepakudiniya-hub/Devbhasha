@@ -38,6 +38,12 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.ui.models.SadhakItem
+import com.example.ui.components.SessionStatusBar
+import com.example.ui.components.rememberSessionController
+import com.example.ui.components.sessionErrorText
+import com.example.utils.PriceLabels
+import com.example.utils.SessionBillingException
+import com.example.utils.SessionType
 import com.example.ui.theme.*
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
@@ -95,11 +101,8 @@ fun ChatConsultationScreen(
             onCategorySelected = { selectedCategory = it },
             walletBalance = walletBalance,
             onStartChat = { sadhak ->
-                if (walletBalance < 20.0) {
-                    onLowBalance()
-                } else {
-                    activeChatSadhak = sadhak
-                }
+                // Balance & price are checked by the server in startSession.
+                activeChatSadhak = sadhak
             },
             onStartCall = onStartCall,
             modifier = modifier
@@ -185,8 +188,8 @@ private fun ChatAstrologerListScreen(
                             )
                         }
                         Text(
-                            text = if (isHindi) "सर्वश्रेष्ठ सत्यापित ज्योतिषी से लाइव चैट करें • ₹20 मात्र"
-                            else "Chat live with verified Vedic experts • Just ₹20",
+                            text = if (isHindi) "सर्वश्रेष्ठ सत्यापित ज्योतिषी से लाइव चैट करें • ${PriceLabels.SESSION}"
+                            else "Chat live with verified Vedic experts • ${PriceLabels.SESSION}",
                             fontSize = 11.5.sp,
                             color = Color(0xFF64748B)
                         )
@@ -451,13 +454,13 @@ fun ChatAstrologerCard(
                 Column {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
-                            text = "₹20",
+                            text = "₹499",
                             fontWeight = FontWeight.Black,
                             fontSize = 16.sp,
                             color = SaffronDeep
                         )
                         Text(
-                            text = if (isHindi) " /सत्र" else " /session",
+                            text = if (isHindi) " / 20 मिनट" else " / 20 min",
                             fontSize = 11.sp,
                             color = Color(0xFF64748B)
                         )
@@ -527,11 +530,35 @@ fun LiveChatRoomScreen(
     onCloseChat: () -> Unit,
     onStartCall: () -> Unit,
     onLowBalance: () -> Unit,
-    onAddBalance: () -> Unit
+    onAddBalance: () -> Unit,
+    sessionType: SessionType = SessionType.SESSION
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val focusManager = LocalFocusManager.current
+
+    // Server-billed session: price, duration and debit are decided by Cloud Functions.
+    val sessionController = rememberSessionController(
+        type = sessionType,
+        providerId = sadhak.id,
+        onExpired = {
+            Toast.makeText(
+                context,
+                if (isHindi) "सत्र का समय समाप्त हो गया" else "Session time is over",
+                Toast.LENGTH_LONG
+            ).show()
+            onCloseChat()
+        }
+    )
+
+    LaunchedEffect(sessionController.error, sessionController.session) {
+        val err = sessionController.error
+        if (err != null && sessionController.session == null) {
+            Toast.makeText(context, sessionErrorText(err, isHindi), Toast.LENGTH_LONG).show()
+            if (err is SessionBillingException && err.isInsufficientBalance) onLowBalance()
+            onCloseChat()
+        }
+    }
 
     var inputMessage by remember { mutableStateOf("") }
     var isAstrologerTyping by remember { mutableStateOf(false) }
@@ -572,6 +599,14 @@ fun LiveChatRoomScreen(
     fun sendMessage(textToSend: String) {
         val trimmed = textToSend.trim()
         if (trimmed.isBlank()) return
+        if (!sessionController.isActive) {
+            Toast.makeText(
+                context,
+                if (isHindi) "सत्र सक्रिय नहीं है" else "Session is not active",
+                Toast.LENGTH_SHORT
+            ).show()
+            return
+        }
 
         val userMsg = ChatMessage(
             senderId = userId.ifBlank { "user" },
@@ -647,7 +682,7 @@ fun LiveChatRoomScreen(
                             text = if (isAstrologerTyping) {
                                 if (isHindi) "✍️ टाइप कर रहे हैं..." else "✍️ typing..."
                             } else {
-                                if (isHindi) "🟢 सक्रिय चैट • ₹20 समर्पित" else "🟢 Active Consultation"
+                                if (isHindi) "🟢 सक्रिय चैट • ${PriceLabels.forType(sessionType)}" else "🟢 Active • ${PriceLabels.forType(sessionType)}"
                             },
                             fontSize = 11.sp,
                             color = if (isAstrologerTyping) SaffronDeep else Color(0xFF16A34A),
@@ -691,7 +726,10 @@ fun LiveChatRoomScreen(
 
                     // End Chat Button
                     TextButton(
-                        onClick = onCloseChat,
+                        onClick = {
+                            sessionController.end()
+                            onCloseChat()
+                        },
                         contentPadding = PaddingValues(horizontal = 8.dp)
                     ) {
                         Text(
@@ -840,6 +878,19 @@ fun LiveChatRoomScreen(
                     )
                 }
             }
+
+            SessionStatusBar(
+                controller = sessionController,
+                isHindi = isHindi,
+                darkBackground = false,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 6.dp),
+                onExtendFailed = { e ->
+                    Toast.makeText(context, sessionErrorText(e, isHindi), Toast.LENGTH_LONG).show()
+                    if (e is SessionBillingException && e.isInsufficientBalance) onLowBalance()
+                }
+            )
 
             // Message Bubble List
             LazyColumn(

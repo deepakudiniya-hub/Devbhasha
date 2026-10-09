@@ -36,8 +36,6 @@ object UserManager {
             .set(userMap, SetOptions.merge())
             .addOnSuccessListener {
                 Log.d(TAG, "User synchronized with Firestore: uid=$uid")
-                // Grant the one-time signup bonus (server-side, idempotent).
-                WalletRepository.claimSignupBonus { }
                 onComplete?.invoke(true)
             }
             .addOnFailureListener { e ->

@@ -11,7 +11,8 @@ import com.google.firebase.functions.FirebaseFunctions
  * The balance lives in Firestore at `users/{uid}.walletBalance` (integer
  * **paise**) and is written ONLY by the Cloud Functions (see functions/index.js).
  * This client never sets a balance — it reads it for display and asks the
- * server to credit, debit or refund.
+ * server to create / verify wallet top-up orders. Debits happen only inside
+ * the session callables (see SessionBilling).
  */
 object WalletRepository {
     private const val TAG = "WalletRepository"
@@ -40,22 +41,6 @@ object WalletRepository {
             }
             onChange(paiseToRupees(snap?.getLong("walletBalance") ?: 0L))
         }
-    }
-
-    /**
-     * Claim the one-time signup bonus. Idempotent on the server — safe to call
-     * on every login; the user is credited at most once.
-     */
-    fun claimSignupBonus(onResult: (Result<Double>) -> Unit = {}) {
-        functions.getHttpsCallable("claimSignupBonus")
-            .call()
-            .addOnSuccessListener { res ->
-                @Suppress("UNCHECKED_CAST")
-                val data = res.data as? Map<String, Any>
-                val bal = (data?.get("balancePaise") as? Number)?.toLong()
-                if (bal != null) onResult(Result.success(paiseToRupees(bal)))
-            }
-            .addOnFailureListener { onResult(Result.failure(it)) }
     }
 
     /** Create a server-side Razorpay order. Returns (orderId, publicKeyId). */
@@ -107,53 +92,7 @@ object WalletRepository {
             .addOnFailureListener { onResult(Result.failure(it)) }
     }
 
-    /**
-     * Debit the wallet server-side. `ref` makes the debit idempotent — reuse the
-     * same ref to retry safely without double-charging.
-     */
-    fun spend(
-        amountRupees: Double,
-        purpose: String,
-        ref: String,
-        onResult: (Result<Double>) -> Unit
-    ) {
-        callBalanceFn("walletSpend", amountRupees, purpose, ref, onResult)
-    }
-
-    /** Refund / credit the wallet server-side (idempotent by `ref`). */
-    fun refund(
-        amountRupees: Double,
-        purpose: String,
-        ref: String,
-        onResult: (Result<Double>) -> Unit
-    ) {
-        callBalanceFn("walletRefund", amountRupees, purpose, ref, onResult)
-    }
-
-    private fun callBalanceFn(
-        fnName: String,
-        amountRupees: Double,
-        purpose: String,
-        ref: String,
-        onResult: (Result<Double>) -> Unit
-    ) {
-        val payload = mapOf(
-            "amountPaise" to rupeesToPaise(amountRupees),
-            "purpose" to purpose,
-            "ref" to ref
-        )
-        functions.getHttpsCallable(fnName)
-            .call(payload)
-            .addOnSuccessListener { res ->
-                @Suppress("UNCHECKED_CAST")
-                val data = res.data as? Map<String, Any>
-                val bal = (data?.get("balancePaise") as? Number)?.toLong()
-                if (bal == null) {
-                    onResult(Result.failure(IllegalStateException("Malformed $fnName response")))
-                } else {
-                    onResult(Result.success(paiseToRupees(bal)))
-                }
-            }
-            .addOnFailureListener { onResult(Result.failure(it)) }
-    }
+    // NOTE: there is intentionally no client-side spend/refund API. Session
+    // billing (amounts, durations, free trial) is decided entirely by the server
+    // via the startSession / extendSession / endSession callables — see SessionBilling.
 }

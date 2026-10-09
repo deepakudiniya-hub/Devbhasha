@@ -9,7 +9,8 @@ import android.app.Activity
 import com.example.utils.RazorpayPaymentManager
 import com.example.utils.DreamSubmitter
 import com.example.utils.DreamSubmitResult
-import com.example.utils.WalletRepository
+import com.example.utils.PriceLabels
+import com.example.utils.SessionType
 import kotlinx.coroutines.launch
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.draw.alpha
@@ -134,7 +135,7 @@ fun BentoEditorialSadhakScreen(
                     if (!isOfferClaimed) {
                         Toast.makeText(
                             context,
-                            if (currentLangCode == "hi") "🎉 कूपन DEV100 सक्रिय! 15 मिनट मुफ़्त मिले" else "🎉 Coupon DEV100 activated! 15 mins free added",
+                            if (currentLangCode == "hi") "पहली स्वप्न चैट 5 मिनट मुफ़्त — पात्रता सत्र शुरू होने पर सर्वर तय करेगा" else "First dream chat free for 5 min — eligibility is confirmed by the server",
                             Toast.LENGTH_SHORT
                         ).show()
                     }
@@ -162,9 +163,9 @@ fun BentoEditorialSadhakScreen(
                         ) {
                             Text(
                                 text = when (currentLangCode) {
-                                    "hi" -> if (isOfferClaimed) "✓ सक्रिय उपहार • 15 MIN" else "🎁 विशेष उपहार • 100% MUFT"
-                                    "hgl" -> if (isOfferClaimed) "✓ ACTIVE GIFT • 15 MIN" else "🎁 WELCOME GIFT • 100% FREE"
-                                    else -> if (isOfferClaimed) "✓ ACTIVE GIFT • 15 MIN" else "🎁 WELCOME PASS • 100% FREE"
+                                    "hi" -> "🎁 पहली स्वप्न चैट • 5 MIN"
+                                    "hgl" -> "🎁 FIRST DREAM CHAT • 5 MIN"
+                                    else -> "🎁 FIRST DREAM CHAT • 5 MIN"
                                 },
                                 fontSize = 9.sp,
                                 fontWeight = FontWeight.Bold,
@@ -173,7 +174,7 @@ fun BentoEditorialSadhakScreen(
                             )
                         }
 
-                        if (!isOfferClaimed) {
+                        if (false) { // coupon codes removed: free trial is server-decided
                             Surface(
                                 color = Color(0xFFFAFAFA),
                                 border = BorderStroke(1.dp, BorderLight),
@@ -206,9 +207,9 @@ fun BentoEditorialSadhakScreen(
                     Spacer(modifier = Modifier.height(7.dp))
                     Text(
                         text = when (currentLangCode) {
-                            "hi" -> if (isOfferClaimed) "15 निःशुल्क मिनट सक्रिय ✨" else "पहला चैट परामर्श बिल्कुल मुफ़्त — 15 मिनट"
-                            "hgl" -> if (isOfferClaimed) "15 free mins active ✨" else "Pehli chat bilkul free — 15 minutes"
-                            else -> if (isOfferClaimed) "15 free mins active ✨" else "First Chat 100% Free — 15 Min"
+                            "hi" -> "पहली स्वप्न अर्थ चैट 5 मिनट मुफ़्त*"
+                            "hgl" -> "Pehli dream chat 5 minute free*"
+                            else -> "First dream chat free — 5 min*"
                         },
                         fontSize = 14.5.sp,
                         fontWeight = FontWeight.Bold,
@@ -995,76 +996,45 @@ fun BentoEditorialDreamsScreen(
                             onClick = {
                                 if (dreamText.isNotBlank()) {
                                     val text = dreamText.trim()
-                                    if (!freeDreamUsed) {
-                                        coroutineScope.launch {
-                                            val res = DreamSubmitter.submitDreamToRandomSadhak(
-                                                userId = userId,
-                                                userName = userName,
-                                                dreamText = text,
-                                                paid = false,
-                                                amount = 0.0,
-                                                paymentMode = "free_trial",
-                                                freeFirst = true
-                                            )
-                                            dreamText = ""
-                                            isListeningVoice = false
-                                            when (res) {
-                                                is DreamSubmitResult.Success -> {
-                                                    Toast.makeText(context, "पहला सपना दर्ज हुआ — साधक '${res.sadhakName}' को सौंपा गया ✨", Toast.LENGTH_LONG).show()
-                                                }
-                                                is DreamSubmitResult.NoVerifiedSadhak -> {
-                                                    Toast.makeText(context, res.message, Toast.LENGTH_LONG).show()
-                                                }
-                                                is DreamSubmitResult.Error -> {
-                                                    Toast.makeText(context, "सपना सुरक्षित हुआ — साधक को भेजा गया", Toast.LENGTH_LONG).show()
-                                                }
-                                            }
-                                        }
-                                    } else if (walletBalance >= 99.0) {
-                                        coroutineScope.launch {
-                                            val chargeRef = "dream_wallet_${System.currentTimeMillis()}"
-                                            val res = DreamSubmitter.submitDreamToRandomSadhak(
-                                                userId = userId,
-                                                userName = userName,
-                                                dreamText = text,
-                                                paid = true,
-                                                amount = 99.0,
-                                                paymentMode = "wallet"
-                                            )
-                                            WalletRepository.spend(99.0, "dream_matlab", chargeRef) { }
-                                            dreamText = ""
-                                            isListeningVoice = false
-                                            when (res) {
-                                                is DreamSubmitResult.Success -> {
-                                                    Toast.makeText(context, "सपना सुरक्षित हुआ — साधक '${res.sadhakName}' को सौंपा गया ✨", Toast.LENGTH_LONG).show()
-                                                }
-                                                is DreamSubmitResult.NoVerifiedSadhak -> {
-                                                    WalletRepository.refund(99.0, "dream_matlab_refund", "${chargeRef}_refund") { }
-                                                    Toast.makeText(context, res.message, Toast.LENGTH_LONG).show()
-                                                }
-                                                is DreamSubmitResult.Error -> {
-                                                    WalletRepository.refund(99.0, "dream_matlab_refund", "${chargeRef}_refund") { }
-                                                    Toast.makeText(context, "सपना सुरक्षित हुआ — साधक को भेजा गया", Toast.LENGTH_LONG).show()
-                                                }
-                                            }
-                                        }
-                                    } else {
-                                        val activity = context as? Activity
-                                        if (activity != null) {
-                                            val started = RazorpayPaymentManager.startRechargePayment(
-                                                activity = activity,
-                                                amount = 99.0,
-                                                userId = userId,
-                                                userName = userName,
-                                                purpose = "dream_matlab",
-                                                dreamText = text
-                                            )
-                                            if (started) {
+                                    coroutineScope.launch {
+                                        // Server decides price / free trial and debits the wallet.
+                                        val res = DreamSubmitter.submitDream(
+                                            userName = userName,
+                                            dreamText = text,
+                                            type = SessionType.DREAM_CHAT
+                                        )
+                                        when (res) {
+                                            is DreamSubmitResult.Success -> {
                                                 dreamText = ""
                                                 isListeningVoice = false
+                                                val freeNote = if (res.isFreeTrial) " (${PriceLabels.FREE_TRIAL_BADGE})" else ""
+                                                Toast.makeText(context, "सपना दर्ज हुआ — साधक '${res.sadhakName}' को सौंपा गया ✨$freeNote", Toast.LENGTH_LONG).show()
                                             }
-                                        } else {
-                                            Toast.makeText(context, "कृपया दोबारा प्रयास करें", Toast.LENGTH_SHORT).show()
+                                            is DreamSubmitResult.InsufficientBalance -> {
+                                                val activity = context as? Activity
+                                                if (activity != null) {
+                                                    val started = RazorpayPaymentManager.startRechargePayment(
+                                                        activity = activity,
+                                                        amount = 99.0,
+                                                        userId = userId,
+                                                        userName = userName,
+                                                        purpose = "dream_matlab",
+                                                        dreamText = text
+                                                    )
+                                                    if (started) {
+                                                        dreamText = ""
+                                                        isListeningVoice = false
+                                                    }
+                                                } else {
+                                                    Toast.makeText(context, res.message, Toast.LENGTH_LONG).show()
+                                                }
+                                            }
+                                            is DreamSubmitResult.NoVerifiedSadhak -> {
+                                                Toast.makeText(context, res.message, Toast.LENGTH_LONG).show()
+                                            }
+                                            is DreamSubmitResult.Error -> {
+                                                Toast.makeText(context, "त्रुटि: ${res.message}", Toast.LENGTH_LONG).show()
+                                            }
                                         }
                                     }
                                 }
@@ -1087,8 +1057,7 @@ fun BentoEditorialDreamsScreen(
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
-                                text = if (!freeDreamUsed) "सपना दर्ज करें · पहला फल मुफ़्त (FREE)"
-                                else "सपना दर्ज करें · फल जानें (₹99)",
+                                text = "सपना दर्ज करें · ${PriceLabels.DREAM_CHAT}",
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 14.5.sp,
                                 color = Color.White
@@ -1097,8 +1066,7 @@ fun BentoEditorialDreamsScreen(
 
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = if (!freeDreamUsed) "✨ पहला स्वप्न विचार निःशुल्क है"
-                            else "वैदिक साधकों द्वारा 100% व्यक्तिगत स्वप्न फल मीमांसा",
+                            text = "वैदिक साधकों द्वारा 100% व्यक्तिगत स्वप्न फल मीमांसा",
                             fontSize = 11.sp,
                             color = Color(0xFF64748B),
                             textAlign = TextAlign.Center,

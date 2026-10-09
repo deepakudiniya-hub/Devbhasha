@@ -204,7 +204,7 @@ fun ChatAndCallDualActionCards(
                 )
 
                 Text(
-                    text = if (isHindi) "तुरंत चैट • ₹20 मात्र" else "Instant Chat • ₹20",
+                    text = if (isHindi) "तुरंत चैट • ₹499 / 20 मिनट" else "Instant Chat • ₹499 / 20 min",
                     fontSize = 11.sp,
                     color = Color(0xFF64748B),
                     fontWeight = FontWeight.Medium
@@ -311,7 +311,7 @@ fun ChatAndCallDualActionCards(
                 )
 
                 Text(
-                    text = if (isHindi) "सीधी बात • ₹20 मात्र" else "Voice Call • ₹20",
+                    text = if (isHindi) "सीधी बात • ₹499 / 20 मिनट" else "Voice Call • ₹499 / 20 min",
                     fontSize = 11.sp,
                     color = Color(0xFF64748B),
                     fontWeight = FontWeight.Medium
@@ -352,7 +352,7 @@ fun ChatAndCallDualActionCards(
 /**
  * Section: "अनुभवी साधक" (Verified Sadhaks)
  * With clean live status indicator (🟢 Green dot) on avatar & next to name when isOnline == true.
- * Quick 📞 Call and 💬 Chat action buttons for ₹20 transaction flow.
+ * Quick 📞 Call and 💬 Chat action buttons (server-billed session).
  */
 @Composable
 fun VerifiedSadhaksSection(
