@@ -80,7 +80,7 @@ fun AstrotalkConsultationScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(Color(0xFFFFFDF9))
+            .background(Color(0xFFFAF6EA))
     ) {
         // Top App Bar matching Astrotalk
         Row(

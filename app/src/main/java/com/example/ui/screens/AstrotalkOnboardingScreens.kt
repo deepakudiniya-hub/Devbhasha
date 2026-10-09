@@ -55,7 +55,7 @@ fun AstrotalkOnboardingWalkthrough(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(Color(0xFFFFFDF9))
+            .background(Color(0xFFFAF6EA))
             .padding(horizontal = 24.dp)
             .statusBarsPadding()
             .navigationBarsPadding(),
@@ -197,7 +197,7 @@ fun AstrotalkLanguageSelectionScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(Color(0xFFFFFDF9))
+            .background(Color(0xFFFAF6EA))
             .padding(horizontal = 22.dp)
             .statusBarsPadding()
             .navigationBarsPadding()
@@ -327,7 +327,7 @@ fun AstrotalkZodiacSelectionScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(Color(0xFFFFFDF9))
+            .background(Color(0xFFFAF6EA))
             .padding(horizontal = 20.dp)
             .statusBarsPadding()
             .navigationBarsPadding()
@@ -475,7 +475,7 @@ fun AstrotalkPersonalDetailsScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(Color(0xFFFFFDF9))
+            .background(Color(0xFFFAF6EA))
             .padding(horizontal = 22.dp)
             .statusBarsPadding()
             .navigationBarsPadding()
@@ -695,7 +695,7 @@ fun AstrotalkAllSetScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(Color(0xFFFFFDF9))
+            .background(Color(0xFFFAF6EA))
             .padding(horizontal = 26.dp)
             .statusBarsPadding()
             .navigationBarsPadding(),

@@ -802,7 +802,7 @@ fun DreamMeaningBottomSheet(
 
                         Surface(
                             shape = RoundedCornerShape(14.dp),
-                            color = Color(0xFFFFFDF9),
+                            color = Color(0xFFFAF6EA),
                             border = BorderStroke(1.dp, if (isAnswered) Color(0xFFA7F3D0) else Color(0xFFFAF6EA)),
                             shadowElevation = 1.dp,
                             modifier = Modifier.fillMaxWidth()

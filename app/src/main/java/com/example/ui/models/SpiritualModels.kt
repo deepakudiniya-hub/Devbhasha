@@ -464,7 +464,7 @@ val ALL_AVATAR_OPTIONS = listOf(
         nameHi = "वैदिक आचार्य / पंडित",
         nameEn = "Vedic Acharya",
         symbol = "🪔",
-        bgColor = Color(0xFFD97706),
+        bgColor = Color(0xFF125157),
         descriptionHi = "पवित्र मंत्रोच्चार, यज्ञ व कर्मकांड विशेषज्ञ",
         badgeHi = "कर्मकांडी"
     ),
@@ -536,7 +536,7 @@ val ALL_AVATAR_OPTIONS = listOf(
     AvatarOption("deepak", "symbols", "दीपक (ज्योति)", "Deepak", "🪔", Color(0xFF0D656C), "अंधकार से प्रकाश की ओर ले जाने वाली ज्योति", "पावन ज्योति"),
     AvatarOption("kamal", "symbols", "कमल पुष्प", "Lotus", "🪷", Color(0xFFDB2777), "पवित्रता, अनासक्ति एवं भगवती लक्ष्मी का आसन", "पवित्र"),
     AvatarOption("shankh", "symbols", "मंगल शंख", "Shankh", "🐚", Color(0xFF0284C7), "सकारात्मक ऊर्जा व विजय का पावन उद्घोष", "मंगल"),
-    AvatarOption("surya", "symbols", "सूर्य देव", "Surya", "☀️", Color(0xFFF59E0B), "ऊर्जा, तेज एवं नवजीवन के प्रत्यक्ष देवता", "तेजस्वी"),
+    AvatarOption("surya", "symbols", "सूर्य देव", "Surya", "☀️", Color(0xFFD0BF75), "ऊर्जा, तेज एवं नवजीवन के प्रत्यक्ष देवता", "तेजस्वी"),
     AvatarOption("kalash", "symbols", "मंगल कलश", "Kalash", "🏺", Color(0xFF125157), "समृद्धि, मांगलिकता व वरुण देव का प्रतीक", "मांगलिक"),
 
     // -------------------------------------------------------------

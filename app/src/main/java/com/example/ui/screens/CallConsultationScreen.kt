@@ -752,7 +752,7 @@ fun LiveAudioCallScreen(
                 Text(
                     text = if (isHindi) sadhak.titleHi else sadhak.titleEn,
                     fontSize = 13.5.sp,
-                    color = Color(0xFFFBBF24),
+                    color = Color(0xFFD0BF75),
                     fontWeight = FontWeight.Medium
                 )
 

@@ -120,7 +120,7 @@ fun HeroAstroPromoBanner(
                     }
 
                     Surface(
-                        color = Color(0xFFFEF08A),
+                        color = Color(0xFFE9DB97),
                         shape = RoundedCornerShape(10.dp)
                     ) {
                         Text(
@@ -373,7 +373,7 @@ fun DailyHoroscopeBottomSheet(
                         modifier = Modifier
                             .size(38.dp)
                             .clip(CircleShape)
-                            .background(Color(0xFFFEF08A)),
+                            .background(Color(0xFFE9DB97)),
                         contentAlignment = Alignment.Center
                     ) {
                         Text("🌟", fontSize = 20.sp)
