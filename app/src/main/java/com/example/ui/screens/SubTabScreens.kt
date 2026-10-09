@@ -338,7 +338,7 @@ fun SadhakDirectoryCard(
                                     text = sadhak.rating,
                                     fontSize = 11.5.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = Color(0xFF92400E)
+                                    color = Color(0xFFC24E1B)
                                 )
                             }
                         }

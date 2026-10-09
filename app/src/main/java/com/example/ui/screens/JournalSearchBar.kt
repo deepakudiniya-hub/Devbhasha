@@ -276,7 +276,7 @@ fun HomeJournalSearchBar(
                             fontSize = 14.5.sp,
                             fontWeight = FontWeight.Medium
                         ),
-                        cursorBrush = SolidColor(Color(0xFFC2410C)),
+                        cursorBrush = SolidColor(Color(0xFFC24E1B)),
                         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
                         keyboardActions = KeyboardActions(onSearch = {
                             focusManager.clearFocus()
@@ -291,7 +291,7 @@ fun HomeJournalSearchBar(
                     val dateLabel = SimpleDateFormat("d MMM", Locale.getDefault()).format(Date(customDateMillis))
                     Surface(
                         shape = RoundedCornerShape(8.dp),
-                        color = Color(0xFFC2410C),
+                        color = Color(0xFFC24E1B),
                         modifier = Modifier.clickable { onCustomDateSelect(null) }
                     ) {
                         Row(
@@ -339,12 +339,12 @@ fun HomeJournalSearchBar(
                     modifier = Modifier
                         .size(34.dp)
                         .clip(CircleShape)
-                        .background(if (customDateMillis != null) Color(0xFFC2410C).copy(alpha = 0.12f) else Color(0xFFF1F5F9))
+                        .background(if (customDateMillis != null) Color(0xFFC24E1B).copy(alpha = 0.12f) else Color(0xFFF1F5F9))
                 ) {
                     Icon(
                         imageVector = Icons.Outlined.CalendarMonth,
                         contentDescription = "Pick Date",
-                        tint = if (customDateMillis != null) Color(0xFFC2410C) else Color(0xFF475569),
+                        tint = if (customDateMillis != null) Color(0xFFC24E1B) else Color(0xFF475569),
                         modifier = Modifier.size(18.dp)
                     )
                 }
@@ -969,7 +969,7 @@ fun highlightSearchQuery(text: String, query: String): androidx.compose.ui.text.
             withStyle(
                 SpanStyle(
                     background = Color(0xFFFFE58F),
-                    color = Color(0xFF593800),
+                    color = Color(0xFFC24E1B),
                     fontWeight = FontWeight.Bold
                 )
             ) {

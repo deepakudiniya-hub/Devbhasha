@@ -352,7 +352,7 @@ fun ChatAstrologerCard(
                             .clip(CircleShape)
                             .background(
                                 Brush.linearGradient(
-                                    listOf(Color(0xFFFF8A00), Color(0xFFFF6B00))
+                                    listOf(Color(0xFFE46228), Color(0xFFE46228))
                                 )
                             ),
                         contentAlignment = Alignment.Center

@@ -40,7 +40,7 @@ fun AstrotalkConsultationScreen(
     onWalletClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val primaryColor = Color(0xFFF97316)
+    val primaryColor = Color(0xFFE46228)
     val textColor = Color(0xFF2B2B2B)
     val textSub = Color(0xFF6E6E6E)
 
