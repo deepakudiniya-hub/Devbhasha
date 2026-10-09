@@ -1,10 +1,10 @@
 {
   "name": "devbhasha-functions",
-  "description": "Devbhasha Cloud Functions — server-authoritative wallet & Razorpay verification",
+  "description": "Devbhasha Cloud Functions \u2014 server-authoritative wallet & Razorpay verification",
   "main": "index.js",
   "private": true,
   "engines": {
-    "node": "20"
+    "node": "22"
   },
   "dependencies": {
     "agora-token": "^2.0.6",

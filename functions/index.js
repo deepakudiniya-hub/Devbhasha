@@ -24,10 +24,10 @@ const Razorpay = require("razorpay");
 const { RtcTokenBuilder, RtcRole } = require("agora-token");
 
 admin.initializeApp();
-// The app uses the named Firestore database "devbhasha-d9e22" (see SHARED-CONTRACT.md).
+// Firestore database id comes from functions/.env (FIRESTORE_DB_ID); "(default)" if unset.
 const { getFirestore } = require("firebase-admin/firestore");
-const FIRESTORE_DB_ID = "devbhasha-d9e22";
-const db = getFirestore(FIRESTORE_DB_ID);
+const FIRESTORE_DB_ID = process.env.FIRESTORE_DB_ID || "(default)";
+const db = FIRESTORE_DB_ID === "(default)" ? getFirestore() : getFirestore(FIRESTORE_DB_ID);
 const FieldValue = admin.firestore.FieldValue;
 const Timestamp = admin.firestore.Timestamp;
 
