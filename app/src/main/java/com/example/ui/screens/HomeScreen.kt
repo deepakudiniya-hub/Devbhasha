@@ -32,7 +32,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.ui.components.DevOfferCarousel
 import com.example.ui.models.*
 import com.example.ui.theme.*
 import com.example.utils.DreamSubmitter
@@ -587,13 +586,6 @@ fun HomeScreen(
                                 .verticalScroll(rememberScrollState())
                                 .padding(bottom = 24.dp)
                         ) {
-                            // 0. Promotional offer carousel (auto-rotating banner)
-                            DevOfferCarousel(
-                                isHindi = isHindi,
-                                onCtaClick = { /* promo offer CTA */ }
-                            )
-                            Spacer(modifier = Modifier.height(4.dp))
-
                             // 1. Journal Search Bar at the top of Home Screen (Keyword & Date filtering)
                             val isJournalSearchActive = searchQuery.isNotBlank() || customFilterDateMillis != null || activeJournalFilter != JournalFilterType.ALL
                             val filteredJournalEntries = remember(dreamList, searchQuery, activeJournalFilter, customFilterDateMillis) {
