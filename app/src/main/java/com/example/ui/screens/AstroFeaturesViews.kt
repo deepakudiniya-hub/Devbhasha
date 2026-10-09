@@ -54,8 +54,8 @@ fun HeroAstroPromoBanner(
 ) {
     val gradient = Brush.horizontalGradient(
         colors = listOf(
-            Color(0xFFFF8A00), // Saffron Gradient Start
-            Color(0xFFFF6B00)  // Strict Saffron #FF6B00
+            Color(0xFFE46228), // Saffron Gradient Start
+            Color(0xFFE46228)  // Strict Saffron #FF6B00
         )
     )
 
@@ -125,7 +125,7 @@ fun HeroAstroPromoBanner(
                     ) {
                         Text(
                             text = if (isHindi) "₹499 / 20 मिनट" else "₹499 / 20 min",
-                            color = Color(0xFF854D0E),
+                            color = Color(0xFFC24E1B),
                             fontWeight = FontWeight.Black,
                             fontSize = 12.sp,
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)

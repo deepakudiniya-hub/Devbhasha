@@ -137,21 +137,21 @@ fun BentoEditorialMasthead(
                 ) {
                     Text(
                         text = "₹${balanceAmount.toInt()}",
-                        color = Color(0xFFB83A0E),
+                        color = Color(0xFFC24E1B),
                         fontFamily = AppFontFamily,
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Bold
                     )
                     Surface(
                         shape = CircleShape,
-                        color = Color(0xFFB83A0E).copy(alpha = 0.12f),
+                        color = Color(0xFFC24E1B).copy(alpha = 0.12f),
                         modifier = Modifier.size(16.dp)
                     ) {
                         Box(contentAlignment = Alignment.Center) {
                             Icon(
                                 imageVector = Icons.Filled.Add,
                                 contentDescription = "Add money",
-                                tint = Color(0xFFB83A0E),
+                                tint = Color(0xFFC24E1B),
                                 modifier = Modifier.size(11.dp)
                             )
                         }
@@ -206,7 +206,7 @@ fun BentoEditorialPoochhaHeroCard(
         shape = RoundedCornerShape(22.dp),
         color = Color.White,
         shadowElevation = 4.dp,
-        border = BorderStroke(1.2.dp, Color(0xFFFED7AA)),
+        border = BorderStroke(1.2.dp, Color(0xFFFDF0E8)),
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 6.dp)
@@ -232,7 +232,7 @@ fun BentoEditorialPoochhaHeroCard(
                             .clip(RoundedCornerShape(14.dp))
                             .background(
                                 Brush.linearGradient(
-                                    listOf(Color(0xFFFFEDD5), Color(0xFFFED7AA))
+                                    listOf(Color(0xFFFFEDD5), Color(0xFFFDF0E8))
                                 )
                             ),
                         contentAlignment = Alignment.Center
@@ -260,7 +260,7 @@ fun BentoEditorialPoochhaHeroCard(
                                 text = "— " + if (currentLangCode == "hi") "सीधा मार्गदर्शन" else "Instant Answer",
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.SemiBold,
-                                color = Color(0xFFB83A0E)
+                                color = Color(0xFFC24E1B)
                             )
                         }
                         Text(
@@ -317,7 +317,7 @@ fun BentoEditorialPoochhaHeroCard(
                     Icon(
                         imageVector = Icons.AutoMirrored.Outlined.Chat,
                         contentDescription = null,
-                        tint = Color(0xFFB83A0E),
+                        tint = Color(0xFFC24E1B),
                         modifier = Modifier.size(19.dp)
                     )
                     Spacer(modifier = Modifier.width(10.dp))
@@ -331,7 +331,7 @@ fun BentoEditorialPoochhaHeroCard(
                     )
                     Surface(
                         shape = CircleShape,
-                        color = Color(0xFFB83A0E),
+                        color = Color(0xFFC24E1B),
                         modifier = Modifier.size(30.dp)
                     ) {
                         Box(contentAlignment = Alignment.Center) {
@@ -363,7 +363,7 @@ fun BentoEditorialPoochhaHeroCard(
                 topics.forEach { topic ->
                     Surface(
                         shape = RoundedCornerShape(999.dp),
-                        color = Color(0xFFFFF7ED),
+                        color = Color(0xFFFDF0E8),
                         border = BorderStroke(1.dp, Color(0xFFFFEDD5)),
                         modifier = Modifier
                             .clip(RoundedCornerShape(999.dp))
@@ -373,7 +373,7 @@ fun BentoEditorialPoochhaHeroCard(
                             text = topic,
                             fontSize = 11.5.sp,
                             fontWeight = FontWeight.Medium,
-                            color = Color(0xFF9A3412),
+                            color = Color(0xFFC24E1B),
                             modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
                         )
                     }
@@ -445,14 +445,14 @@ fun BentoEditorialRecommendationPanel(
                     Surface(
                         shape = CircleShape,
                         color = Color(0xFFFFF2E8),
-                        border = BorderStroke(1.2.dp, Color(0xFFF97316)),
+                        border = BorderStroke(1.2.dp, Color(0xFFE46228)),
                         modifier = Modifier.size(32.dp)
                     ) {
                         Box(contentAlignment = Alignment.Center) {
                             Icon(
                                 imageVector = Icons.Outlined.Schedule,
                                 contentDescription = "Clock",
-                                tint = Color(0xFFEA580C),
+                                tint = Color(0xFFE46228),
                                 modifier = Modifier.size(17.dp)
                             )
                         }
@@ -492,7 +492,7 @@ fun BentoEditorialRecommendationPanel(
                     text = currentMuhurat.first,
                     fontSize = 15.sp,
                     fontWeight = FontWeight.SemiBold,
-                    color = Color(0xFFB83A0E)
+                    color = Color(0xFFC24E1B)
                 )
                 Spacer(modifier = Modifier.height(2.dp))
                 Text(
@@ -534,7 +534,7 @@ fun BentoEditorialRecommendationPanel(
                                 .size(if (isSelected) 14.dp else 6.dp, 6.dp)
                                 .clip(RoundedCornerShape(3.dp))
                                 .background(
-                                    if (isSelected) Color(0xFFEA580C) else Color(0xFFE2E8F0)
+                                    if (isSelected) Color(0xFFE46228) else Color(0xFFE2E8F0)
                                 )
                                 .clickable { selectedMuhuratIndex = index }
                         )
@@ -555,7 +555,7 @@ fun BentoEditorialRecommendationPanel(
                             text = "देव भाषा",
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold,
-                            color = Color(0xFFB83A0E)
+                            color = Color(0xFFC24E1B)
                         )
                     }
 
@@ -1007,7 +1007,7 @@ fun BentoProblemCategoryRow(
                     },
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFFB83A0E),
+                    color = Color(0xFFC24E1B),
                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
                 )
             }
@@ -1097,14 +1097,14 @@ private fun BentoQuickActionCard(
             Surface(
                 shape = CircleShape,
                 color = Color(0xFFFFF2E8), // soft warm light-orange background
-                border = BorderStroke(1.dp, Color(0xFFFFD8BF)),
+                border = BorderStroke(1.dp, Color(0xFFFDF0E8)),
                 modifier = Modifier.size(48.dp)
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     Icon(
                         imageVector = icon,
                         contentDescription = title,
-                        tint = Color(0xFFB83A0E),
+                        tint = Color(0xFFC24E1B),
                         modifier = Modifier.size(26.dp) // increased icon size
                     )
                 }
@@ -1220,7 +1220,7 @@ fun BentoEditorialPromoBanner(
                         Color(0xFFFEF08A),
                         Color(0xFFF59E0B),
                         Color(0xFFFDE047),
-                        Color(0xFFEA580C)
+                        Color(0xFFE46228)
                     )
                 )
             ),
@@ -1234,9 +1234,9 @@ fun BentoEditorialPromoBanner(
                     .background(
                         Brush.linearGradient(
                             colors = listOf(
-                                Color(0xFF9A1C0E), // Deep Vedic Crimson/Saffron
-                                Color(0xFFC2410C), // Rich Orange
-                                Color(0xFFEA580C), // Saffron Flame
+                                Color(0xFFC24E1B), // Deep Vedic Crimson/Saffron
+                                Color(0xFFC24E1B), // Rich Orange
+                                Color(0xFFE46228), // Saffron Flame
                                 Color(0xFFD97706)  // Warm Amber Gold
                             ),
                             start = Offset(0f, 0f),
@@ -1334,7 +1334,7 @@ fun BentoEditorialPromoBanner(
                                     text = "⚡ 100% FREE",
                                     fontSize = 10.5.sp,
                                     fontWeight = FontWeight.ExtraBold,
-                                    color = Color(0xFF9A1C0E)
+                                    color = Color(0xFFC24E1B)
                                 )
                             }
                         }
@@ -1379,7 +1379,7 @@ fun BentoEditorialPromoBanner(
                                     else -> "*Once per phone number • eligibility checked by server"
                                 },
                                 fontSize = 11.5.sp,
-                                color = Color(0xFFFFF7ED),
+                                color = Color(0xFFFDF0E8),
                                 lineHeight = 15.sp
                             )
 
@@ -1455,7 +1455,7 @@ fun BentoEditorialPromoBanner(
                                         Icon(
                                             imageVector = Icons.Filled.Phone,
                                             contentDescription = "Phone",
-                                            tint = Color(0xFFC2410C),
+                                            tint = Color(0xFFC24E1B),
                                             modifier = Modifier.size(14.dp)
                                         )
                                         Text(
@@ -1466,12 +1466,12 @@ fun BentoEditorialPromoBanner(
                                             },
                                             fontSize = 12.sp,
                                             fontWeight = FontWeight.ExtraBold,
-                                            color = Color(0xFFC2410C)
+                                            color = Color(0xFFC24E1B)
                                         )
                                         Icon(
                                             imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                                             contentDescription = null,
-                                            tint = Color(0xFFC2410C),
+                                            tint = Color(0xFFC24E1B),
                                             modifier = Modifier.size(12.dp)
                                         )
                                     }
@@ -1604,7 +1604,7 @@ private fun BentoProblemCategoryCard(
         shape = RoundedCornerShape(20.dp),
         color = Color.White,
         shadowElevation = if (isPressed) 1.dp else 4.dp,
-        border = BorderStroke(1.2.dp, if (isSelected) Color(0xFFB83A0E) else Color(0xFFFFEDD5)),
+        border = BorderStroke(1.2.dp, if (isSelected) Color(0xFFC24E1B) else Color(0xFFFFEDD5)),
         modifier = modifier
             .graphicsLayer {
                 scaleX = scale
@@ -1613,7 +1613,7 @@ private fun BentoProblemCategoryCard(
             .clip(RoundedCornerShape(20.dp))
             .clickable(
                 interactionSource = interactionSource,
-                indication = ripple(color = Color(0xFFB83A0E)),
+                indication = ripple(color = Color(0xFFC24E1B)),
                 onClick = onClick
             )
     ) {
@@ -1626,7 +1626,7 @@ private fun BentoProblemCategoryCard(
         ) {
             Surface(
                 shape = CircleShape,
-                color = Color(0xFFFFF7ED),
+                color = Color(0xFFFDF0E8),
                 border = BorderStroke(0.8.dp, Color(0xFFFFEDD5)),
                 modifier = Modifier.size(36.dp)
             ) {
@@ -1634,7 +1634,7 @@ private fun BentoProblemCategoryCard(
                     Icon(
                         imageVector = icon,
                         contentDescription = title,
-                        tint = Color(0xFFB83A0E),
+                        tint = Color(0xFFC24E1B),
                         modifier = Modifier.size(19.dp)
                     )
                 }
@@ -1728,7 +1728,7 @@ fun BentoEditorialExpertsSection(
                 },
                 fontSize = 13.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFFB83A0E),
+                color = Color(0xFFC24E1B),
                 modifier = Modifier
                     .clip(RoundedCornerShape(6.dp))
                     .clickable { onSeeAllClick() }
@@ -1778,7 +1778,7 @@ fun BentoEditorialExpertsSection(
                         shape = RoundedCornerShape(18.dp),
                         color = Color.White,
                         shadowElevation = 2.dp,
-                        border = BorderStroke(1.dp, Color(0xFFFED7AA).copy(alpha = 0.6f)),
+                        border = BorderStroke(1.dp, Color(0xFFFDF0E8).copy(alpha = 0.6f)),
                         modifier = Modifier
                             .width(155.dp)
                             .clip(RoundedCornerShape(18.dp))
@@ -1792,7 +1792,7 @@ fun BentoEditorialExpertsSection(
                             Box {
                                 Surface(
                                     shape = CircleShape,
-                                    color = Color(0xFFFFF7ED),
+                                    color = Color(0xFFFDF0E8),
                                     border = BorderStroke(1.dp, Color(0xFFFFEDD5)),
                                     modifier = Modifier.size(54.dp)
                                 ) {
@@ -1802,7 +1802,7 @@ fun BentoEditorialExpertsSection(
                                             fontFamily = AppFontFamily,
                                             fontSize = 18.sp,
                                             fontWeight = FontWeight.Bold,
-                                            color = Color(0xFFB83A0E)
+                                            color = Color(0xFFC24E1B)
                                         )
                                     }
                                 }
@@ -1860,7 +1860,7 @@ fun BentoEditorialExpertsSection(
                                 Text(
                                     text = "• " + com.example.utils.PriceLabels.SESSION,
                                     fontSize = 11.sp,
-                                    color = Color(0xFFB83A0E),
+                                    color = Color(0xFFC24E1B),
                                     fontWeight = FontWeight.Bold
                                 )
                             }
@@ -1968,7 +1968,7 @@ fun BentoEditorialExpertsSection(
                     Button(
                         onClick = { onChatClick(featuredSadhak) },
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFFB83A0E),
+                            containerColor = Color(0xFFC24E1B),
                             contentColor = Color.White
                         ),
                         shape = RoundedCornerShape(999.dp),
@@ -2126,7 +2126,7 @@ fun BentoEditorialExpertRow(
                 text = "₹${when(sadhak.id) { "am" -> 12; "ri" -> 19; else -> 25 }}/${if (currentLangCode == "hi") "मिनट" else "min"}",
                 fontSize = 11.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFFB83A0E)
+                color = Color(0xFFC24E1B)
             )
 
             // Outline Actions (No filled orange button)
@@ -2153,7 +2153,7 @@ fun BentoEditorialExpertRow(
                 Surface(
                     shape = CircleShape,
                     color = Color.Transparent,
-                    border = BorderStroke(1.dp, Color(0xFFB83A0E)),
+                    border = BorderStroke(1.dp, Color(0xFFC24E1B)),
                     modifier = Modifier
                         .size(34.dp)
                         .clip(CircleShape)
@@ -2163,7 +2163,7 @@ fun BentoEditorialExpertRow(
                         Icon(
                             imageVector = Icons.AutoMirrored.Outlined.Chat,
                             contentDescription = "Chat",
-                            tint = Color(0xFFB83A0E),
+                            tint = Color(0xFFC24E1B),
                             modifier = Modifier.size(14.dp)
                         )
                     }

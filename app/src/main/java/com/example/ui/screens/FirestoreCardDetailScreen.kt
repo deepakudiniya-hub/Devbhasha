@@ -300,7 +300,7 @@ fun FirestoreCardDetailScreen(
                                 text = if (displayContent.existsInCloud) "☁️ Cloud Synced ID: ${displayContent.cardId}" else "📌 Local Fallback ID: ${displayContent.cardId}",
                                 fontSize = 11.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = if (displayContent.existsInCloud) Color(0xFF92400E) else Color(0xFF475569),
+                                color = if (displayContent.existsInCloud) Color(0xFFC24E1B) else Color(0xFF475569),
                                 modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
                             )
                         }

@@ -45,7 +45,7 @@ fun AstrotalkLoginScreen(
     isLoading: Boolean,
     modifier: Modifier = Modifier
 ) {
-    val primaryColor = Color(0xFFF97316)
+    val primaryColor = Color(0xFFE46228)
     val textColor = Color(0xFF2B2B2B)
     val textSub = Color(0xFF6E6E6E)
 
@@ -76,8 +76,8 @@ fun AstrotalkLoginScreen(
                     path = path,
                     brush = Brush.verticalGradient(
                         colors = listOf(
-                            Color(0xFFF97316),
-                            Color(0xFFEA580C)
+                            Color(0xFFE46228),
+                            Color(0xFFE46228)
                         )
                     )
                 )
@@ -340,7 +340,7 @@ fun AstrotalkOtpScreen(
     isLoading: Boolean,
     modifier: Modifier = Modifier
 ) {
-    val primaryColor = Color(0xFFF97316)
+    val primaryColor = Color(0xFFE46228)
     val textColor = Color(0xFF2B2B2B)
     val textSub = Color(0xFF6E6E6E)
 

@@ -154,7 +154,7 @@ fun BentoEditorialSadhakScreen(
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         Surface(
-                            color = if (isOfferClaimed) Color(0xFFDCFCE7) else Color(0xFFFFF7ED),
+                            color = if (isOfferClaimed) Color(0xFFDCFCE7) else Color(0xFFFDF0E8),
                             border = BorderStroke(
                                 1.dp,
                                 if (isOfferClaimed) Color(0xFF86EFAC) else Saffron.copy(alpha = 0.35f)
@@ -840,7 +840,7 @@ fun BentoEditorialDreamsScreen(
     var selectedMeaningEntryId by remember { mutableStateOf<String?>(null) }
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
-    val saffronColor = Color(0xFFE66C1B)
+    val saffronColor = Color(0xFFE46228)
 
     Column(
         modifier = modifier

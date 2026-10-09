@@ -39,7 +39,7 @@ data class CircleCategoryItem(
     val titleEn: String,
     val symbol: String = "🪔",
     val icon: ImageVector? = null,
-    val primaryColor: Color = Color(0xFFFF6B00),
+    val primaryColor: Color = Color(0xFFE46228),
     val softBgColor: Color = Color(0xFFFAFAFA),
     val borderColor: Color = Color(0xFFEFEFEF)
 )
@@ -50,7 +50,7 @@ val DEFAULT_CIRCLE_CATEGORIES = listOf(
         titleHi = "दैनिक राशिफल",
         titleEn = "Horoscope",
         symbol = "🌟",
-        primaryColor = Color(0xFFFF6B00),
+        primaryColor = Color(0xFFE46228),
         softBgColor = Color(0xFFFAFAFA),
         borderColor = Color(0xFFEFEFEF)
     ),
@@ -59,7 +59,7 @@ val DEFAULT_CIRCLE_CATEGORIES = listOf(
         titleHi = "पारिवारिक समस्या",
         titleEn = "Family Problems",
         symbol = "🏡",
-        primaryColor = Color(0xFFFF6B00),
+        primaryColor = Color(0xFFE46228),
         softBgColor = Color(0xFFFAFAFA),
         borderColor = Color(0xFFEFEFEF)
     ),
@@ -95,7 +95,7 @@ val DEFAULT_CIRCLE_CATEGORIES = listOf(
         titleHi = "पूजा-पाठ",
         titleEn = "Pooja",
         symbol = "🪔",
-        primaryColor = Color(0xFFFF6B00),
+        primaryColor = Color(0xFFE46228),
         softBgColor = Color(0xFFFAFAFA),
         borderColor = Color(0xFFEFEFEF)
     ),
@@ -122,7 +122,7 @@ val DEFAULT_CIRCLE_CATEGORIES = listOf(
         titleHi = "मंत्र जप",
         titleEn = "Mantra Jap",
         symbol = "📿",
-        primaryColor = Color(0xFFFF6B00),
+        primaryColor = Color(0xFFE46228),
         softBgColor = Color(0xFFFAFAFA),
         borderColor = Color(0xFFEFEFEF)
     )
@@ -424,7 +424,7 @@ val ALL_AVATAR_OPTIONS = listOf(
         nameHi = "रुद्राक्षधारी साधक",
         nameEn = "Rudraksha Sadhak",
         symbol = "📿",
-        bgColor = Color(0xFF9A3412),
+        bgColor = Color(0xFFC24E1B),
         descriptionHi = "भगवान शिव के उपासक एवं रुद्राक्ष माला साधक",
         badgeHi = "शैव साधक"
     ),
@@ -454,7 +454,7 @@ val ALL_AVATAR_OPTIONS = listOf(
         nameHi = "अनन्य भक्त (नमन)",
         nameEn = "Humble Devotee",
         symbol = "🙏",
-        bgColor = Color(0xFFFF6B00),
+        bgColor = Color(0xFFE46228),
         descriptionHi = "ईश्वर के प्रति पूर्ण समर्पण व विनम्रता का भाव",
         badgeHi = "भक्ति भाव"
     ),
@@ -474,7 +474,7 @@ val ALL_AVATAR_OPTIONS = listOf(
         nameHi = "संन्यासी / तपस्वी",
         nameEn = "Ascetic Hermit",
         symbol = "🕉️",
-        bgColor = Color(0xFFEA580C),
+        bgColor = Color(0xFFE46228),
         descriptionHi = "वैराग्य, तपस्या एवं आत्म-साक्षात्कार मार्गी",
         badgeHi = "तपस्वी"
     ),
@@ -532,19 +532,19 @@ val ALL_AVATAR_OPTIONS = listOf(
     // -------------------------------------------------------------
     // पैकेज 2: सनातन प्रतीक (Sacred Symbols)
     // -------------------------------------------------------------
-    AvatarOption("om", "symbols", "ॐ (प्रणव नाद)", "Om", "ॐ", Color(0xFFFF6B00), "ब्रह्मांड की प्रथम पावन ध्वनि", "सनातन"),
-    AvatarOption("deepak", "symbols", "दीपक (ज्योति)", "Deepak", "🪔", Color(0xFFEA580C), "अंधकार से प्रकाश की ओर ले जाने वाली ज्योति", "पावन ज्योति"),
+    AvatarOption("om", "symbols", "ॐ (प्रणव नाद)", "Om", "ॐ", Color(0xFFE46228), "ब्रह्मांड की प्रथम पावन ध्वनि", "सनातन"),
+    AvatarOption("deepak", "symbols", "दीपक (ज्योति)", "Deepak", "🪔", Color(0xFFE46228), "अंधकार से प्रकाश की ओर ले जाने वाली ज्योति", "पावन ज्योति"),
     AvatarOption("kamal", "symbols", "कमल पुष्प", "Lotus", "🪷", Color(0xFFDB2777), "पवित्रता, अनासक्ति एवं भगवती लक्ष्मी का आसन", "पवित्र"),
     AvatarOption("shankh", "symbols", "मंगल शंख", "Shankh", "🐚", Color(0xFF0284C7), "सकारात्मक ऊर्जा व विजय का पावन उद्घोष", "मंगल"),
     AvatarOption("surya", "symbols", "सूर्य देव", "Surya", "☀️", Color(0xFFF59E0B), "ऊर्जा, तेज एवं नवजीवन के प्रत्यक्ष देवता", "तेजस्वी"),
-    AvatarOption("kalash", "symbols", "मंगल कलश", "Kalash", "🏺", Color(0xFFC2410C), "समृद्धि, मांगलिकता व वरुण देव का प्रतीक", "मांगलिक"),
+    AvatarOption("kalash", "symbols", "मंगल कलश", "Kalash", "🏺", Color(0xFFC24E1B), "समृद्धि, मांगलिकता व वरुण देव का प्रतीक", "मांगलिक"),
 
     // -------------------------------------------------------------
     // पैकेज 3: देवता कृपा (Divine Deities)
     // -------------------------------------------------------------
     AvatarOption("deva_shiva", "deities", "भगवान शिव", "Lord Shiva", "🔱", Color(0xFF475569), "देवाधिदेव महादेव की असीम अनुकंपा", "महादेव"),
     AvatarOption("deva_ganesh", "deities", "श्री गणेश", "Lord Ganesha", "🐘", Color(0xFFE11D48), "प्रथम पूज्य विघ्नहर्ता मंगलकर्ता", "विघ्नहर्ता"),
-    AvatarOption("deva_hanuman", "deities", "बजरंगबली हनुमान", "Lord Hanuman", "🚩", Color(0xFFEA580C), "बल, बुद्धि, विद्या व संकटमोचन कृपा", "संकटमोचन"),
+    AvatarOption("deva_hanuman", "deities", "बजरंगबली हनुमान", "Lord Hanuman", "🚩", Color(0xFFE46228), "बल, बुद्धि, विद्या व संकटमोचन कृपा", "संकटमोचन"),
     AvatarOption("deva_durga", "deities", "माँ दुर्गा भवानी", "Maa Durga", "🦁", Color(0xFFB91C1C), "दुष्टनाशिनी, शक्तिदायिनी जगदम्बा", "जगदम्बा"),
     AvatarOption("deva_vishnu", "deities", "भगवान श्री नारायण", "Lord Vishnu", "🪷", Color(0xFF1D4ED8), "जगत के पालनहार श्री हरि विष्णु", "पालनहार")
 )

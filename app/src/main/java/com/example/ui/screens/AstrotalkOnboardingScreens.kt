@@ -47,7 +47,7 @@ fun AstrotalkOnboardingWalkthrough(
     onSkip: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val primaryColor = Color(0xFFF97316)
+    val primaryColor = Color(0xFFE46228)
     val accentGold = Color(0xFFEAB308)
     val textColor = Color(0xFF2B2B2B)
     val textSub = Color(0xFF6E6E6E)
@@ -190,7 +190,7 @@ fun AstrotalkLanguageSelectionScreen(
     onSkip: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val primaryColor = Color(0xFFF97316)
+    val primaryColor = Color(0xFFE46228)
     val textColor = Color(0xFF2B2B2B)
     val textSub = Color(0xFF6E6E6E)
 
@@ -248,7 +248,7 @@ fun AstrotalkLanguageSelectionScreen(
 
                 Surface(
                     shape = RoundedCornerShape(16.dp),
-                    color = if (isSelected) Color(0xFFFFF7ED) else Color.White,
+                    color = if (isSelected) Color(0xFFFDF0E8) else Color.White,
                     shadowElevation = if (isSelected) 2.dp else 1.dp,
                     border = BorderStroke(
                         width = if (isSelected) 2.dp else 1.dp,
@@ -320,7 +320,7 @@ fun AstrotalkZodiacSelectionScreen(
     onSkip: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val primaryColor = Color(0xFFF97316)
+    val primaryColor = Color(0xFFE46228)
     val textColor = Color(0xFF2B2B2B)
     val textSub = Color(0xFF6E6E6E)
 
@@ -376,7 +376,7 @@ fun AstrotalkZodiacSelectionScreen(
 
                 Surface(
                     shape = RoundedCornerShape(16.dp),
-                    color = if (isSelected) Color(0xFFFFF7ED) else Color.White,
+                    color = if (isSelected) Color(0xFFFDF0E8) else Color.White,
                     shadowElevation = if (isSelected) 2.dp else 1.dp,
                     border = BorderStroke(
                         width = if (isSelected) 2.dp else 1.dp,
@@ -462,7 +462,7 @@ fun AstrotalkPersonalDetailsScreen(
     onBackClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val primaryColor = Color(0xFFF97316)
+    val primaryColor = Color(0xFFE46228)
     val textColor = Color(0xFF2B2B2B)
     val textSub = Color(0xFF6E6E6E)
 
@@ -523,7 +523,7 @@ fun AstrotalkPersonalDetailsScreen(
             val isMale = gender == "male"
             Surface(
                 shape = RoundedCornerShape(16.dp),
-                color = if (isMale) Color(0xFFFFF7ED) else Color.White,
+                color = if (isMale) Color(0xFFFDF0E8) else Color.White,
                 border = BorderStroke(if (isMale) 2.dp else 1.dp, if (isMale) primaryColor else Color(0xFFE2E8F0)),
                 modifier = Modifier
                     .weight(1f)
@@ -551,7 +551,7 @@ fun AstrotalkPersonalDetailsScreen(
             val isFemale = gender == "female"
             Surface(
                 shape = RoundedCornerShape(16.dp),
-                color = if (isFemale) Color(0xFFFFF7ED) else Color.White,
+                color = if (isFemale) Color(0xFFFDF0E8) else Color.White,
                 border = BorderStroke(if (isFemale) 2.dp else 1.dp, if (isFemale) primaryColor else Color(0xFFE2E8F0)),
                 modifier = Modifier
                     .weight(1f)
@@ -688,7 +688,7 @@ fun AstrotalkAllSetScreen(
     onLetsGo: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val primaryColor = Color(0xFFF97316)
+    val primaryColor = Color(0xFFE46228)
     val textColor = Color(0xFF2B2B2B)
     val textSub = Color(0xFF6E6E6E)
 
