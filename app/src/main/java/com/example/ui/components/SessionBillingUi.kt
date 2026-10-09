@@ -179,8 +179,8 @@ fun SessionStatusBar(
             Spacer(Modifier.height(8.dp))
             Surface(
                 shape = RoundedCornerShape(12.dp),
-                color = Color(0xFFFDF0E8),
-                border = BorderStroke(1.dp, Color(0xFFE46228))
+                color = Color(0xFFFAF6EA),
+                border = BorderStroke(1.dp, Color(0xFF0D656C))
             ) {
                 Row(
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
@@ -188,13 +188,13 @@ fun SessionStatusBar(
                 ) {
                     Text(
                         text = if (isHindi) "⏳ केवल 2 मिनट शेष" else "⏳ Only 2 minutes left",
-                        color = Color(0xFFC24E1B), fontSize = 12.sp, fontWeight = FontWeight.SemiBold
+                        color = Color(0xFF125157), fontSize = 12.sp, fontWeight = FontWeight.SemiBold
                     )
                     Spacer(Modifier.width(10.dp))
                     Button(
                         onClick = { controller.extend { r -> r.onFailure(onExtendFailed) } },
                         enabled = !controller.isExtending,
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE46228)),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0D656C)),
                         contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
                         modifier = Modifier.height(32.dp)
                     ) {

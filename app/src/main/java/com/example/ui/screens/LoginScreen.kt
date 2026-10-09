@@ -754,7 +754,7 @@ private fun BentoOtpVerifyView(
                 text = "💡 SMS न पहुँचे तो 30 सेकंड बाद दोबारा भेजें",
                 fontSize = 11.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFFC24E1B),
+                color = Color(0xFF125157),
                 modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
             )
         }

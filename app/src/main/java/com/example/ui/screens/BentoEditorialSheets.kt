@@ -102,7 +102,7 @@ fun BentoEditorialRechargeSheet(
                         text = "🔒 Secure Razorpay",
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFFC24E1B),
+                        color = Color(0xFF125157),
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
                     )
                 }
@@ -139,12 +139,12 @@ fun BentoEditorialRechargeSheet(
                         text = "परामर्श सत्र ${PriceLabels.SESSION} · समय बढ़ाएँ ${PriceLabels.EXTEND}",
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFFC24E1B)
+                        color = Color(0xFF125157)
                     )
                     Text(
                         text = "स्वप्न अर्थ चैट ${PriceLabels.DREAM_CHAT} · स्वप्न कॉल ${PriceLabels.DREAM_CALL}",
                         fontSize = 11.sp,
-                        color = Color(0xFFC24E1B)
+                        color = Color(0xFF125157)
                     )
                 }
             }
@@ -392,7 +392,7 @@ fun BentoEditorialProfileSheet(
                                 text = "✨ साधक अवतार चुनें",
                                 fontSize = 12.5.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = Color(0xFFC24E1B)
+                                color = Color(0xFF125157)
                             )
                             Spacer(modifier = Modifier.width(6.dp))
                             Surface(
@@ -412,7 +412,7 @@ fun BentoEditorialProfileSheet(
                             text = "सभी देखें ›",
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Bold,
-                            color = Color(0xFFC24E1B),
+                            color = Color(0xFF125157),
                             modifier = Modifier.clickable {
                                 HapticFeedbackHelper.playClick(haptic)
                                 showAvatarModalDialog = true
@@ -464,7 +464,7 @@ fun BentoEditorialProfileSheet(
                                         text = opt.nameHi,
                                         fontSize = 11.sp,
                                         fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                                        color = if (isSelected) Color(0xFFC24E1B) else Color(0xFFC24E1B)
+                                        color = if (isSelected) Color(0xFF125157) else Color(0xFF125157)
                                     )
                                 }
                             }
@@ -741,7 +741,7 @@ fun BentoEditorialProfileSheet(
                                 val isSelected = (pkg.id == selectedPackageId)
                                 Surface(
                                     shape = RoundedCornerShape(10.dp),
-                                    color = if (isSelected) Color(0xFFC24E1B) else Color(0xFFF1F5F9),
+                                    color = if (isSelected) Color(0xFF125157) else Color(0xFFF1F5F9),
                                     modifier = Modifier
                                         .weight(1f)
                                         .clickable {
@@ -836,7 +836,7 @@ fun BentoEditorialProfileSheet(
                                             Icon(
                                                 imageVector = Icons.Filled.Check,
                                                 contentDescription = "Selected",
-                                                tint = Color(0xFFC24E1B),
+                                                tint = Color(0xFF125157),
                                                 modifier = Modifier.size(20.dp)
                                             )
                                         }
@@ -856,7 +856,7 @@ fun BentoEditorialProfileSheet(
                             Toast.makeText(context, "साधक अवतार लागू हुआ: ${tempAvatar.nameHi} ✨", Toast.LENGTH_SHORT).show()
                         },
                         shape = RoundedCornerShape(12.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC24E1B)),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF125157)),
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Text(

@@ -77,7 +77,7 @@ fun GuidanceCategoriesSection(
                         shadowElevation = if (isSelected) 4.dp else 1.5.dp,
                         border = BorderStroke(
                             width = if (isSelected) 2.dp else 1.2.dp,
-                            color = if (isSelected) Color(0xFFE46228) else item.borderColor
+                            color = if (isSelected) Color(0xFF0D656C) else item.borderColor
                         )
                     ) {
                         Box(
@@ -106,7 +106,7 @@ fun GuidanceCategoriesSection(
                         text = if (isHindi) item.titleHi else item.titleEn,
                         fontSize = 11.5.sp,
                         fontWeight = if (isSelected) FontWeight.Bold else FontWeight.SemiBold,
-                        color = if (isSelected) Color(0xFFE46228) else Color(0xFF2D3748),
+                        color = if (isSelected) Color(0xFF0D656C) else Color(0xFF2D3748),
                         textAlign = TextAlign.Center,
                         maxLines = 1
                     )

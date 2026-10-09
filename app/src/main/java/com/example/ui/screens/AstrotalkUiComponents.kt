@@ -57,7 +57,7 @@ import kotlin.math.*
 @Composable
 fun AstrotalkZodiacWheelIllustration(
     modifier: Modifier = Modifier,
-    primaryColor: Color = Color(0xFFE46228),
+    primaryColor: Color = Color(0xFF0D656C),
     accentColor: Color = Color(0xFFEAB308)
 ) {
     val infiniteTransition = rememberInfiniteTransition(label = "wheel_spin")
@@ -145,7 +145,7 @@ fun AstrotalkZodiacWheelIllustration(
         // Center sacred glyph
         Surface(
             shape = CircleShape,
-            color = Color(0xFFFDF0E8),
+            color = Color(0xFFFAF6EA),
             border = BorderStroke(1.5.dp, primaryColor),
             modifier = Modifier.size(52.dp)
         ) {
@@ -167,7 +167,7 @@ fun AstrotalkZodiacWheelIllustration(
 @Composable
 fun AstrotalkSunMandalaIllustration(
     modifier: Modifier = Modifier,
-    primaryColor: Color = Color(0xFFE46228),
+    primaryColor: Color = Color(0xFF0D656C),
     accentColor: Color = Color(0xFFEAB308)
 ) {
     val infiniteTransition = rememberInfiniteTransition(label = "sun_pulse")
@@ -233,7 +233,7 @@ fun AstrotalkSunMandalaIllustration(
         // Radiant Sun Face Icon
         Surface(
             shape = CircleShape,
-            color = Color(0xFFFDF0E8),
+            color = Color(0xFFFAF6EA),
             border = BorderStroke(2.dp, primaryColor),
             modifier = Modifier.size(68.dp)
         ) {
@@ -253,7 +253,7 @@ fun AstrotalkSunMandalaIllustration(
 @Composable
 fun AstrotalkYantraMandalaIllustration(
     modifier: Modifier = Modifier,
-    primaryColor: Color = Color(0xFFE46228),
+    primaryColor: Color = Color(0xFF0D656C),
     accentColor: Color = Color(0xFFEAB308)
 ) {
     Box(
@@ -314,7 +314,7 @@ fun AstrotalkYantraMandalaIllustration(
         // Center Bindu symbol
         Surface(
             shape = CircleShape,
-            color = Color(0xFFFDF0E8),
+            color = Color(0xFFFAF6EA),
             border = BorderStroke(2.dp, primaryColor),
             modifier = Modifier.size(54.dp)
         ) {
