@@ -747,8 +747,8 @@ private fun BentoOtpVerifyView(
 
         Surface(
             shape = RoundedCornerShape(8.dp),
-            color = Color(0xFFFEF3C7),
-            border = BorderStroke(1.dp, Color(0xFFFDE68A))
+            color = Color(0xFFFAF6EA),
+            border = BorderStroke(1.dp, Color(0xFFE9DB97))
         ) {
             Text(
                 text = "💡 SMS न पहुँचे तो 30 सेकंड बाद दोबारा भेजें",

@@ -294,7 +294,7 @@ fun FirestoreCardDetailScreen(
 
                         Surface(
                             shape = RoundedCornerShape(999.dp),
-                            color = if (displayContent.existsInCloud) Color(0xFFFEF3C7) else Color(0xFFF1F5F9)
+                            color = if (displayContent.existsInCloud) Color(0xFFFAF6EA) else Color(0xFFF1F5F9)
                         ) {
                             Text(
                                 text = if (displayContent.existsInCloud) "☁️ Cloud Synced ID: ${displayContent.cardId}" else "📌 Local Fallback ID: ${displayContent.cardId}",

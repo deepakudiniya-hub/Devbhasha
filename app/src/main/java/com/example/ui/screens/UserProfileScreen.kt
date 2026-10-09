@@ -330,10 +330,10 @@ fun UserProfileScreen(
                                 .background(
                                     Brush.sweepGradient(
                                         listOf(
-                                            Color(0xFFF59E0B),
+                                            Color(0xFFD0BF75),
                                             Color(0xFF0D656C),
                                             Color(0xFF0D656C),
-                                            Color(0xFFF59E0B)
+                                            Color(0xFFD0BF75)
                                         )
                                     )
                                 )
@@ -451,8 +451,8 @@ fun UserProfileScreen(
                             } else {
                                 Surface(
                                     shape = RoundedCornerShape(12.dp),
-                                    color = Color(0xFFFEF3C7),
-                                    border = BorderStroke(0.8.dp, Color(0xFFFDE68A)),
+                                    color = Color(0xFFFAF6EA),
+                                    border = BorderStroke(0.8.dp, Color(0xFFE9DB97)),
                                     modifier = Modifier.clickable { showEditProfileDialog = true }
                                 ) {
                                     Row(
@@ -462,7 +462,7 @@ fun UserProfileScreen(
                                         Icon(
                                             imageVector = Icons.Filled.Phone,
                                             contentDescription = null,
-                                            tint = Color(0xFFD97706),
+                                            tint = Color(0xFF125157),
                                             modifier = Modifier.size(11.dp)
                                         )
                                         Spacer(modifier = Modifier.width(4.dp))
@@ -501,7 +501,7 @@ fun UserProfileScreen(
                     // ---------------------------------------------------------
                     Surface(
                         shape = RoundedCornerShape(14.dp),
-                        color = Color(0xFFFFFBEB),
+                        color = Color(0xFFFAF6EA),
                         border = BorderStroke(1.dp, Color(0xFFFAF6EA).copy(alpha = 0.7f)),
                         modifier = Modifier.fillMaxWidth()
                     ) {
@@ -573,7 +573,7 @@ fun UserProfileScreen(
                                                 .background(option.bgColor)
                                                 .border(
                                                     width = if (isSelected) 2.5.dp else 1.dp,
-                                                    color = if (isSelected) Color(0xFFF59E0B) else Color.White,
+                                                    color = if (isSelected) Color(0xFFD0BF75) else Color.White,
                                                     shape = CircleShape
                                                 ),
                                             contentAlignment = Alignment.Center
@@ -801,8 +801,8 @@ fun UserProfileScreen(
                         .fillMaxWidth()
                         .testTag("add_details_banner"),
                     shape = RoundedCornerShape(18.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFFFFFBEB)),
-                    border = BorderStroke(1.2.dp, Color(0xFFFDE68A))
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFFFAF6EA)),
+                    border = BorderStroke(1.2.dp, Color(0xFFE9DB97))
                 ) {
                     Row(
                         modifier = Modifier
@@ -814,7 +814,7 @@ fun UserProfileScreen(
                             modifier = Modifier
                                 .size(42.dp)
                                 .clip(CircleShape)
-                                .background(Color(0xFFFEF3C7)),
+                                .background(Color(0xFFFAF6EA)),
                             contentAlignment = Alignment.Center
                         ) {
                             Text(text = "✍️", fontSize = 20.sp)
@@ -843,7 +843,7 @@ fun UserProfileScreen(
                         Button(
                             onClick = { showEditProfileDialog = true },
                             shape = RoundedCornerShape(10.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD97706)),
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF125157)),
                             contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
                         ) {
                             Text(
@@ -975,10 +975,10 @@ fun UserProfileScreen(
 
                                 Surface(
                                     shape = RoundedCornerShape(12.dp),
-                                    color = if (isAnswered) Color(0xFFF0FDF4) else Color(0xFFFFFBEB),
+                                    color = if (isAnswered) Color(0xFFF0FDF4) else Color(0xFFFAF6EA),
                                     border = BorderStroke(
                                         1.dp,
-                                        if (isAnswered) Color(0xFFBBF7D0) else Color(0xFFFDE68A)
+                                        if (isAnswered) Color(0xFFBBF7D0) else Color(0xFFE9DB97)
                                     ),
                                     modifier = Modifier
                                         .fillMaxWidth()
@@ -998,7 +998,7 @@ fun UserProfileScreen(
                                                     text = "#${idx + 1}",
                                                     fontSize = 11.sp,
                                                     fontWeight = FontWeight.Bold,
-                                                    color = if (isAnswered) GreenPrimary else Color(0xFFD97706)
+                                                    color = if (isAnswered) GreenPrimary else Color(0xFF125157)
                                                 )
                                                 Spacer(modifier = Modifier.width(6.dp))
                                                 Text(
@@ -1013,7 +1013,7 @@ fun UserProfileScreen(
 
                                             Surface(
                                                 shape = RoundedCornerShape(8.dp),
-                                                color = if (isAnswered) GreenPrimary.copy(alpha = 0.15f) else Color(0xFFF59E0B).copy(alpha = 0.15f)
+                                                color = if (isAnswered) GreenPrimary.copy(alpha = 0.15f) else Color(0xFFD0BF75).copy(alpha = 0.15f)
                                             ) {
                                                 Text(
                                                     text = if (isAnswered) "समाधान प्राप्त ✓" else "प्रतीक्षारत ⏳",
@@ -1484,7 +1484,7 @@ fun UserProfileScreen(
                     // 0. Sadhak Avatar Selection Strip inside Edit Profile
                     Surface(
                         shape = RoundedCornerShape(14.dp),
-                        color = Color(0xFFFFFBEB),
+                        color = Color(0xFFFAF6EA),
                         border = BorderStroke(1.dp, Color(0xFFFAF6EA))
                     ) {
                         Column(modifier = Modifier.padding(10.dp)) {
@@ -1541,7 +1541,7 @@ fun UserProfileScreen(
                                             .background(opt.bgColor)
                                             .border(
                                                 width = if (isSelected) 2.5.dp else 0.dp,
-                                                color = if (isSelected) Color(0xFFF59E0B) else Color.Transparent,
+                                                color = if (isSelected) Color(0xFFD0BF75) else Color.Transparent,
                                                 shape = CircleShape
                                             )
                                             .clickable {
@@ -1797,10 +1797,10 @@ fun UserProfileScreen(
                                     .background(
                                         Brush.sweepGradient(
                                             listOf(
-                                                Color(0xFFF59E0B),
+                                                Color(0xFFD0BF75),
                                                 previewAvatar.bgColor,
                                                 Color(0xFF0D656C),
-                                                Color(0xFFF59E0B)
+                                                Color(0xFFD0BF75)
                                             )
                                         )
                                     )
@@ -1929,7 +1929,7 @@ fun UserProfileScreen(
                                                 .background(option.bgColor)
                                                 .border(
                                                     width = if (isSelected) 3.dp else 1.dp,
-                                                    color = if (isSelected) Color(0xFFF59E0B) else Color(0xFFE2E8F0),
+                                                    color = if (isSelected) Color(0xFFD0BF75) else Color(0xFFE2E8F0),
                                                     shape = CircleShape
                                                 ),
                                             contentAlignment = Alignment.Center

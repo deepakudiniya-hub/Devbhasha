@@ -52,7 +52,7 @@ fun AstrotalkLoginScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(Color(0xFFFFFDF9))
+            .background(Color(0xFFFAF6EA))
             .verticalScroll(rememberScrollState())
     ) {
         // Curved Wave Top Header matching Astrotalk
@@ -347,7 +347,7 @@ fun AstrotalkOtpScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(Color(0xFFFFFDF9))
+            .background(Color(0xFFFAF6EA))
             .statusBarsPadding()
             .navigationBarsPadding()
             .padding(horizontal = 24.dp)

@@ -286,8 +286,8 @@ val DangerRedDeep = Color(0xFFDC2626)
 val DangerSoft = Color(0xFFFEE2E2)
 
 // Warning — amber
-val WarningAmberBase = Color(0xFFF59E0B)
-val WarningAmberDeep = Color(0xFFD97706)
+val WarningAmberBase = Color(0xFFD0BF75)
+val WarningAmberDeep = Color(0xFF125157)
 val WarningSoft = Color(0xFFFFF3C7)
 
 // Accents

@@ -321,7 +321,7 @@ fun SadhakDirectoryCard(
                         // Rating Chip
                         Surface(
                             shape = RoundedCornerShape(8.dp),
-                            color = Color(0xFFFEF3C7)
+                            color = Color(0xFFFAF6EA)
                         ) {
                             Row(
                                 modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
@@ -331,7 +331,7 @@ fun SadhakDirectoryCard(
                                 Icon(
                                     imageVector = Icons.Filled.Star,
                                     contentDescription = null,
-                                    tint = Color(0xFFD97706),
+                                    tint = Color(0xFF125157),
                                     modifier = Modifier.size(12.dp)
                                 )
                                 Text(

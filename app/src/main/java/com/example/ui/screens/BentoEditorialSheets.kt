@@ -95,8 +95,8 @@ fun BentoEditorialRechargeSheet(
                 )
                 Surface(
                     shape = RoundedCornerShape(999.dp),
-                    color = Color(0xFFFEF3C7),
-                    border = BorderStroke(1.dp, Color(0xFFFDE68A))
+                    color = Color(0xFFFAF6EA),
+                    border = BorderStroke(1.dp, Color(0xFFE9DB97))
                 ) {
                     Text(
                         text = "🔒 Secure Razorpay",
@@ -130,8 +130,8 @@ fun BentoEditorialRechargeSheet(
             // Price list (display labels only — amounts are decided by the server)
             Surface(
                 shape = RoundedCornerShape(14.dp),
-                color = Color(0xFFFFFBEB),
-                border = BorderStroke(1.2.dp, Color(0xFFF59E0B)),
+                color = Color(0xFFFAF6EA),
+                border = BorderStroke(1.2.dp, Color(0xFFD0BF75)),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column(modifier = Modifier.padding(12.dp)) {
@@ -304,7 +304,7 @@ fun BentoEditorialProfileSheet(
                     Surface(
                         shape = CircleShape,
                         color = avatar.bgColor,
-                        border = BorderStroke(2.5.dp, Color(0xFFF59E0B)),
+                        border = BorderStroke(2.5.dp, Color(0xFFD0BF75)),
                         shadowElevation = 3.dp,
                         modifier = Modifier.size(58.dp)
                     ) {
@@ -375,8 +375,8 @@ fun BentoEditorialProfileSheet(
             // Quick 1-Tap Sadhak Avatar Strip
             Surface(
                 shape = RoundedCornerShape(14.dp),
-                color = Color(0xFFFFFBEB),
-                border = BorderStroke(1.dp, Color(0xFFFDE68A)),
+                color = Color(0xFFFAF6EA),
+                border = BorderStroke(1.dp, Color(0xFFE9DB97)),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 12.dp)
@@ -397,7 +397,7 @@ fun BentoEditorialProfileSheet(
                             Spacer(modifier = Modifier.width(6.dp))
                             Surface(
                                 shape = RoundedCornerShape(999.dp),
-                                color = Color(0xFFF59E0B)
+                                color = Color(0xFFD0BF75)
                             ) {
                                 Text(
                                     text = "12+ उपलब्ध",
@@ -431,10 +431,10 @@ fun BentoEditorialProfileSheet(
                             val isSelected = (opt.id == currentAvatarId)
                             Surface(
                                 shape = RoundedCornerShape(12.dp),
-                                color = if (isSelected) Color.White else Color(0xFFFEF3C7),
+                                color = if (isSelected) Color.White else Color(0xFFFAF6EA),
                                 border = BorderStroke(
                                     if (isSelected) 2.dp else 1.dp,
-                                    if (isSelected) Color(0xFFF59E0B) else Color(0xFFFDE68A)
+                                    if (isSelected) Color(0xFFD0BF75) else Color(0xFFE9DB97)
                                 ),
                                 shadowElevation = if (isSelected) 2.dp else 0.dp,
                                 modifier = Modifier
@@ -773,10 +773,10 @@ fun BentoEditorialProfileSheet(
                                 val isSelected = (opt.id == tempSelectedAvatarId)
                                 Surface(
                                     shape = RoundedCornerShape(14.dp),
-                                    color = if (isSelected) Color(0xFFFFFBEB) else Color.White,
+                                    color = if (isSelected) Color(0xFFFAF6EA) else Color.White,
                                     border = BorderStroke(
                                         if (isSelected) 2.dp else 1.dp,
-                                        if (isSelected) Color(0xFFF59E0B) else Color(0xFFE2E8F0)
+                                        if (isSelected) Color(0xFFD0BF75) else Color(0xFFE2E8F0)
                                     ),
                                     shadowElevation = if (isSelected) 2.dp else 0.5.dp,
                                     modifier = Modifier
