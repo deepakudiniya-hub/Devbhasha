@@ -2175,8 +2175,8 @@ fun BentoEditorialExpertRow(
 }
 
 /**
- * 4 Navigation Tabs Dock: होम, साधक, स्वप्न (Dream), शॉप
- * Active tab has filled icon and primary deep saffron color.
+ * 4 Navigation Tabs Dock: होम, साधक, सपने, उपाय
+ * White bar; the active tab sits in a light-teal pill (home v2 design).
  */
 @Composable
 fun BentoEditorialDock(
@@ -2193,20 +2193,28 @@ fun BentoEditorialDock(
         else -> "en"
     }
 
-    val primaryColor = Saffron
-    val inactiveColor = Color(0xFF6E6E6E)
+    val primaryColor = Color(0xFF0D656C)
+    val inactiveColor = Color(0xFF8A9294)
 
     NavigationBar(
-        modifier = modifier.fillMaxWidth(),
-        containerColor = Color(0xFFF8FAFC),
-        tonalElevation = 4.dp
+        modifier = modifier
+            .fillMaxWidth()
+            .drawBehind {
+                drawLine(
+                    color = Color(0xFFE6E8E6),
+                    start = Offset(0f, 0f),
+                    end = Offset(size.width, 0f),
+                    strokeWidth = 1.dp.toPx()
+                )
+            },
+        containerColor = Color.White,
+        tonalElevation = 0.dp
     ) {
         val tabs = listOf(
             Triple(
                 "today",
                 when (currentLangCode) {
                     "hi" -> "होम"
-                    "hgl" -> "Home"
                     else -> "Home"
                 },
                 Pair(Icons.Filled.Home, Icons.Outlined.Home)
@@ -2215,7 +2223,6 @@ fun BentoEditorialDock(
                 "sadhak",
                 when (currentLangCode) {
                     "hi" -> "साधक"
-                    "hgl" -> "Sadhak"
                     else -> "Sadhak"
                 },
                 Pair(Icons.Filled.SelfImprovement, Icons.Outlined.SelfImprovement)
@@ -2223,9 +2230,9 @@ fun BentoEditorialDock(
             Triple(
                 "dreams",
                 when (currentLangCode) {
-                    "hi" -> "स्वप्न"
-                    "hgl" -> "Dream"
-                    else -> "Dream"
+                    "hi" -> "सपने"
+                    "hgl" -> "Sapne"
+                    else -> "Dreams"
                 },
                 Pair(Icons.Filled.Bedtime, Icons.Outlined.Bedtime)
             ),
@@ -2233,7 +2240,7 @@ fun BentoEditorialDock(
                 "remedy",
                 when (currentLangCode) {
                     "hi" -> "उपाय"
-                    "hgl" -> "Remedy"
+                    "hgl" -> "Upaay"
                     else -> "Remedy"
                 },
                 Pair(Icons.Filled.AutoFixHigh, Icons.Outlined.AutoFixHigh)
@@ -2246,23 +2253,21 @@ fun BentoEditorialDock(
                 selected = isSelected,
                 onClick = { onTabSelect(tab) },
                 icon = {
-                    Box(modifier = Modifier.padding(bottom = 2.dp)) {
-                        Icon(
-                            imageVector = if (isSelected) iconsPair.first else iconsPair.second,
-                            contentDescription = label,
-                            modifier = Modifier.size(22.dp)
-                        )
-                    }
+                    Icon(
+                        imageVector = if (isSelected) iconsPair.first else iconsPair.second,
+                        contentDescription = label,
+                        modifier = Modifier.size(23.dp)
+                    )
                 },
                 label = {
                     Text(
                         text = label,
-                        fontSize = 11.sp,
+                        fontSize = 12.sp,
                         fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
                     )
                 },
                 colors = NavigationBarItemDefaults.colors(
-                    indicatorColor = primaryColor.copy(alpha = 0.12f),
+                    indicatorColor = Color(0xFFE3EFEF),
                     selectedIconColor = primaryColor,
                     selectedTextColor = primaryColor,
                     unselectedIconColor = inactiveColor,
@@ -2272,4 +2277,3 @@ fun BentoEditorialDock(
         }
     }
 }
-
