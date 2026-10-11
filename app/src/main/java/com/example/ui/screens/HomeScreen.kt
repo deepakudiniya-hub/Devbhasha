@@ -493,12 +493,29 @@ fun HomeScreen(
         currentView = "sadhak"
     }
 
+    // Home has a dark teal header behind the status bar: use light status bar icons there.
+    val hostView = androidx.compose.ui.platform.LocalView.current
+    if (!hostView.isInEditMode) {
+        DisposableEffect(currentView) {
+            val window = (hostView.context as? Activity)?.window
+            val controller = window?.let { androidx.core.view.WindowCompat.getInsetsController(it, hostView) }
+            val previous = controller?.isAppearanceLightStatusBars
+            if (currentView == "today") {
+                controller?.isAppearanceLightStatusBars = false
+            }
+            onDispose {
+                if (controller != null && previous != null) controller.isAppearanceLightStatusBars = previous
+            }
+        }
+    }
+
     // Main Scaffold in Bento Editorial Design
     Scaffold(
         modifier = modifier.fillMaxSize(),
-        containerColor = Color(0xFFFAF7F2), // Off-white / light cream background
+        containerColor = Color(0xFFFAF6EA), // Brand cream background
         topBar = {
-            if (currentView in listOf("today", "sadhak")) {
+            // Home ("today") draws its own teal header inside the scroll content.
+            if (currentView == "sadhak") {
                 Surface(
                     color = Color(0xFFFAF7F2), // Matches Scaffold off-white
                     modifier = Modifier.statusBarsPadding()
@@ -566,7 +583,14 @@ fun HomeScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding)
+                .then(
+                    if (currentView == "today") {
+                        // Teal header extends behind the status bar; it pads itself.
+                        Modifier.padding(bottom = innerPadding.calculateBottomPadding())
+                    } else {
+                        Modifier.padding(innerPadding)
+                    }
+                )
         ) {
             AnimatedContent(
                 // ... (existing content)
@@ -584,115 +608,84 @@ fun HomeScreen(
                             modifier = Modifier
                                 .fillMaxSize()
                                 .verticalScroll(rememberScrollState())
-                                .padding(bottom = 24.dp)
+                                .padding(bottom = 28.dp)
                         ) {
-                            // 1. Journal Search Bar at the top of Home Screen (Keyword & Date filtering)
-                            val isJournalSearchActive = searchQuery.isNotBlank() || customFilterDateMillis != null || activeJournalFilter != JournalFilterType.ALL
-                            val filteredJournalEntries = remember(dreamList, searchQuery, activeJournalFilter, customFilterDateMillis) {
-                                JournalSearchEngine.filterEntries(
-                                    entries = dreamList,
-                                    query = searchQuery,
-                                    filterType = activeJournalFilter,
-                                    customDateMillis = customFilterDateMillis
-                                )
-                            }
-
-                            HomeJournalSearchBar(
-                                query = searchQuery,
-                                onQueryChange = { searchQuery = it },
-                                activeFilter = activeJournalFilter,
-                                onFilterSelect = { filter ->
-                                    activeJournalFilter = filter
-                                    if (filter != JournalFilterType.ALL) {
-                                        customFilterDateMillis = null
-                                    }
-                                },
-                                customDateMillis = customFilterDateMillis,
-                                onCustomDateSelect = { dateMillis ->
-                                    customFilterDateMillis = dateMillis
-                                    if (dateMillis != null) {
-                                        activeJournalFilter = JournalFilterType.ALL
-                                    }
-                                },
-                                onSearchSubmit = { q ->
-                                    if (q.isNotBlank()) {
-                                        showToast("Searching journal for \"$q\"")
-                                    }
-                                },
-                                onOpenJournalClick = {
-                                    currentView = "dreams"
-                                },
+                            // 1 + 2. Teal header: brand, wallet, avatar, greeting, today card
+                            HomeV2Header(
+                                userName = userDisplayName,
+                                balanceAmount = walletBalance,
+                                language = language,
                                 isHindi = isHindi,
-                                language = language
+                                onBalanceClick = { currentView = "wallet" },
+                                onAddMoneyClick = {
+                                    HapticFeedbackHelper.playClick(haptic)
+                                    showRechargeSheet = true
+                                },
+                                onProfileClick = {
+                                    HapticFeedbackHelper.playClick(haptic)
+                                    showProfileSheet = true
+                                },
+                                onTodayClick = {
+                                    HapticFeedbackHelper.playClick(haptic)
+                                    currentView = "pooja"
+                                }
                             )
 
+                            // 3. Ask card -> existing पूछो sheet
+                            Spacer(modifier = Modifier.height(12.dp))
+                            HomeV2AskCard(
+                                onAskClick = {
+                                    HapticFeedbackHelper.playClick(haptic)
+                                    showPoochhoSheet = true
+                                },
+                                language = language,
+                                isHindi = isHindi
+                            )
 
-
-                            // 5. Circular Problem & Guidance Categories Row
-                            Spacer(modifier = Modifier.height(8.dp))
-                            BentoProblemCategoryRow(
+                            // 4. Problem categories -> existing Firestore card detail
+                            Spacer(modifier = Modifier.height(26.dp))
+                            HomeV2CategoryRow(
                                 onCategoryClick = { category ->
+                                    HapticFeedbackHelper.playClick(haptic)
                                     selectedCardId = category
                                     currentView = "firestore_card"
                                 },
-                                isHindi = isHindi,
-                                language = language
+                                language = language,
+                                isHindi = isHindi
                             )
 
-                            // 2. Real-time Filtered Search Results (displays when searching or date filtering)
-                            if (isJournalSearchActive) {
-                                HomeJournalSearchResultsSection(
-                                    searchResults = filteredJournalEntries,
-                                    searchQuery = searchQuery,
-                                    activeFilter = activeJournalFilter,
-                                    customDateMillis = customFilterDateMillis,
-                                    onClearAllFilters = {
-                                        searchQuery = ""
-                                        activeJournalFilter = JournalFilterType.ALL
-                                        customFilterDateMillis = null
-                                    },
-                                    onEntryClick = { entry ->
-                                        selectedEntryForDetail = entry
-                                    },
-                                    onAskSadhakClick = { entry ->
-                                        val firstSadhak = saadhakList.firstOrNull()
-                                        if (firstSadhak != null) {
-                                            handleStartConsultation(firstSadhak, "chat")
-                                        } else {
-                                            showBookingSheet = true
-                                        }
-                                    },
-                                    onAddNewDreamClick = {
-                                        showLogDreamDialog = true
-                                    },
-                                    isHindi = isHindi,
-                                    language = language
-                                )
-                            }
-
-                            // 3. Featured Big "पूछा" Card (Direct Sadhak Query & Instant Resolution)
-                            Spacer(modifier = Modifier.height(10.dp))
-                            BentoEditorialPoochhaHeroCard(
-                                onAskClick = { showPoochhoSheet = true },
-                                isHindi = isHindi,
-                                language = language
-                            )
-
-                            // 4. Verified Sadhaks on Call (Featured card + Expert list)
-                            Spacer(modifier = Modifier.height(16.dp))
-                            BentoEditorialExpertsSection(
+                            // 5. Online sadhaks
+                            Spacer(modifier = Modifier.height(26.dp))
+                            HomeV2OnlineSadhaks(
                                 sadhaks = saadhakList,
-                                onChatClick = { sadhak ->
-                                    handleStartConsultation(sadhak, "chat")
+                                onChatClick = { sadhak -> handleStartConsultation(sadhak, "chat") },
+                                onCallClick = { sadhak -> handleStartConsultation(sadhak, "call") },
+                                onSeeAllClick = { showBookingSheet = true },
+                                language = language,
+                                isHindi = isHindi
+                            )
+
+                            // 6. Daily sadhana tools
+                            Spacer(modifier = Modifier.height(26.dp))
+                            HomeV2DailySadhana(
+                                onJapaClick = {
+                                    HapticFeedbackHelper.playClick(haptic)
+                                    currentView = "japa"
                                 },
-                                onCallClick = { sadhak ->
-                                    handleStartConsultation(sadhak, "call")
+                                onPanchangClick = {
+                                    HapticFeedbackHelper.playClick(haptic)
+                                    currentView = "panchang"
                                 },
-                                onSeeAllClick = {
-                                    showBookingSheet = true
+                                onKundliClick = {
+                                    HapticFeedbackHelper.playClick(haptic)
+                                    currentView = "kundli"
                                 },
-                                isHindi = isHindi,
-                                language = language
+                                onDreamsClick = {
+                                    HapticFeedbackHelper.playClick(haptic)
+                                    currentView = "dreams"
+                                },
+                                language = language,
+                                isHindi = isHindi
                             )
                         }
                     }
@@ -799,6 +792,14 @@ fun HomeScreen(
 
                     "pooja" -> {
                         BentoDailyPoojaScreen(onBackClick = { currentView = "today" })
+                    }
+
+                    "japa" -> {
+                        BentoJapaTimerScreen(onBackClick = { currentView = "today" })
+                    }
+
+                    "panchang" -> {
+                        RemedyScreen(isHindi = isHindi)
                     }
 
                     "habits", "negativity" -> {
