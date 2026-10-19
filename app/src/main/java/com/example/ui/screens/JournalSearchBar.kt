@@ -276,7 +276,7 @@ fun HomeJournalSearchBar(
                             fontSize = 14.5.sp,
                             fontWeight = FontWeight.Medium
                         ),
-                        cursorBrush = SolidColor(Color(0xFF125157)),
+                        cursorBrush = SolidColor(DevColorTokens.brandTealDeep),
                         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
                         keyboardActions = KeyboardActions(onSearch = {
                             focusManager.clearFocus()
@@ -291,7 +291,7 @@ fun HomeJournalSearchBar(
                     val dateLabel = SimpleDateFormat("d MMM", Locale.getDefault()).format(Date(customDateMillis))
                     Surface(
                         shape = RoundedCornerShape(8.dp),
-                        color = Color(0xFF125157),
+                        color = DevColorTokens.brandTealDeep,
                         modifier = Modifier.clickable { onCustomDateSelect(null) }
                     ) {
                         Row(
@@ -300,7 +300,7 @@ fun HomeJournalSearchBar(
                         ) {
                             Text(
                                 text = dateLabel,
-                                color = Color.White,
+                                color = DevColorTokens.textInverse,
                                 fontSize = 11.sp,
                                 fontWeight = FontWeight.Bold
                             )
@@ -308,7 +308,7 @@ fun HomeJournalSearchBar(
                             Icon(
                                 imageVector = Icons.Filled.Close,
                                 contentDescription = "Clear Date",
-                                tint = Color.White,
+                                tint = DevColorTokens.textInverse,
                                 modifier = Modifier.size(12.dp)
                             )
                         }
@@ -339,12 +339,12 @@ fun HomeJournalSearchBar(
                     modifier = Modifier
                         .size(34.dp)
                         .clip(CircleShape)
-                        .background(if (customDateMillis != null) Color(0xFF125157).copy(alpha = 0.12f) else Color(0xFFF1F5F9))
+                        .background(if (customDateMillis != null) DevColorTokens.brandTealDeep.copy(alpha = 0.12f) else DevColorTokens.neutralSlate100)
                 ) {
                     Icon(
                         imageVector = Icons.Outlined.CalendarMonth,
                         contentDescription = "Pick Date",
-                        tint = if (customDateMillis != null) Color(0xFF125157) else Color(0xFF475569),
+                        tint = if (customDateMillis != null) DevColorTokens.brandTealDeep else DevColorTokens.neutralSlate600,
                         modifier = Modifier.size(18.dp)
                     )
                 }
@@ -372,10 +372,10 @@ fun HomeJournalSearchBar(
 
                         Surface(
                             shape = RoundedCornerShape(999.dp),
-                            color = if (isSelected) Color(0xFF000000) else Color.White,
+                            color = if (isSelected) DevColorTokens.textPrimary else DevColorTokens.bgCard,
                             border = BorderStroke(
                                 width = 1.dp,
-                                color = if (isSelected) Color(0xFF000000) else Color(0xFFEFEFEF)
+                                color = if (isSelected) DevColorTokens.textPrimary else DevColorTokens.borderLight
                             ),
                             modifier = Modifier
                                 .clip(RoundedCornerShape(999.dp))
@@ -392,7 +392,7 @@ fun HomeJournalSearchBar(
                                 )
                                 Text(
                                     text = label,
-                                    color = if (isSelected) Color.White else Color(0xFF737373),
+                                    color = if (isSelected) DevColorTokens.textInverse else DevColorTokens.textSecondary,
                                     fontSize = 11.5.sp,
                                     fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
                                 )
@@ -511,7 +511,7 @@ fun HomeJournalSearchResultsSection(
             // Empty Search State
             Surface(
                 shape = RoundedCornerShape(16.dp),
-                color = Color.White,
+                color = DevColorTokens.bgCard,
                 border = BorderStroke(1.dp, Color(0xFFEFE6D8)),
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -554,7 +554,7 @@ fun HomeJournalSearchResultsSection(
                         Icon(
                             imageVector = Icons.Filled.Add,
                             contentDescription = "Add",
-                            tint = Color.White,
+                            tint = DevColorTokens.textInverse,
                             modifier = Modifier.size(16.dp)
                         )
                         Spacer(modifier = Modifier.width(6.dp))
@@ -622,7 +622,7 @@ fun JournalSearchResultCard(
 
     Surface(
         shape = RoundedCornerShape(16.dp),
-        color = Color.White,
+        color = DevColorTokens.bgCard,
         border = BorderStroke(1.dp, Color(0xFFEAE2D5)),
         shadowElevation = 1.dp,
         modifier = modifier
@@ -674,14 +674,14 @@ fun JournalSearchResultCard(
                                 shape = RoundedCornerShape(6.dp),
                                 color = when {
                                     isAlert -> Color(0xFFFFF1F0)
-                                    isLucidOrSpecial -> Color(0xFFF3E8FF)
+                                    isLucidOrSpecial -> DevColorTokens.accentVioletSoft
                                     else -> Color(0xFFF2F7EC)
                                 },
                                 border = BorderStroke(
                                     1.dp,
                                     when {
                                         isAlert -> Color(0xFFFFCCC7)
-                                        isLucidOrSpecial -> Color(0xFFDDD6FE)
+                                        isLucidOrSpecial -> DevColorTokens.accentVioletBorderStrong
                                         else -> Color(0xFFD6E4C4)
                                     }
                                 )
@@ -690,7 +690,7 @@ fun JournalSearchResultCard(
                                     text = t,
                                     color = when {
                                         isAlert -> Color(0xFFCF1322)
-                                        isLucidOrSpecial -> Color(0xFF7C3AED)
+                                        isLucidOrSpecial -> DevColorTokens.accentViolet
                                         else -> Color(0xFF389E0D)
                                     },
                                     fontSize = 10.sp,
@@ -891,7 +891,7 @@ fun JournalSearchResultCard(
                     ) {
                         Text(
                             text = "विवरण →",
-                            color = Color.White,
+                            color = DevColorTokens.textInverse,
                             fontWeight = FontWeight.Bold,
                             fontSize = 11.sp,
                             modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
@@ -969,7 +969,7 @@ fun highlightSearchQuery(text: String, query: String): androidx.compose.ui.text.
             withStyle(
                 SpanStyle(
                     background = Color(0xFFFFE58F),
-                    color = Color(0xFF125157),
+                    color = DevColorTokens.brandTealDeep,
                     fontWeight = FontWeight.Bold
                 )
             ) {
@@ -1018,7 +1018,7 @@ fun DreamEntryDetailDialog(
                 Icon(
                     imageVector = Icons.AutoMirrored.Outlined.Chat,
                     contentDescription = "Ask",
-                    tint = Color.White,
+                    tint = DevColorTokens.textInverse,
                     modifier = Modifier.size(16.dp)
                 )
                 Spacer(modifier = Modifier.width(6.dp))
@@ -1145,6 +1145,7 @@ fun DreamEntryDetailDialog(
             }
         },
         shape = RoundedCornerShape(20.dp),
-        containerColor = Color.White
+        containerColor = DevColorTokens.bgCard
     )
 }
+

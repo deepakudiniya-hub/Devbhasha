@@ -131,11 +131,11 @@ private fun CallAstrologerListScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(Color.White)
+            .background(DevColorTokens.bgCard)
     ) {
         // Top Header
         Surface(
-            color = Color.White,
+            color = DevColorTokens.bgCard,
             shadowElevation = 2.dp
         ) {
             Column(
@@ -159,23 +159,23 @@ private fun CallAstrologerListScreen(
                                 text = if (isHindi) "साधक वॉइस कॉल परामर्श" else "Call Astrologers",
                                 fontSize = 17.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = Color(0xFF1E293B)
+                                color = DevColorTokens.neutralSlate800
                             )
                         }
                         Text(
                             text = if (isHindi) "सीधे फ़ोन पर बात करें • ${PriceLabels.SESSION}"
                             else "Direct phone consultation • ${PriceLabels.SESSION}",
                             fontSize = 11.5.sp,
-                            color = Color(0xFF64748B)
+                            color = DevColorTokens.neutralSlate500
                         )
                     }
 
                     // Online Available Count Badge
                     val onlineAvailableCount = sadhaks.count { it.isOnline }
                     Surface(
-                        color = Color(0xFFDCFCE7),
+                        color = DevColorTokens.statusSuccessSoft,
                         shape = RoundedCornerShape(12.dp),
-                        border = BorderStroke(1.dp, Color(0xFF86EFAC))
+                        border = BorderStroke(1.dp, DevColorTokens.statusSuccessLight)
                     ) {
                         Row(
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
@@ -185,12 +185,12 @@ private fun CallAstrologerListScreen(
                                 modifier = Modifier
                                     .size(7.dp)
                                     .clip(CircleShape)
-                                    .background(Color(0xFF16A34A))
+                                    .background(DevColorTokens.statusSuccess)
                             )
                             Spacer(modifier = Modifier.width(5.dp))
                             Text(
                                 text = if (isHindi) "$onlineAvailableCount उपलब्ध" else "$onlineAvailableCount Available",
-                                color = Color(0xFF15803D),
+                                color = DevColorTokens.statusSuccessDeep,
                                 fontSize = 11.sp,
                                 fontWeight = FontWeight.Bold
                             )
@@ -207,13 +207,13 @@ private fun CallAstrologerListScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(20.dp))
-                        .background(Color(0xFFF8FAFC))
-                        .border(1.dp, Color(0xFFE2E8F0), RoundedCornerShape(20.dp)),
+                        .background(DevColorTokens.neutralSlate50)
+                        .border(1.dp, DevColorTokens.neutralSlate200, RoundedCornerShape(20.dp)),
                     placeholder = {
                         Text(
                             text = if (isHindi) "ज्योतिषी का नाम या अनुभव खोजें..." else "Search astrologers...",
                             fontSize = 13.sp,
-                            color = Color(0xFF94A3B8)
+                            color = DevColorTokens.neutralSlate400
                         )
                     },
                     leadingIcon = {
@@ -230,7 +230,7 @@ private fun CallAstrologerListScreen(
                                 Icon(
                                     imageVector = Icons.Outlined.Close,
                                     contentDescription = "Clear",
-                                    tint = Color(0xFF94A3B8),
+                                    tint = DevColorTokens.neutralSlate400,
                                     modifier = Modifier.size(16.dp)
                                 )
                             }
@@ -241,8 +241,8 @@ private fun CallAstrologerListScreen(
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = Color.Transparent,
                         unfocusedBorderColor = Color.Transparent,
-                        focusedContainerColor = Color(0xFFF8FAFC),
-                        unfocusedContainerColor = Color(0xFFF8FAFC)
+                        focusedContainerColor = DevColorTokens.neutralSlate50,
+                        unfocusedContainerColor = DevColorTokens.neutralSlate50
                     )
                 )
 
@@ -257,10 +257,10 @@ private fun CallAstrologerListScreen(
                         val isSelected = selectedFilter == key
                         Surface(
                             shape = RoundedCornerShape(16.dp),
-                            color = if (isSelected) Color(0xFF15803D) else Color(0xFFF1F5F9),
+                            color = if (isSelected) DevColorTokens.statusSuccessDeep else DevColorTokens.neutralSlate100,
                             border = BorderStroke(
                                 1.dp,
-                                if (isSelected) Color(0xFF166534) else Color(0xFFE2E8F0)
+                                if (isSelected) Color(0xFF166534) else DevColorTokens.neutralSlate200
                             ),
                             modifier = Modifier
                                 .clip(RoundedCornerShape(16.dp))
@@ -270,7 +270,7 @@ private fun CallAstrologerListScreen(
                                 text = label,
                                 fontSize = 12.sp,
                                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                                color = if (isSelected) Color.White else Color(0xFF475569),
+                                color = if (isSelected) DevColorTokens.textInverse else DevColorTokens.neutralSlate600,
                                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
                             )
                         }
@@ -309,9 +309,9 @@ fun CallAstrologerCard(
 ) {
     Surface(
         shape = RoundedCornerShape(18.dp),
-        color = Color.White,
+        color = DevColorTokens.bgCard,
         shadowElevation = 2.dp,
-        border = BorderStroke(1.dp, Color(0xFFE2E8F0)),
+        border = BorderStroke(1.dp, DevColorTokens.neutralSlate200),
         modifier = modifier.fillMaxWidth()
     ) {
         Column(modifier = Modifier.padding(14.dp)) {
@@ -327,14 +327,14 @@ fun CallAstrologerCard(
                             .clip(CircleShape)
                             .background(
                                 Brush.linearGradient(
-                                    listOf(Color(0xFF16A34A), Color(0xFF0D9488))
+                                    listOf(DevColorTokens.statusSuccess, Color(0xFF0D9488))
                                 )
                             ),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
                             text = if (isHindi) sadhak.initialHi else sadhak.initialEn,
-                            color = Color.White,
+                            color = DevColorTokens.textInverse,
                             fontSize = 22.sp,
                             fontWeight = FontWeight.Bold
                         )
@@ -346,14 +346,14 @@ fun CallAstrologerCard(
                                 .align(Alignment.BottomEnd)
                                 .size(14.dp)
                                 .clip(CircleShape)
-                                .background(Color.White)
+                                .background(DevColorTokens.bgCard)
                                 .padding(2.dp)
                         ) {
                             Box(
                                 modifier = Modifier
                                     .fillMaxSize()
                                     .clip(CircleShape)
-                                    .background(Color(0xFF10B981))
+                                    .background(DevColorTokens.statusEmerald)
                             )
                         }
                     }
@@ -371,10 +371,10 @@ fun CallAstrologerCard(
                             text = if (isHindi) sadhak.nameHi else sadhak.nameEn,
                             fontWeight = FontWeight.Bold,
                             fontSize = 15.sp,
-                            color = Color(0xFF1E293B)
+                            color = DevColorTokens.neutralSlate800
                         )
                         Surface(
-                            color = Color(0xFFFAFAFA),
+                            color = DevColorTokens.bgSecondary,
                             border = BorderStroke(1.dp, BorderLight),
                             shape = RoundedCornerShape(6.dp)
                         ) {
@@ -390,7 +390,7 @@ fun CallAstrologerCard(
 
                     Text(
                         text = if (isHindi) sadhak.titleHi else sadhak.titleEn,
-                        color = Color(0xFF15803D),
+                        color = DevColorTokens.statusSuccessDeep,
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Medium,
                         maxLines = 1,
@@ -404,13 +404,13 @@ fun CallAstrologerCard(
                         Text(
                             text = "💼 ${if (isHindi) sadhak.experienceHi else sadhak.experienceEn}",
                             fontSize = 11.5.sp,
-                            color = Color(0xFF64748B)
+                            color = DevColorTokens.neutralSlate500
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             text = "• ⏱️ ${if (isHindi) "प्रतीक्षा 0 मिनट" else "0 min wait"}",
                             fontSize = 11.5.sp,
-                            color = Color(0xFF16A34A),
+                            color = DevColorTokens.statusSuccess,
                             fontWeight = FontWeight.Medium
                         )
                     }
@@ -418,7 +418,7 @@ fun CallAstrologerCard(
             }
 
             Spacer(modifier = Modifier.height(10.dp))
-            HorizontalDivider(color = Color(0xFFF1F5F9))
+            HorizontalDivider(color = DevColorTokens.neutralSlate100)
             Spacer(modifier = Modifier.height(10.dp))
 
             // Bottom Action Row
@@ -433,19 +433,19 @@ fun CallAstrologerCard(
                             text = "₹499",
                             fontWeight = FontWeight.Black,
                             fontSize = 16.sp,
-                            color = Color(0xFF15803D)
+                            color = DevColorTokens.statusSuccessDeep
                         )
                         Text(
                             text = if (isHindi) " / 20 मिनट" else " / 20 min",
                             fontSize = 11.sp,
-                            color = Color(0xFF64748B)
+                            color = DevColorTokens.neutralSlate500
                         )
                     }
                     Text(
                         text = if (isHindi) "📞 सीधी वॉइस कॉल" else "📞 Direct Audio Call",
                         fontSize = 10.5.sp,
                         fontWeight = FontWeight.SemiBold,
-                        color = Color(0xFF15803D)
+                        color = DevColorTokens.statusSuccessDeep
                     )
                 }
 
@@ -456,7 +456,7 @@ fun CallAstrologerCard(
                         modifier = Modifier
                             .size(38.dp)
                             .clip(RoundedCornerShape(12.dp))
-                            .background(Color(0xFFFAFAFA))
+                            .background(DevColorTokens.bgSecondary)
                             .border(1.dp, BorderLight, RoundedCornerShape(12.dp))
                     ) {
                         Icon(
@@ -471,13 +471,13 @@ fun CallAstrologerCard(
                     Button(
                         onClick = onStartCall,
                         shape = RoundedCornerShape(12.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF16A34A)),
+                        colors = ButtonDefaults.buttonColors(containerColor = DevColorTokens.statusSuccess),
                         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
                     ) {
                         Icon(
                             imageVector = Icons.Outlined.Phone,
                             contentDescription = null,
-                            tint = Color.White,
+                            tint = DevColorTokens.textInverse,
                             modifier = Modifier.size(16.dp)
                         )
                         Spacer(modifier = Modifier.width(6.dp))
@@ -609,7 +609,7 @@ fun LiveAudioCallScreen(
                         else
                             "Your consultation of $formattedDuration with ${sadhak.nameEn} completed.",
                         fontSize = 13.5.sp,
-                        color = Color(0xFF334155),
+                        color = DevColorTokens.neutralSlate700,
                         lineHeight = 19.sp
                     )
                     Spacer(modifier = Modifier.height(14.dp))
@@ -636,7 +636,7 @@ fun LiveAudioCallScreen(
     }
 
     Scaffold(
-        containerColor = Color(0xFF0F172A) // Rich Deep Vedic Navy
+        containerColor = DevColorTokens.neutralSlate900 // Rich Deep Vedic Navy
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -653,8 +653,8 @@ fun LiveAudioCallScreen(
             ) {
                 Surface(
                     shape = RoundedCornerShape(16.dp),
-                    color = Color.White.copy(alpha = 0.1f),
-                    border = BorderStroke(1.dp, Color.White.copy(alpha = 0.15f))
+                    color = DevColorTokens.bgCard.copy(alpha = 0.1f),
+                    border = BorderStroke(1.dp, DevColorTokens.textInverse.copy(alpha = 0.15f))
                 ) {
                     Row(
                         modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp),
@@ -664,7 +664,7 @@ fun LiveAudioCallScreen(
                             modifier = Modifier
                                 .size(8.dp)
                                 .clip(CircleShape)
-                                .background(if (isCallConnected) Color(0xFF10B981) else Saffron)
+                                .background(if (isCallConnected) DevColorTokens.statusEmerald else Saffron)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
@@ -673,7 +673,7 @@ fun LiveAudioCallScreen(
                             } else {
                                 if (isHindi) "पंडित जी से संपर्क हो रहा है..." else "Connecting call..."
                             },
-                            color = Color.White,
+                            color = DevColorTokens.textInverse,
                             fontSize = 13.sp,
                             fontWeight = FontWeight.Medium
                         )
@@ -685,7 +685,7 @@ fun LiveAudioCallScreen(
                 Text(
                     text = "🔒 100% End-to-End Encrypted Vedic Audio",
                     fontSize = 11.sp,
-                    color = Color(0xFF94A3B8)
+                    color = DevColorTokens.neutralSlate400
                 )
 
                 Spacer(modifier = Modifier.height(10.dp))
@@ -725,13 +725,13 @@ fun LiveAudioCallScreen(
                         modifier = Modifier
                             .size(118.dp)
                             .clip(CircleShape)
-                            .background(Color(0xFF1E293B))
+                            .background(DevColorTokens.neutralSlate800)
                             .border(3.dp, Saffron, CircleShape),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
                             text = if (isHindi) sadhak.initialHi else sadhak.initialEn,
-                            color = Color.White,
+                            color = DevColorTokens.textInverse,
                             fontSize = 44.sp,
                             fontWeight = FontWeight.Bold
                         )
@@ -744,7 +744,7 @@ fun LiveAudioCallScreen(
                     text = if (isHindi) sadhak.nameHi else sadhak.nameEn,
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color.White
+                    color = DevColorTokens.textInverse
                 )
 
                 Spacer(modifier = Modifier.height(4.dp))
@@ -752,19 +752,19 @@ fun LiveAudioCallScreen(
                 Text(
                     text = if (isHindi) sadhak.titleHi else sadhak.titleEn,
                     fontSize = 13.5.sp,
-                    color = Color(0xFFD0BF75),
+                    color = DevColorTokens.brandGold,
                     fontWeight = FontWeight.Medium
                 )
 
                 Spacer(modifier = Modifier.height(10.dp))
 
                 Surface(
-                    color = Color.White.copy(alpha = 0.08f),
+                    color = DevColorTokens.bgCard.copy(alpha = 0.08f),
                     shape = RoundedCornerShape(12.dp)
                 ) {
                     Text(
                         text = if (isHindi) "🎙️ सात्विक वैदिक परामर्श चालू है" else "🎙️ Sacred Vedic Session Live",
-                        color = Color(0xFFE2E8F0),
+                        color = DevColorTokens.neutralSlate200,
                         fontSize = 12.sp,
                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 5.dp)
                     )
@@ -791,19 +791,19 @@ fun LiveAudioCallScreen(
                             modifier = Modifier
                                 .size(56.dp)
                                 .clip(CircleShape)
-                                .background(if (isMuted) Color(0xFFEF4444) else Color.White.copy(alpha = 0.15f))
+                                .background(if (isMuted) DevColorTokens.statusDanger else DevColorTokens.bgCard.copy(alpha = 0.15f))
                         ) {
                             Icon(
                                 imageVector = if (isMuted) Icons.Filled.MicOff else Icons.Filled.Mic,
                                 contentDescription = "Mute",
-                                tint = Color.White,
+                                tint = DevColorTokens.textInverse,
                                 modifier = Modifier.size(26.dp)
                             )
                         }
                         Spacer(modifier = Modifier.height(6.dp))
                         Text(
                             text = if (isMuted) (if (isHindi) "म्यूट" else "Muted") else (if (isHindi) "माइक" else "Mic"),
-                            color = Color(0xFFCBD5E1),
+                            color = DevColorTokens.neutralSlate300,
                             fontSize = 12.sp
                         )
                     }
@@ -820,12 +820,12 @@ fun LiveAudioCallScreen(
                                 .size(68.dp)
                                 .shadow(8.dp, CircleShape)
                                 .clip(CircleShape)
-                                .background(Color(0xFFDC2626))
+                                .background(DevColorTokens.statusDangerDeep)
                         ) {
                             Icon(
                                 imageVector = Icons.Filled.CallEnd,
                                 contentDescription = "End Call",
-                                tint = Color.White,
+                                tint = DevColorTokens.textInverse,
                                 modifier = Modifier.size(32.dp)
                             )
                         }
@@ -848,19 +848,19 @@ fun LiveAudioCallScreen(
                             modifier = Modifier
                                 .size(56.dp)
                                 .clip(CircleShape)
-                                .background(if (isSpeakerOn) SaffronPrimary else Color.White.copy(alpha = 0.15f))
+                                .background(if (isSpeakerOn) SaffronPrimary else DevColorTokens.bgCard.copy(alpha = 0.15f))
                         ) {
                             Icon(
                                 imageVector = if (isSpeakerOn) Icons.AutoMirrored.Filled.VolumeUp else Icons.AutoMirrored.Filled.VolumeOff,
                                 contentDescription = "Speaker",
-                                tint = Color.White,
+                                tint = DevColorTokens.textInverse,
                                 modifier = Modifier.size(26.dp)
                             )
                         }
                         Spacer(modifier = Modifier.height(6.dp))
                         Text(
                             text = if (isSpeakerOn) (if (isHindi) "स्पीकर ON" else "Speaker ON") else (if (isHindi) "स्पीकर" else "Speaker"),
-                            color = Color(0xFFCBD5E1),
+                            color = DevColorTokens.neutralSlate300,
                             fontSize = 12.sp
                         )
                     }
@@ -869,3 +869,4 @@ fun LiveAudioCallScreen(
         }
     }
 }
+

@@ -121,10 +121,10 @@ fun BentoEditorialSadhakScreen(
         // First Chat Free Ticket (Solar Sunset Saffron Hologram Pass)
         Surface(
             shape = RoundedCornerShape(18.dp),
-            color = Color.White,
+            color = DevColorTokens.bgCard,
             border = BorderStroke(
                 1.2.dp,
-                if (isOfferClaimed) Color(0xFF16A34A).copy(alpha = 0.5f) else Saffron.copy(alpha = 0.5f)
+                if (isOfferClaimed) DevColorTokens.statusSuccess.copy(alpha = 0.5f) else Saffron.copy(alpha = 0.5f)
             ),
             shadowElevation = 2.dp,
             modifier = Modifier
@@ -154,10 +154,10 @@ fun BentoEditorialSadhakScreen(
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         Surface(
-                            color = if (isOfferClaimed) Color(0xFFDCFCE7) else Color(0xFFFAF6EA),
+                            color = if (isOfferClaimed) DevColorTokens.statusSuccessSoft else DevColorTokens.brandCream,
                             border = BorderStroke(
                                 1.dp,
-                                if (isOfferClaimed) Color(0xFF86EFAC) else Saffron.copy(alpha = 0.35f)
+                                if (isOfferClaimed) DevColorTokens.statusSuccessLight else Saffron.copy(alpha = 0.35f)
                             ),
                             shape = RoundedCornerShape(6.dp)
                         ) {
@@ -169,14 +169,14 @@ fun BentoEditorialSadhakScreen(
                                 },
                                 fontSize = 9.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = if (isOfferClaimed) Color(0xFF16A34A) else Saffron,
+                                color = if (isOfferClaimed) DevColorTokens.statusSuccess else Saffron,
                                 modifier = Modifier.padding(horizontal = 7.dp, vertical = 3.dp)
                             )
                         }
 
                         if (false) { // coupon codes removed: free trial is server-decided
                             Surface(
-                                color = Color(0xFFFAFAFA),
+                                color = DevColorTokens.bgSecondary,
                                 border = BorderStroke(1.dp, BorderLight),
                                 shape = RoundedCornerShape(6.dp)
                             ) {
@@ -190,7 +190,7 @@ fun BentoEditorialSadhakScreen(
                                         fontSize = 10.sp,
                                         fontWeight = FontWeight.ExtraBold,
                                         letterSpacing = 1.sp,
-                                        color = Color.Black
+                                        color = DevColorTokens.textPrimary
                                     )
                                     Spacer(modifier = Modifier.width(3.dp))
                                     Icon(
@@ -213,7 +213,7 @@ fun BentoEditorialSadhakScreen(
                         },
                         fontSize = 14.5.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color.Black
+                        color = DevColorTokens.textPrimary
                     )
                     Spacer(modifier = Modifier.height(2.dp))
                     Text(
@@ -223,7 +223,7 @@ fun BentoEditorialSadhakScreen(
                             else -> if (isOfferClaimed) "Use them with any guide" else "With any guide, no card needed"
                         },
                         fontSize = 11.sp,
-                        color = Color(0xFF737373)
+                        color = DevColorTokens.textSecondary
                     )
                 }
 
@@ -233,7 +233,7 @@ fun BentoEditorialSadhakScreen(
                     Surface(
                         shape = RoundedCornerShape(12.dp),
                         color = Color(0xFFF0FDF4),
-                        border = BorderStroke(1.dp, Color(0xFF86EFAC)),
+                        border = BorderStroke(1.dp, DevColorTokens.statusSuccessLight),
                         modifier = Modifier.height(38.dp)
                     ) {
                         Row(
@@ -244,14 +244,14 @@ fun BentoEditorialSadhakScreen(
                             Icon(
                                 imageVector = Icons.Filled.CheckCircle,
                                 contentDescription = null,
-                                tint = Color(0xFF16A34A),
+                                tint = DevColorTokens.statusSuccess,
                                 modifier = Modifier.size(16.dp)
                             )
                             Text(
                                 text = if (currentLangCode == "hi") "सक्रिय" else "Active",
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = Color(0xFF16A34A)
+                                color = DevColorTokens.statusSuccess
                             )
                         }
                     }
@@ -270,14 +270,14 @@ fun BentoEditorialSadhakScreen(
                             Icon(
                                 imageVector = Icons.Filled.Bolt,
                                 contentDescription = null,
-                                tint = Color.White,
+                                tint = DevColorTokens.textInverse,
                                 modifier = Modifier.size(15.dp)
                             )
                             Text(
                                 text = if (currentLangCode == "hi") "क्लेम करें" else "Claim",
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = Color.White
+                                color = DevColorTokens.textInverse
                             )
                         }
                     }
@@ -343,7 +343,7 @@ fun BentoEditorialSadhakScreen(
                                         fontFamily = FontFamily.Serif,
                                         fontSize = 16.sp,
                                         fontWeight = FontWeight.Bold,
-                                        color = Color.White
+                                        color = DevColorTokens.textInverse
                                     )
                                 }
                             }
@@ -385,7 +385,7 @@ fun BentoEditorialSadhakScreen(
                                 ) {
                                     Text(
                                         text = unread,
-                                        color = Color.White,
+                                        color = DevColorTokens.textInverse,
                                         fontSize = 10.sp,
                                         fontWeight = FontWeight.Bold,
                                         modifier = Modifier.padding(horizontal = 7.dp, vertical = 2.dp)
@@ -430,7 +430,7 @@ fun BentoEditorialSadhakScreen(
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(Icons.Filled.Add, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
+                Icon(Icons.Filled.Add, contentDescription = null, tint = DevColorTokens.textInverse, modifier = Modifier.size(16.dp))
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = when (currentLangCode) {
@@ -441,7 +441,7 @@ fun BentoEditorialSadhakScreen(
                     fontFamily = FontFamily.Default,
                     fontSize = 13.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color.White
+                    color = DevColorTokens.textInverse
                 )
             }
         }
@@ -565,7 +565,7 @@ fun BentoEditorialRemedyScreen(
                         text = label,
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Bold,
-                        color = if (isSelected) Color.White else InkSoft,
+                        color = if (isSelected) DevColorTokens.textInverse else InkSoft,
                         modifier = Modifier.padding(horizontal = 14.dp, vertical = 7.dp)
                     )
                 }
@@ -840,12 +840,12 @@ fun BentoEditorialDreamsScreen(
     var selectedMeaningEntryId by remember { mutableStateOf<String?>(null) }
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
-    val saffronColor = Color(0xFF0D656C)
+    val saffronColor = DevColorTokens.brandTeal
 
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(Color.White)
+            .background(DevColorTokens.bgCard)
             .padding(horizontal = 20.dp)
     ) {
         Spacer(modifier = Modifier.height(14.dp))
@@ -860,7 +860,7 @@ fun BentoEditorialDreamsScreen(
                 modifier = Modifier
                     .size(40.dp)
                     .clip(CircleShape)
-                    .background(Color(0xFFF8FAFC))
+                    .background(DevColorTokens.neutralSlate50)
             ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -880,7 +880,7 @@ fun BentoEditorialDreamsScreen(
                 Text(
                     text = "सपनों का आध्यात्मिक व वैदिक फल जानें",
                     fontSize = 11.sp,
-                    color = Color(0xFF64748B)
+                    color = DevColorTokens.neutralSlate500
                 )
             }
             Spacer(modifier = Modifier.weight(1f))
@@ -898,7 +898,7 @@ fun BentoEditorialDreamsScreen(
                 Surface(
                     shape = RoundedCornerShape(20.dp),
                     color = Color(0xFFFCFDFC),
-                    border = BorderStroke(1.dp, Color(0xFFE2E8F0)),
+                    border = BorderStroke(1.dp, DevColorTokens.neutralSlate200),
                     shadowElevation = 2.dp,
                     modifier = Modifier.fillMaxWidth()
                 ) {
@@ -954,7 +954,7 @@ fun BentoEditorialDreamsScreen(
                                 Text(
                                     "सपना यहाँ लिखें या माइक दबाकर बोलें...",
                                     fontSize = 13.5.sp,
-                                    color = Color(0xFF94A3B8)
+                                    color = DevColorTokens.neutralSlate400
                                 )
                             },
                             trailingIcon = {
@@ -972,7 +972,7 @@ fun BentoEditorialDreamsScreen(
                                     Icon(
                                         imageVector = Icons.Filled.Mic,
                                         contentDescription = "Voice Input",
-                                        tint = if (isListeningVoice) saffronColor else Color(0xFF64748B),
+                                        tint = if (isListeningVoice) saffronColor else DevColorTokens.neutralSlate500,
                                         modifier = Modifier.size(24.dp)
                                     )
                                 }
@@ -983,9 +983,9 @@ fun BentoEditorialDreamsScreen(
                             shape = RoundedCornerShape(16.dp),
                             colors = OutlinedTextFieldDefaults.colors(
                                 focusedBorderColor = saffronColor,
-                                unfocusedBorderColor = Color(0xFFE2E8F0),
-                                focusedContainerColor = Color.White,
-                                unfocusedContainerColor = Color(0xFFF8FAFC)
+                                unfocusedBorderColor = DevColorTokens.neutralSlate200,
+                                focusedContainerColor = DevColorTokens.bgCard,
+                                unfocusedContainerColor = DevColorTokens.neutralSlate50
                             )
                         )
 
@@ -1052,7 +1052,7 @@ fun BentoEditorialDreamsScreen(
                             Icon(
                                 imageVector = Icons.Filled.Add,
                                 contentDescription = "Add",
-                                tint = Color.White,
+                                tint = DevColorTokens.textInverse,
                                 modifier = Modifier.size(20.dp)
                             )
                             Spacer(modifier = Modifier.width(8.dp))
@@ -1060,7 +1060,7 @@ fun BentoEditorialDreamsScreen(
                                 text = "सपना दर्ज करें · ${PriceLabels.DREAM_CHAT}",
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 14.5.sp,
-                                color = Color.White
+                                color = DevColorTokens.textInverse
                             )
                         }
 
@@ -1068,7 +1068,7 @@ fun BentoEditorialDreamsScreen(
                         Text(
                             text = "वैदिक साधकों द्वारा 100% व्यक्तिगत स्वप्न फल मीमांसा",
                             fontSize = 11.sp,
-                            color = Color(0xFF64748B),
+                            color = DevColorTokens.neutralSlate500,
                             textAlign = TextAlign.Center,
                             modifier = Modifier.fillMaxWidth()
                         )
@@ -1094,13 +1094,13 @@ fun BentoEditorialDreamsScreen(
                     Spacer(modifier = Modifier.weight(1f))
                     Surface(
                         shape = RoundedCornerShape(50),
-                        color = Color(0xFFF1F5F9)
+                        color = DevColorTokens.neutralSlate100
                     ) {
                         Text(
                             text = "${dreams.size} सपने",
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Bold,
-                            color = Color(0xFF475569),
+                            color = DevColorTokens.neutralSlate600,
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
                         )
                     }
@@ -1113,7 +1113,7 @@ fun BentoEditorialDreamsScreen(
                     Surface(
                         shape = RoundedCornerShape(20.dp),
                         color = Color(0xFFFAFAFC),
-                        border = BorderStroke(1.dp, Color(0xFFE2E8F0)),
+                        border = BorderStroke(1.dp, DevColorTokens.neutralSlate200),
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(vertical = 12.dp)
@@ -1153,7 +1153,7 @@ fun BentoEditorialDreamsScreen(
                             Text(
                                 text = "रात में देखा गया कोई भी सपना ऊपर दर्ज करें और उसका आध्यात्मिक रहस्य जानें।",
                                 fontSize = 12.5.sp,
-                                color = Color(0xFF64748B),
+                                color = DevColorTokens.neutralSlate500,
                                 textAlign = TextAlign.Center,
                                 lineHeight = 18.sp
                             )
@@ -1170,8 +1170,8 @@ fun BentoEditorialDreamsScreen(
                     }
 
                     val moodColor = when {
-                        moodTag.contains("शुभ") -> Color(0xFF16A34A)
-                        moodTag.contains("चेतावनी") -> Color(0xFFDC2626)
+                        moodTag.contains("शुभ") -> DevColorTokens.statusSuccess
+                        moodTag.contains("चेतावनी") -> DevColorTokens.statusDangerDeep
                         else -> saffronColor
                     }
 
@@ -1179,8 +1179,8 @@ fun BentoEditorialDreamsScreen(
 
                     Surface(
                         shape = RoundedCornerShape(18.dp),
-                        color = Color.White,
-                        border = BorderStroke(1.dp, Color(0xFFE2E8F0)),
+                        color = DevColorTokens.bgCard,
+                        border = BorderStroke(1.dp, DevColorTokens.neutralSlate200),
                         shadowElevation = 1.5.dp,
                         modifier = Modifier.fillMaxWidth()
                     ) {
@@ -1195,7 +1195,7 @@ fun BentoEditorialDreamsScreen(
                                     Icon(
                                         imageVector = Icons.Outlined.CalendarToday,
                                         contentDescription = "Date",
-                                        tint = Color(0xFF64748B),
+                                        tint = DevColorTokens.neutralSlate500,
                                         modifier = Modifier.size(13.dp)
                                     )
                                     Spacer(modifier = Modifier.width(5.dp))
@@ -1203,7 +1203,7 @@ fun BentoEditorialDreamsScreen(
                                         text = entry.datePhase.ifBlank { "आज का सपना" },
                                         fontSize = 12.sp,
                                         fontWeight = FontWeight.Medium,
-                                        color = Color(0xFF64748B)
+                                        color = DevColorTokens.neutralSlate500
                                     )
                                 }
 
@@ -1246,14 +1246,14 @@ fun BentoEditorialDreamsScreen(
                                         val isHashtag = t.startsWith("#")
                                         Surface(
                                             shape = RoundedCornerShape(6.dp),
-                                            color = if (isHashtag) Color(0xFFF3E8FF) else saffronColor.copy(alpha = 0.08f),
-                                            border = BorderStroke(0.8.dp, if (isHashtag) Color(0xFFDDD6FE) else saffronColor.copy(alpha = 0.25f))
+                                            color = if (isHashtag) DevColorTokens.accentVioletSoft else saffronColor.copy(alpha = 0.08f),
+                                            border = BorderStroke(0.8.dp, if (isHashtag) DevColorTokens.accentVioletBorderStrong else saffronColor.copy(alpha = 0.25f))
                                         ) {
                                             Text(
                                                 text = t,
                                                 fontSize = 10.5.sp,
                                                 fontWeight = FontWeight.SemiBold,
-                                                color = if (isHashtag) Color(0xFF7C3AED) else saffronColor,
+                                                color = if (isHashtag) DevColorTokens.accentViolet else saffronColor,
                                                 modifier = Modifier.padding(horizontal = 7.dp, vertical = 2.5.dp)
                                             )
                                         }
@@ -1302,7 +1302,7 @@ fun BentoEditorialDreamsScreen(
                                                 text = "— मार्गदर्शन: ${entry.answeredBy}",
                                                 fontSize = 11.sp,
                                                 fontWeight = FontWeight.Medium,
-                                                color = Color(0xFF64748B),
+                                                color = DevColorTokens.neutralSlate500,
                                                 modifier = Modifier.align(Alignment.End)
                                             )
                                         }
@@ -1338,12 +1338,12 @@ fun BentoEditorialDreamsScreen(
                                         Icon(
                                             imageVector = Icons.Outlined.ContentCopy,
                                             contentDescription = "Copy",
-                                            tint = Color(0xFF64748B),
+                                            tint = DevColorTokens.neutralSlate500,
                                             modifier = Modifier.size(13.dp)
                                         )
                                         Text(
                                             text = "कॉपी",
-                                            color = Color(0xFF64748B),
+                                            color = DevColorTokens.neutralSlate500,
                                             fontSize = 11.sp
                                         )
                                     }
@@ -1567,7 +1567,7 @@ fun BentoEditorialWalletScreen(
                             horizontalArrangement = Arrangement.Center,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Icon(Icons.Filled.Add, contentDescription = null, tint = Color.White, modifier = Modifier.size(13.dp))
+                            Icon(Icons.Filled.Add, contentDescription = null, tint = DevColorTokens.textInverse, modifier = Modifier.size(13.dp))
                             Spacer(modifier = Modifier.width(6.dp))
                             Text(
                                 text = when (currentLangCode) {
@@ -1577,7 +1577,7 @@ fun BentoEditorialWalletScreen(
                                 },
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = Color.White
+                                color = DevColorTokens.textInverse
                             )
                         }
                     }
@@ -1802,3 +1802,4 @@ fun BentoEditorialWalletScreen(
         }
     }
 }
+
