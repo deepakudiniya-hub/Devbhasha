@@ -8,7 +8,7 @@ This document defines the shared architecture, Firebase configuration, collectio
 
 - **Shared Firebase Project ID:** `devbhasha-d9e22`
 - **Project Number:** `1059256538774`
-- **Firestore Database ID:** `devbhasha-d9e22`
+- **Firestore Database ID:** `ai-studio-android-devbhash-c2b59e88-80f5-4209-81ce-859c3cb917d9`
 - **Client App Packages (`google-services.json`):**
   - **Devbhasha (Seeker App):** `com.aistudio.provider.xkpwd` / `com.aistudio.devbhasha.kxmpzq`
   - **Devsadhak (Provider App):** `com.aistudio.provider.xkpwd`
@@ -19,6 +19,14 @@ This document defines the shared architecture, Firebase configuration, collectio
 
 - **Currency Base Unit:** Indian Rupees (INR)
 - **Denomination Standard:** **Integer Paise** (1 INR = 100 paise; e.g. ₹50.00 = `5000` paise).
+- **Core Standard Pricing:**
+  - **Consultation (Voice/Audio Call):** ₹499 for 20 minutes (`49900` paise). Each extra 5 minutes is ₹99 (`9900` paise).
+  - **Text Question:** ₹51 (`5100` paise).
+  - **Dream Consultation:** Uses identical pricing — Dream Chat/Question: ₹51 (`5100` paise); Dream Call: ₹499 for 20 minutes (`49900` paise) + ₹99 per extra 5 minutes (`9900` paise).
+  - **Revenue Share:**
+    - **Sadhak (Provider) Share:** **65%** of every paid session.
+    - **Platform Share:** **35%** of every paid session.
+  - **Referral Bonus:** ₹100 (`10000` paise) welcome and referral credit maintained.
 - **Floating Point Prohibition:** No currency values may be stored as floating-point numbers. All balances, deductions, rates, and earnings are strictly non-negative integers (`Number.isInteger`).
 - **Server Authority:** Clients are untrusted. All wallet modifications, transaction records, and settlements are strictly executed server-side via Cloud Functions (Admin SDK).
 
@@ -41,17 +49,22 @@ This document defines the shared architecture, Firebase configuration, collectio
   - `createdAt` (timestamp): Account creation timestamp.
   - `updatedAt` (timestamp): Last profile update.
 
-### B. `/sadhaks/{sadhakId}` (Sadhak Directory & Profile)
-- **Role:** Sadhak public listings and consultation metadata.
-- **Security:** Signed-in read (`allow read: if isSignedIn();`). Sadhak may update only `name`, `bio`, `photo`, `rate`, and `availability` of their own document (`auth.uid == sadhakId`). Never `verified`, `rating`, or `earnings` fields.
+### B. Partner Records: `/sadhaks/{authUid}` & `/providers/{authUid}`
+- **Role:** Sadhak / provider directory, onboarding status, and consultation metadata. Partner records are mirrored / accessible at `sadhaks/{authUid}` and `providers/{authUid}`.
+- **Status Lifecycle:** `status` is `'PENDING' | 'APPROVED' | 'REJECTED'`.
+- **Verification Flag:** `isVerified` (boolean) reflects verified credential status.
+- **Listing & Discovery Query:** Sadhak listing (e.g. `DreamSubmitter.kt` and directory listings) MUST query using `status == 'APPROVED'` and `isVerified == true` (replacing legacy `verified == true`).
+- **Security:** Signed-in read (`allow read: if isSignedIn();`). Sadhak may update only `name`, `bio`, `photo`, `rate`, and `availability` of their own document (`auth.uid == sadhakId`). Never `status`, `isVerified`, `verified`, `rating`, or `earnings` fields.
 - **Fields:**
-  - `sadhakId` (string): Provider UID.
-  - `name` (string): Sadhak display name.
+  - `sadhakId` / `providerId` (string): Provider auth UID.
+  - `name` / `displayName` (string): Sadhak display name.
   - `bio` (string): Profile bio and spiritual specialization.
-  - `photo` (string): Profile photo URL.
+  - `photo` / `avatarUrl` (string): Profile photo URL.
   - `rate` (integer paise/min): Call consultation rate per minute.
   - `availability` (boolean): Current online/available status.
-  - `verified` (boolean): Verification badge (ops/server-only write).
+  - `status` (string): Partner approval status (`'PENDING'` | `'APPROVED'` | `'REJECTED'`).
+  - `isVerified` (boolean): Partner verification status (ops/server-only write).
+  - `verified` (boolean, legacy): Backward compatibility verification flag.
   - `rating` (number): Overall rating score (server-only write).
   - `earnings` / `totalEarnings` (integer paise): Accumulated lifetime earnings (server-only write).
 
@@ -131,22 +144,29 @@ This document defines the shared architecture, Firebase configuration, collectio
 
 ### 1. `settleCall` (Trigger: `active_calls -> 'ended'`)
 - **Trigger:** Cloud Firestore document update on `active_calls/{callId}` when `status` transitions from non-ended to `'ended'`. Also exposed via `settleCallCallable`.
-- **Settlement Formula:**
-  $$\text{earnedAmount} = \lceil \frac{\text{durationSeconds}}{60} \rceil \times \text{ratePerMinute} \quad (\text{all values in paise})$$
+- **Pricing & Settlement Formulas:**
+  - If $\text{durationSeconds} \le 1200$ (first 20 mins): $\text{totalSessionPaise} = 49900 \text{ paise}$ (₹499).
+  - If $\text{durationSeconds} > 1200$: $\text{totalSessionPaise} = 49900 + \lceil \frac{\text{durationSeconds} - 1200}{300} \rceil \times 9900 \text{ paise}$ (each extra 5 minutes is ₹99).
+  - **Sadhak (Provider) Earned Share (65%):** $\text{earnedAmount} = \text{round}(\text{totalSessionPaise} \times 0.65)$.
+  - **Platform Share (35%):** $\text{platformFee} = \text{totalSessionPaise} - \text{earnedAmount}$.
 - **Atomic Operations (`db.runTransaction`):**
   1. Idempotency Check: Verifies `callData.settled != true` and `ledgerSnap.exists != true`.
-  2. Debit Seeker: Atomically increments `/users/{callerId}.walletBalance` by `-earnedAmount`.
-  3. Write Seeker Ledger: Creates `/walletLedger/{callerId}_call_{callId}` with negative paise debit.
-  4. Credit Provider Transaction: Writes `/providers/{providerId}/transactions/call_{callId}` with `+earnedAmount`.
-  5. Update Provider Wallet: Increments `/providers/{providerId}/wallet/summary` `balance` by `+earnedAmount` and `totalEarnings` by `+earnedAmount`.
-  6. Finalize Call: Updates `/active_calls/{callId}` with `earnedAmount`, `settled: true`, and `settledAt`.
+  2. Debit Seeker: Atomically increments `/users/{callerId}.walletBalance` by $-\text{totalSessionPaise}$.
+  3. Write Seeker Ledger: Creates `/walletLedger/{callerId}_call_{callId}` with $-\text{totalSessionPaise}$ debit.
+  4. Credit Provider Transaction: Writes `/providers/{providerId}/transactions/call_{callId}` with $+\text{earnedAmount}$ (65% share).
+  5. Update Provider Wallet: Increments `/providers/{providerId}/wallet/summary` `balance` and `totalEarnings` by $+\text{earnedAmount}$.
+  6. Finalize Call: Updates `/active_calls/{callId}` with `totalSessionPaise`, `earnedAmount`, `platformFeePaise`, `settled: true`, and `settledAt`.
 
 ### 2. `settleQuestion` (Trigger: `questions -> 'answered'`)
 - **Trigger:** Cloud Firestore document update on `questions/{questionId}` when `status` transitions to `'answered'`. Also exposed via `settleQuestionCallable`.
+- **Pricing & Settlement Formulas:**
+  - $\text{totalQuestionPaise} = 5100 \text{ paise}$ (₹51).
+  - **Sadhak (Provider) Earned Share (65%):** $\text{earningAmount} = \text{round}(5100 \times 0.65) = 3315 \text{ paise}$ (₹33.15).
+  - **Platform Share (35%):** $\text{platformFee} = 5100 - 3315 = 1785 \text{ paise}$ (₹17.85).
 - **Atomic Operations (`db.runTransaction`):**
   1. Idempotency Check: Verifies `questionData.settled != true` and `ledgerSnap.exists != true`.
-  2. Debit Seeker: Atomically increments `/users/{userId}.walletBalance` by `-earningAmount`.
+  2. Debit Seeker: Atomically increments `/users/{userId}.walletBalance` by $-\text{totalQuestionPaise}$ (-5100 paise).
   3. Write Seeker Ledger: Creates `/walletLedger/{userId}_question_{questionId}`.
-  4. Credit Provider Transaction: Writes `/providers/{providerId}/transactions/question_{questionId}` with `+earningAmount`.
-  5. Update Provider Wallet: Increments `/providers/{providerId}/wallet/summary` `balance` and `totalEarnings`.
-  6. Finalize Question: Updates `/questions/{questionId}` with `earningAmount`, `settled: true`, and `settledAt`.
+  4. Credit Provider Transaction: Writes `/providers/{providerId}/transactions/question_{questionId}` with $+\text{earningAmount}$ (+3315 paise).
+  5. Update Provider Wallet: Increments `/providers/{providerId}/wallet/summary` `balance` and `totalEarnings` by $+\text{earningAmount}$.
+  6. Finalize Question: Updates `/questions/{questionId}` with `sessionAmount: 5100`, `earningAmount: 3315`, `platformFeePaise: 1785`, `settled: true`, and `settledAt`.

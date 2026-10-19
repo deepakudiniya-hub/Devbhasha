@@ -1,0 +1,28 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "sadhaks",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "category", "order": "ASCENDING" },
+        { "fieldPath": "online_status", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "sadhaks",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "language", "order": "ASCENDING" },
+        { "fieldPath": "online_status", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "sadhaks",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "price", "order": "ASCENDING" },
+        { "fieldPath": "online_status", "order": "ASCENDING" }
+      ]
+    }
+  ]
+}

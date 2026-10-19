@@ -12,12 +12,14 @@ object FirestoreProvider {
     fun get(context: Context? = null): FirebaseFirestore {
         return instance ?: synchronized(this) {
             instance ?: run {
-                val dbId = try {
-                    context?.getString(R.string.firestore_database_id)
+                val app = FirebaseApp.getInstance()
+                val ctx = context ?: try { app.applicationContext } catch (e: Exception) { null }
+                val rawDbId = try {
+                    ctx?.getString(R.string.firestore_database_id)
                 } catch (e: Exception) {
                     null
                 }
-                val app = FirebaseApp.getInstance()
+                val dbId = rawDbId?.trim()?.takeIf { it.isNotEmpty() && it != "default" && it != "(default)" }
                 val firestore = if (!dbId.isNullOrBlank()) {
                     try {
                         FirebaseFirestore.getInstance(app, dbId)

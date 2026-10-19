@@ -67,7 +67,7 @@ object RazorpayPaymentManager {
         dreamText: String = ""
     ): Boolean {
         if (amount <= 0 || userId.isBlank()) {
-            Toast.makeText(activity, "अमान्य राशि या यूज़र", Toast.LENGTH_SHORT).show()
+            Toast.makeText(activity, "Invalid amount or user", Toast.LENGTH_SHORT).show()
             return false
         }
 
@@ -89,7 +89,7 @@ object RazorpayPaymentManager {
                 activity.runOnUiThread {
                     Toast.makeText(
                         activity,
-                        "पेमेंट शुरू नहीं हो सका: ${e.localizedMessage}",
+                        "Could not start payment: ${e.localizedMessage}",
                         Toast.LENGTH_LONG
                     ).show()
                     _paymentEvents.tryEmit(
@@ -113,8 +113,8 @@ object RazorpayPaymentManager {
         checkout.setKeyID(keyId)
         try {
             val options = JSONObject()
-            options.put("name", "भाषा (Bhasha)")
-            options.put("description", "वॉलेट दक्षिणा रिचार्ज (+₹${amount.toInt()})")
+            options.put("name", "Devbhasha")
+            options.put("description", "Wallet recharge (+₹${amount.toInt()})")
             options.put("currency", "INR")
             // Amount is defined by the server order; do not send it from here.
             options.put("order_id", orderId)
@@ -135,7 +135,7 @@ object RazorpayPaymentManager {
             Log.e(TAG, "Error opening Razorpay checkout: ${e.message}", e)
             Toast.makeText(
                 activity,
-                "पेमेंट गेटवे प्रारंभ करने में त्रुटि: ${e.localizedMessage}",
+                "Error starting payment gateway: ${e.localizedMessage}",
                 Toast.LENGTH_LONG
             ).show()
         }
@@ -167,14 +167,14 @@ object RazorpayPaymentManager {
         WalletRepository.verifyAndCredit(orderId, pid, signature) { result ->
             result.onSuccess { newBalance ->
                 Log.d(TAG, "Payment verified. txn=$pid newBalance=$newBalance")
-                val msg = "₹${amount.toInt()} का भुगतान सफल रहा! वॉलेट बैलेंस अपडेट हो गया।"
+                val msg = "₹${amount.toInt()} payment successful! Wallet balance updated."
                 Toast.makeText(activity, msg, Toast.LENGTH_LONG).show()
                 _paymentEvents.tryEmit(
                     PaymentResultEvent.Success(amount, pid, msg)
                 )
             }.onFailure { e ->
                 Log.e(TAG, "Payment verification failed", e)
-                val msg = "भुगतान सत्यापन विफल: ${e.localizedMessage}"
+                val msg = "Payment verification failed: ${e.localizedMessage}"
                 Toast.makeText(activity, msg, Toast.LENGTH_LONG).show()
                 _paymentEvents.tryEmit(
                     PaymentResultEvent.Error(amount, -3, msg)
@@ -193,8 +193,8 @@ object RazorpayPaymentManager {
         paymentData: PaymentData?
     ) {
         val amount = pendingAmount
-        val errorMsg = response ?: "उपयोगकर्ता द्वारा भुगतान रद्द किया गया या नेटवर्क समस्या"
-        val userFriendlyMsg = "भुगतान विफल रहा (Payment Failed): $errorMsg"
+        val errorMsg = response ?: "Payment cancelled by user or network issue"
+        val userFriendlyMsg = "Payment Failed: $errorMsg"
         Toast.makeText(activity, userFriendlyMsg, Toast.LENGTH_LONG).show()
         _paymentEvents.tryEmit(
             PaymentResultEvent.Error(amount, errorCode, userFriendlyMsg)

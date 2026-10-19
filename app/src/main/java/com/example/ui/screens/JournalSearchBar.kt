@@ -64,7 +64,7 @@ enum class JournalFilterType(val titleHi: String, val titleEn: String, val title
     THIS_WEEK("इस सप्ताह", "This Week", "Iss Hafte", "🗓️"),
     SHUBH("शुभ स्वप्न", "Auspicious", "Shubh Sapne", "🌿"),
     ALERT("चेतावनी", "Warnings", "Chetavni", "⚡"),
-    ANSWERED("साधक उत्तर", "Answered", "Sadhak Answer", "👤")
+    ANSWERED("Sadhak उत्तर", "Answered", "Sadhak Answer", "👤")
 }
 
 /**
@@ -169,8 +169,6 @@ fun HomeJournalSearchBar(
     onQueryChange: (String) -> Unit,
     activeFilter: JournalFilterType,
     onFilterSelect: (JournalFilterType) -> Unit,
-    customDateMillis: Long?,
-    onCustomDateSelect: (Long?) -> Unit,
     onSearchSubmit: (String) -> Unit,
     onOpenJournalClick: () -> Unit,
     isHindi: Boolean,
@@ -178,7 +176,6 @@ fun HomeJournalSearchBar(
     modifier: Modifier = Modifier
 ) {
     var showFilters by remember { mutableStateOf(false) }
-    val context = LocalContext.current
     val focusManager = LocalFocusManager.current
     val currentLangCode = when {
         language.lowercase() in listOf("hgl", "hinglish") -> "hgl"
@@ -192,35 +189,6 @@ fun HomeJournalSearchBar(
         else -> "Search…"
     }
 
-    // Function to launch Android DatePickerDialog
-    fun openDatePicker() {
-        val calendar = Calendar.getInstance()
-        if (customDateMillis != null) {
-            calendar.timeInMillis = customDateMillis
-        }
-        val dialog = DatePickerDialog(
-            context,
-            { _, year, month, dayOfMonth ->
-                val selectedCal = Calendar.getInstance().apply {
-                    set(Calendar.YEAR, year)
-                    set(Calendar.MONTH, month)
-                    set(Calendar.DAY_OF_MONTH, dayOfMonth)
-                    set(Calendar.HOUR_OF_DAY, 0)
-                    set(Calendar.MINUTE, 0)
-                    set(Calendar.SECOND, 0)
-                    set(Calendar.MILLISECOND, 0)
-                }
-                onCustomDateSelect(selectedCal.timeInMillis)
-                val dateStr = SimpleDateFormat("d MMM yyyy", Locale.getDefault()).format(selectedCal.time)
-                Toast.makeText(context, "तारीख फ़िल्टर: $dateStr", Toast.LENGTH_SHORT).show()
-            },
-            calendar.get(Calendar.YEAR),
-            calendar.get(Calendar.MONTH),
-            calendar.get(Calendar.DAY_OF_MONTH)
-        )
-        dialog.show()
-    }
-
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -229,7 +197,8 @@ fun HomeJournalSearchBar(
         // Main Search Bar Pill
         Surface(
             shape = RoundedCornerShape(10.dp),
-            color = Color(0xFFF2F2F7), // Light grey background
+            color = Color(0xFFFFFFFF), // Pure white search box
+            border = BorderStroke(1.dp, Color(0xFFEADFD3)), // Thin beige border
             shadowElevation = 0.dp,
             modifier = Modifier
                 .fillMaxWidth()
@@ -246,7 +215,7 @@ fun HomeJournalSearchBar(
                 Icon(
                     imageVector = Icons.Outlined.Search,
                     contentDescription = "Search",
-                    tint = Color(0xFF8E8E93),
+                    tint = Color(0xFF6B5B53),
                     modifier = Modifier.size(20.dp)
                 )
 
@@ -257,10 +226,10 @@ fun HomeJournalSearchBar(
                         .padding(horizontal = 2.dp),
                     contentAlignment = Alignment.CenterStart
                 ) {
-                    if (query.isEmpty() && customDateMillis == null) {
+                    if (query.isEmpty()) {
                         Text(
                             text = placeholderText,
-                            color = Color(0xFF8E8E93),
+                            color = Color(0xFF6B5B53),
                             fontSize = 15.sp,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
@@ -286,35 +255,6 @@ fun HomeJournalSearchBar(
                     )
                 }
 
-                // Active Custom Date Badge (if any)
-                if (customDateMillis != null) {
-                    val dateLabel = SimpleDateFormat("d MMM", Locale.getDefault()).format(Date(customDateMillis))
-                    Surface(
-                        shape = RoundedCornerShape(8.dp),
-                        color = Color(0xFF125157),
-                        modifier = Modifier.clickable { onCustomDateSelect(null) }
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                        ) {
-                            Text(
-                                text = dateLabel,
-                                color = Color.White,
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Icon(
-                                imageVector = Icons.Filled.Close,
-                                contentDescription = "Clear Date",
-                                tint = Color.White,
-                                modifier = Modifier.size(12.dp)
-                            )
-                        }
-                    }
-                }
-
                 // Clear Query Button ('✕')
                 if (query.isNotEmpty()) {
                     IconButton(
@@ -327,26 +267,10 @@ fun HomeJournalSearchBar(
                         Icon(
                             imageVector = Icons.Filled.Clear,
                             contentDescription = "Clear",
-                            tint = InkSoft,
+                            tint = Color(0xFF6B5B53),
                             modifier = Modifier.size(16.dp)
                         )
                     }
-                }
-
-                // Single Date Picker Calendar Button
-                IconButton(
-                    onClick = { openDatePicker() },
-                    modifier = Modifier
-                        .size(34.dp)
-                        .clip(CircleShape)
-                        .background(if (customDateMillis != null) Color(0xFF125157).copy(alpha = 0.12f) else Color(0xFFF1F5F9))
-                ) {
-                    Icon(
-                        imageVector = Icons.Outlined.CalendarMonth,
-                        contentDescription = "Pick Date",
-                        tint = if (customDateMillis != null) Color(0xFF125157) else Color(0xFF475569),
-                        modifier = Modifier.size(18.dp)
-                    )
                 }
             }
         }
@@ -363,7 +287,7 @@ fun HomeJournalSearchBar(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     JournalFilterType.values().forEach { filter ->
-                        val isSelected = (activeFilter == filter && customDateMillis == null)
+                        val isSelected = (activeFilter == filter)
                         val label = when (currentLangCode) {
                             "hi" -> filter.titleHi
                             "hgl" -> filter.titleHgl
@@ -674,14 +598,14 @@ fun JournalSearchResultCard(
                                 shape = RoundedCornerShape(6.dp),
                                 color = when {
                                     isAlert -> Color(0xFFFFF1F0)
-                                    isLucidOrSpecial -> Color(0xFFF3E8FF)
+                                    isLucidOrSpecial -> MaterialTheme.colorScheme.primaryContainer
                                     else -> Color(0xFFF2F7EC)
                                 },
                                 border = BorderStroke(
                                     1.dp,
                                     when {
                                         isAlert -> Color(0xFFFFCCC7)
-                                        isLucidOrSpecial -> Color(0xFFDDD6FE)
+                                        isLucidOrSpecial -> MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
                                         else -> Color(0xFFD6E4C4)
                                     }
                                 )
@@ -690,7 +614,7 @@ fun JournalSearchResultCard(
                                     text = t,
                                     color = when {
                                         isAlert -> Color(0xFFCF1322)
-                                        isLucidOrSpecial -> Color(0xFF7C3AED)
+                                        isLucidOrSpecial -> MaterialTheme.colorScheme.primary
                                         else -> Color(0xFF389E0D)
                                     },
                                     fontSize = 10.sp,
@@ -761,7 +685,7 @@ fun JournalSearchResultCard(
                         Text(text = "✨", fontSize = 12.sp)
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = "साधक परामर्श / वैदिक फल:",
+                                text = "Sadhak परामर्श / वैदिक फल:",
                                 color = Color(0xFF2B5B2E),
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 10.5.sp
@@ -871,7 +795,7 @@ fun JournalSearchResultCard(
                             )
                             Text(
                                 text = when (currentLangCode) {
-                                    "hi" -> "साधक से फल जानें"
+                                    "hi" -> "Sadhak से फल जानें"
                                     "hgl" -> "Sadhak se poochein"
                                     else -> "Ask Sadhak"
                                 },
@@ -1024,9 +948,9 @@ fun DreamEntryDetailDialog(
                 Spacer(modifier = Modifier.width(6.dp))
                 Text(
                     text = when (currentLangCode) {
-                        "hi" -> "साधक से फल जानें (₹99)"
-                        "hgl" -> "Sadhak se poochein (₹99)"
-                        else -> "Ask Sadhak (₹99)"
+                        "hi" -> "Sadhak से फल जानें (₹199)"
+                        "hgl" -> "Sadhak se poochein (₹199)"
+                        else -> "Ask Sadhak (₹199)"
                     },
                     fontWeight = FontWeight.Bold
                 )

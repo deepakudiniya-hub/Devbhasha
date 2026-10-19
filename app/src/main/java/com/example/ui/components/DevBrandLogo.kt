@@ -36,7 +36,7 @@ import com.example.ui.theme.SaffronSoftBg
 
 /**
  * Premium, spiritually refined Original Brand Logo component.
- * Uses the official #F97316 orange rounded squircle with white bold 'देव'.
+// English comment placeholder
  */
 @Composable
 fun DevLogoIcon(
@@ -59,7 +59,7 @@ fun DevLogoIcon(
 }
 
 /**
- * Brand Lockup for App Bar & Top Headers (36x36 Icon + "देव भाषा" Title + Tagline)
+// English comment placeholder
  */
 @Composable
 fun DevBrandLockup(
@@ -84,14 +84,14 @@ fun DevBrandLockup(
                 text = if (isHindi) "देव भाषा" else "Dev Bhasha",
                 fontSize = 17.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF2B2B2B),
+                color = MaterialTheme.colorScheme.onBackground,
                 letterSpacing = 0.3.sp
             )
             Text(
                 text = if (isHindi) "वैदिक पंचांग • स्वप्न विचार • परामर्श" else "Vedic Almanac & Guidance",
                 fontSize = 11.sp,
                 fontWeight = FontWeight.Medium,
-                color = Color(0xFF6E6E6E)
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
     }
@@ -121,7 +121,7 @@ fun DevWatermarkLogo(
             text = "देव भाषा",
             fontSize = 10.sp,
             fontWeight = FontWeight.Bold,
-            color = Color(0xFF2B2B2B).copy(alpha = 0.80f)
+            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.80f)
         )
     }
 }
@@ -138,9 +138,9 @@ fun DevBrandBanner(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
-            containerColor = Color.White
+            containerColor = MaterialTheme.colorScheme.surface
         ),
-        border = BorderStroke(1.dp, BorderLight)
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
     ) {
         Column(
             modifier = Modifier
@@ -160,16 +160,16 @@ fun DevBrandBanner(
                 text = if (isHindi) "देव भाषा" else "Dev Bhasha",
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF1E293B)
+                color = MaterialTheme.colorScheme.onSurface
             )
 
             Spacer(modifier = Modifier.height(4.dp))
 
             Text(
-                text = if (isHindi) "सनातन ज्ञान, कर्मकांड एवं विश्वसनीय साधक सेवा"
+                text = if (isHindi) "सनातन ज्ञान, कर्मकांड एवं विश्वसनीय Sadhak सेवा"
                 else "Sanatan Wisdom, Vedic Remedies & Verified Sadhak Guidance",
                 fontSize = 12.5.sp,
-                color = Color(0xFF64748B),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 lineHeight = 18.sp,
                 textAlign = androidx.compose.ui.text.style.TextAlign.Center
             )
@@ -181,20 +181,20 @@ fun DevBrandBanner(
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
                 modifier = Modifier
                     .clip(RoundedCornerShape(50))
-                    .background(SaffronSoftBg)
+                    .background(MaterialTheme.colorScheme.primaryContainer)
                     .padding(horizontal = 12.dp, vertical = 5.dp)
             ) {
                 Icon(
                     imageVector = Icons.Filled.CheckCircle,
                     contentDescription = null,
-                    tint = SaffronPrimary,
+                    tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(14.dp)
                 )
                 Text(
                     text = if (isHindi) "100% प्रमाणित वैदिक पद्धति" else "100% Verified Vedic Tradition",
                     fontSize = 11.5.sp,
                     fontWeight = FontWeight.SemiBold,
-                    color = SaffronDeep
+                    color = MaterialTheme.colorScheme.primary
                 )
             }
         }
@@ -202,7 +202,7 @@ fun DevBrandBanner(
 }
 
 /**
- * Compact animated 'देव' Logo Loading Indicator (for pull-to-refresh, cards, and transitions)
+// English comment placeholder
  */
 @Composable
 fun DevLogoLoadingIndicator(

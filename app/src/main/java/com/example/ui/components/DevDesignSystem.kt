@@ -49,7 +49,7 @@ object DevRadius {
 }
 
 /**
- * Editorial Section Header with optional action link (e.g. "सभी देखें →")
+// English comment placeholder
  */
 @Composable
 fun DevSectionHeader(
@@ -104,7 +104,7 @@ fun DevSectionHeader(
 }
 
 /**
- * Primary Brand Button in Saffron Gradient with touch target >= 48dp, white text, and shadow
+ * Primary Brand Button in solid Saffron (#C2410C) with touch target >= 48dp, white text, and clean elevation
  */
 @Composable
 fun DevPrimaryButton(
@@ -117,20 +117,13 @@ fun DevPrimaryButton(
     containerColor: Color = Saffron,
     contentColor: Color = Color.White
 ) {
-    val saffronBrush = Brush.horizontalGradient(
-        listOf(SaffronGradientStart, SaffronGradientEnd)
-    )
     Surface(
-        shape = RoundedCornerShape(DevRadius.pill),
-        color = if (enabled && !isLoading) Color.Transparent else containerColor.copy(alpha = 0.45f),
-        shadowElevation = if (enabled && !isLoading) 4.dp else 0.dp,
+        shape = RoundedCornerShape(14.dp),
+        color = if (enabled && !isLoading) containerColor else containerColor.copy(alpha = 0.45f),
+        shadowElevation = if (enabled && !isLoading) 1.dp else 0.dp,
         modifier = modifier
             .defaultMinSize(minHeight = 48.dp)
-            .clip(RoundedCornerShape(DevRadius.pill))
-            .then(
-                if (enabled && !isLoading) Modifier.background(saffronBrush)
-                else Modifier.background(containerColor.copy(alpha = 0.45f))
-            )
+            .clip(RoundedCornerShape(14.dp))
             .clickable(enabled = enabled && !isLoading) { onClick() }
     ) {
         Row(

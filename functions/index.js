@@ -411,7 +411,7 @@ exports.startSession = onCall(async (request) => {
     tx.set(sessionRef, {
       sessionId,
       seekerId: uid,
-      seekerName: (userSnap.data() || {}).name || "Client",
+      seekerName: (userSnap.data() || {}).userName || (userSnap.data() || {}).name || "Client",
       providerId,
       participants: [uid, providerId],
       type,
@@ -432,7 +432,7 @@ exports.startSession = onCall(async (request) => {
       chatId: sessionId,
       sessionId,
       seekerId: uid,
-      seekerName: (userSnap.data() || {}).name || "Client",
+      seekerName: (userSnap.data() || {}).userName || (userSnap.data() || {}).name || "Client",
       providerId,
       participants: [uid, providerId],
       type,
@@ -442,7 +442,7 @@ exports.startSession = onCall(async (request) => {
     if (type !== "DREAM_CHAT" && data.mode !== "chat") {
       tx.set(db.collection("active_calls").doc(sessionId), {
         callId: sessionId, sessionId, callerId: uid, userId: uid, providerId,
-        callerName: (userSnap.data() || {}).name || "Client",
+        callerName: (userSnap.data() || {}).userName || (userSnap.data() || {}).name || "Client",
         status: "Ringing", channelName: channelFor(sessionId),
         timestamp: FieldValue.serverTimestamp(), createdAt: FieldValue.serverTimestamp(),
       });
@@ -865,7 +865,7 @@ async function executeAgentTool(name, args, uid) {
       chatId: sessionId,
       sessionId,
       seekerId: uid,
-      seekerName: (userSnap.data() || {}).name || "Client",
+      seekerName: (userSnap.data() || {}).userName || (userSnap.data() || {}).name || "Client",
       providerId,
       participants: [uid, providerId],
       type: "chat",
@@ -988,3 +988,47 @@ exports.mirrorProviderDirectory = onDocumentUpdated(
     await db.collection("sadhaks").doc(event.params.providerId).set(directory);
   }
 );
+
+
+// Creates an operations request and reserves funds. No payout is sent here.
+exports.requestProviderPayout = onCall(async request => {
+  const uid = requireUid(request), data = request.data || {};
+  const amountPaise = data.amountPaise;
+  if (!Number.isSafeInteger(amountPaise) || amountPaise < 50000) {
+    throw new HttpsError("invalid-argument", "Minimum payout is 500 rupees.");
+  }
+  const key = requireId(data.idempotencyKey, "idempotencyKey");
+  const requestId = `${uid}_${key}`;
+  const destination = data.payoutType === "UPI"
+    ? {payoutType:"UPI", upiId:String(data.upiId || "").trim()}
+    : {payoutType:"BANK_ACCOUNT", accountNumber:String(data.accountNumber || "").trim(),
+       ifscCode:String(data.ifscCode || "").trim().toUpperCase(),
+       accountHolderName:String(data.accountHolderName || "").trim()};
+  if ((destination.payoutType === "UPI" && !/^[a-zA-Z0-9._-]{2,256}@[a-zA-Z][a-zA-Z0-9.-]{1,63}$/.test(destination.upiId)) ||
+      (destination.payoutType === "BANK_ACCOUNT" && (!/^\d{9,18}$/.test(destination.accountNumber) ||
+       !/^[A-Z]{4}0[A-Z0-9]{6}$/.test(destination.ifscCode) || destination.accountHolderName.length < 2)) ||
+      !["UPI", "BANK_ACCOUNT"].includes(data.payoutType)) {
+    throw new HttpsError("invalid-argument", "Invalid payout destination.");
+  }
+  return db.runTransaction(async tx => {
+    const wallet = db.collection("providers").doc(uid).collection("wallet").doc("summary");
+    const own = db.collection("providers").doc(uid).collection("payout_requests").doc(requestId);
+    const [w, existing] = await Promise.all([tx.get(wallet), tx.get(own)]);
+    if (existing.exists) return {requestId, alreadyProcessed:true};
+    const balance = w.get("balancePaise");
+    // Refuse legacy mixed-unit wallets until the audited paise migration is complete.
+    if (!Number.isSafeInteger(balance) || balance < amountPaise) {
+      throw new HttpsError("failed-precondition", "Insufficient available balance.");
+    }
+    const record={requestId,providerId:uid,amountPaise,amount:amountPaise/100,
+      status:"pending",...destination,createdAt:FieldValue.serverTimestamp()};
+    tx.set(wallet,{balancePaise:FieldValue.increment(-amountPaise),balance:FieldValue.increment(-amountPaise/100),
+      pendingPayoutPaise:FieldValue.increment(amountPaise)}, {merge:true});
+    tx.set(own,record);
+    tx.set(db.collection("payout_requests").doc(requestId),record);
+    tx.set(db.collection("providers").doc(uid).collection("transactions").doc(`payout_${requestId}`),{
+      id:`payout_${requestId}`,type:"payout_reserved",amountPaise:-amountPaise,status:"pending",
+      timestamp:FieldValue.serverTimestamp(),referenceId:requestId});
+    return {requestId,alreadyProcessed:false};
+  });
+});

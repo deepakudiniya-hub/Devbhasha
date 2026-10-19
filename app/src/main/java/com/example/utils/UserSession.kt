@@ -7,7 +7,7 @@ class UserSession(context: Context) {
     private val prefs: SharedPreferences = 
         context.getSharedPreferences("devbhasha_user_prefs", Context.MODE_PRIVATE)
 
-    // यूज़र का नाम, लॉगिन स्टेट और आईडी सेव करने के लिए
+// English comment placeholder
     fun saveUserSession(userName: String, isLoggedIn: Boolean, userId: String, phoneNumber: String = "") {
         saveUserSessionWithRole(userName, isLoggedIn, userId, phoneNumber, "user")
     }
@@ -34,19 +34,19 @@ class UserSession(context: Context) {
         return getUserRole().equals("provider", ignoreCase = true)
     }
 
-    // सेव किया हुआ नाम प्राप्त करने के लिए
+// English comment placeholder
     fun getUserName(): String {
         val saved = prefs.getString("user_name", "")?.trim() ?: ""
         if (saved.isNotBlank() && 
             !saved.equals("null", ignoreCase = true) && 
             !saved.contains("Facebook", ignoreCase = true) && 
-            saved != "साधक") {
+            saved != "Sadhak") {
             return saved
         }
-        return "दीपक जी"
+        return "Devotee"
     }
 
-    // सेव की गई यूज़र आईडी प्राप्त करने के लिए
+// English comment placeholder
     fun getUserId(): String {
         val saved = prefs.getString("user_id", "") ?: ""
         if (saved.isNotBlank()) return saved
@@ -55,20 +55,20 @@ class UserSession(context: Context) {
         return newId
     }
 
-    // फ़ोन नंबर प्राप्त करने के लिए
+// English comment placeholder
     fun getPhoneNumber(): String {
         val saved = prefs.getString("phone_number", "") ?: ""
         return if (saved.isNotBlank() && saved != "9876543210") saved else ""
     }
 
-    // क्या यूज़र लॉग इन है?
+// English comment placeholder
     fun isLoggedIn(): Boolean {
         return prefs.getBoolean("is_logged_in", false)
     }
 
-    // Supported languages: "en", "hi", "hgl"
+    // Supported languages: "en", "hi", "sa"
     fun getLanguage(): String {
-        return prefs.getString("user_language", "hi") ?: "hi"
+        return prefs.getString("user_language", "en") ?: "en"
     }
 
     fun setLanguage(lang: String) {
@@ -108,20 +108,85 @@ class UserSession(context: Context) {
         prefs.edit().putFloat("cached_wallet_balance", balance.toFloat()).apply()
     }
 
-    // चयनित अवतार आईडी
+// English comment placeholder
     fun getAvatarId(): String {
-        return prefs.getString("user_avatar_id", "sadhak_dhyan") ?: "sadhak_dhyan"
+        val saved = prefs.getString("user_avatar_id", "avatar_01") ?: "avatar_01"
+        return if (saved.startsWith("avatar_")) saved else "avatar_01"
     }
 
     fun setAvatarId(avatarId: String) {
-        prefs.edit().putString("user_avatar_id", avatarId).apply()
+        val validAvatarId = if (avatarId.startsWith("avatar_")) avatarId else "avatar_01"
+        prefs.edit().putString("user_avatar_id", validAvatarId).apply()
         val uid = getUserId()
         if (uid.isNotBlank()) {
-            UserManager.updateAvatarPreference(uid, avatarId)
+            UserManager.updateAvatarPreference(uid, validAvatarId)
         }
     }
 
-    // लॉग आउट करने के लिए
+    // DPDP Consent Methods
+    fun hasGivenConsent(uid: String = getUserId()): Boolean {
+        return prefs.getBoolean("has_given_consent_$uid", false) || prefs.getBoolean("has_given_consent", false)
+    }
+
+    fun setGivenConsent(uid: String = getUserId(), hasGiven: Boolean = true) {
+        prefs.edit()
+            .putBoolean("has_given_consent_$uid", hasGiven)
+            .putBoolean("has_given_consent", hasGiven)
+            .apply()
+    }
+
+    fun getBirthDate(): String = prefs.getString("birth_date", "") ?: ""
+    fun setBirthDate(dob: String) = prefs.edit().putString("birth_date", dob).apply()
+
+    fun getBirthTime(): String = prefs.getString("birth_time", "") ?: ""
+    fun setBirthTime(time: String) = prefs.edit().putString("birth_time", time).apply()
+
+    fun getBirthPlace(): String = prefs.getString("birth_place", "") ?: ""
+    fun setBirthPlace(place: String) = prefs.edit().putString("birth_place", place).apply()
+
+    fun getGotra(): String = prefs.getString("gotra", "") ?: ""
+    fun setGotra(gotra: String) = prefs.edit().putString("gotra", gotra).apply()
+
+// English comment placeholder
+    fun getFavorites(): Set<String> {
+        return prefs.getStringSet("favorite_sadhaks", emptySet()) ?: emptySet()
+    }
+
+    fun toggleFavorite(sadhakId: String): Boolean {
+        val set = getFavorites().toMutableSet()
+        val isFav = if (set.contains(sadhakId)) {
+            set.remove(sadhakId)
+            false
+        } else {
+            set.add(sadhakId)
+            true
+        }
+        prefs.edit().putStringSet("favorite_sadhaks", set).apply()
+        return isFav
+    }
+
+    fun isFavorite(sadhakId: String): Boolean {
+        return getFavorites().contains(sadhakId)
+    }
+
+    fun getSelectedRashi(): String {
+        return prefs.getString("selected_rashi", "mesh") ?: "mesh"
+    }
+
+    fun setSelectedRashi(rashi: String) {
+        prefs.edit().putString("selected_rashi", rashi).apply()
+    }
+
+    fun getWaitlist(): Set<String> {
+        return prefs.getStringSet("waitlist_sadhaks", emptySet()) ?: emptySet()
+    }
+
+    fun addToWaitlist(sadhakId: String) {
+        val set = getWaitlist().toMutableSet()
+        set.add(sadhakId)
+        prefs.edit().putStringSet("waitlist_sadhaks", set).apply()
+    }
+
     fun clearSession() {
         prefs.edit().clear().apply()
     }

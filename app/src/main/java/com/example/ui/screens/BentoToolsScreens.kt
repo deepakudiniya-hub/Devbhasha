@@ -50,7 +50,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 // =========================================================================
-// 1. FAMILY PROBLEMS (पारिवारिक समस्या, गृह क्लेश निवारण व साधक परामर्श)
+// English comment placeholder
 // =========================================================================
 data class FamilyProblemCategory(
     val id: String,
@@ -160,10 +160,6 @@ fun BentoFamilyProblemsScreen(
     var isMicActive by remember { mutableStateOf(false) }
     var submittedMessage by remember { mutableStateOf<String?>(null) }
 
-    val saffronGradient = Brush.horizontalGradient(
-        listOf(SaffronGradientStart, SaffronGradientEnd)
-    )
-
     Scaffold(
         modifier = modifier.fillMaxSize(),
         containerColor = Color.White,
@@ -215,7 +211,7 @@ fun BentoFamilyProblemsScreen(
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = if (currentLangCode == "hi")
-                            "गृह क्लेश, वैवाहिक मतभेद, संतान चिंता या पारिवारिक विवादों का वैदिक उपाय व अनुभवी साधक से परामर्श पाएं।"
+                            "गृह क्लेश, वैवाहिक मतभेद, संतान चिंता या पारिवारिक विवादों का वैदिक उपाय व अनुभवी Sadhak से परामर्श पाएं।"
                         else
                             "Find remedies and consult verified sadhaks for household discord, relationships, children and peace.",
                         fontSize = 12.5.sp,
@@ -438,7 +434,7 @@ fun BentoFamilyProblemsScreen(
                 ) {
                     Column(modifier = Modifier.padding(18.dp)) {
                         Text(
-                            text = if (currentLangCode == "hi") "साधक से परामर्श लें (Live Consultation)" else "Consult Verified Sadhak",
+                            text = if (currentLangCode == "hi") "Sadhak से परामर्श लें (Live Consultation)" else "Consult Verified Sadhak",
                             fontFamily = FontFamily.Serif,
                             fontWeight = FontWeight.Bold,
                             fontSize = 16.sp,
@@ -447,7 +443,7 @@ fun BentoFamilyProblemsScreen(
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
                             text = if (currentLangCode == "hi")
-                                "पारिवारिक शांति व समाधान हेतु अनुभवी साधक से चैट या सीधे वॉइस कॉल द्वारा बात करें।"
+                                "पारिवारिक शांति व समाधान हेतु अनुभवी Sadhak से चैट या सीधे वॉइस कॉल द्वारा बात करें।"
                             else
                                 "Connect with experienced spiritual mentors via chat or voice call for direct solutions.",
                             fontSize = 11.5.sp,
@@ -465,14 +461,13 @@ fun BentoFamilyProblemsScreen(
 
                             // Primary Saffron: Chat
                             Surface(
-                                shape = RoundedCornerShape(999.dp),
-                                color = Color.Transparent,
-                                shadowElevation = 2.dp,
+                                shape = RoundedCornerShape(12.dp),
+                                color = Saffron,
+                                shadowElevation = 0.dp,
                                 modifier = Modifier
                                     .weight(1f)
                                     .height(48.dp)
-                                    .clip(RoundedCornerShape(999.dp))
-                                    .background(saffronGradient)
+                                    .clip(RoundedCornerShape(12.dp))
                                     .clickable {
                                         if (activeSadhak != null && onStartChat != null) {
                                             onStartChat(activeSadhak)
@@ -1490,12 +1485,8 @@ fun BentoJapaTimerScreen(
                 modifier = Modifier
                     .size(230.dp)
                     .clip(CircleShape)
-                    .background(
-                        brush = Brush.radialGradient(
-                            colors = listOf(Terra, TerraDeep, Ink)
-                        )
-                    )
-                    .border(4.dp, GoldStamp, CircleShape)
+                    .background(Color(0xFF2B2019))
+                    .border(3.dp, Saffron, CircleShape)
                     .clickable { handleBeadCount() },
                 contentAlignment = Alignment.Center
             ) {

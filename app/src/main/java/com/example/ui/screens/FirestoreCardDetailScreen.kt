@@ -13,15 +13,19 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.Chat
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Phone
 import androidx.compose.material.icons.outlined.Share
+import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material3.*
 import androidx.compose.material3.pulltorefresh.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.animation.core.*
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -62,6 +66,7 @@ fun FirestoreCardDetailScreen(
     var submittedMessage by remember { mutableStateOf<String?>(null) }
     var commentsList by remember { mutableStateOf<List<CardComment>>(emptyList()) }
     var newCommentText by remember { mutableStateOf("") }
+    var selectedRating by remember { mutableStateOf(5) }
     var isPostingComment by remember { mutableStateOf(false) }
 
     // State-based fetching from Firestore using the card's unique ID with fallback empty state handling
@@ -84,7 +89,7 @@ fun FirestoreCardDetailScreen(
             commentsList = CommentRepository.fetchComments(cardId)
         } catch (e: Exception) {
             cardContent = getDefaultCardContent(cardId, isHindi)
-            errorMessage = if (isHindi) "क्लाउड फेच त्रुटि: ${e.localizedMessage}" else "Cloud fetch error: ${e.localizedMessage}"
+            errorMessage = if (isHindi) "क्लाउड फेच Error: ${e.localizedMessage}" else "Cloud fetch error: ${e.localizedMessage}"
             commentsList = CommentRepository.fetchComments(cardId)
         } finally {
             isLoading = false
@@ -294,7 +299,7 @@ fun FirestoreCardDetailScreen(
 
                         Surface(
                             shape = RoundedCornerShape(999.dp),
-                            color = if (displayContent.existsInCloud) Color(0xFFFAF6EA) else Color(0xFFF1F5F9)
+                            color = if (displayContent.existsInCloud) Color(0xFFF1F5F9) else Color(0xFFF1F5F9)
                         ) {
                             Text(
                                 text = if (displayContent.existsInCloud) "☁️ Cloud Synced ID: ${displayContent.cardId}" else "📌 Local Fallback ID: ${displayContent.cardId}",
@@ -496,7 +501,7 @@ fun FirestoreCardDetailScreen(
                         ) {
                             Text(text = "💬", fontSize = 20.sp)
                             Text(
-                                text = if (currentLangCode == "hi") "साधक अनुभव एवं टिप्पणियाँ" else "User Comments & Feedback",
+                                text = if (currentLangCode == "hi") "Sadhak अनुभव एवं टिप्पणियाँ" else "User Comments & Feedback",
                                 fontFamily = AppFontFamily,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 16.sp,
@@ -505,6 +510,44 @@ fun FirestoreCardDetailScreen(
                         }
 
                         Spacer(modifier = Modifier.height(12.dp))
+
+                        // Star Rating Selector
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(2.dp)
+                        ) {
+                            Text(
+                                text = if (currentLangCode == "hi") "रेटिंग दें (Rating):" else "Rate:",
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Ink
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            for (i in 1..5) {
+                                val isSelected = i <= selectedRating
+                                val scale by animateFloatAsState(
+                                    targetValue = if (isSelected) 1.25f else 1.0f,
+                                    animationSpec = spring(
+                                        dampingRatio = Spring.DampingRatioMediumBouncy,
+                                        stiffness = Spring.StiffnessLow
+                                    ),
+                                    label = "star_scale_$i"
+                                )
+                                IconButton(
+                                    onClick = { selectedRating = i },
+                                    modifier = Modifier.size(28.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = if (isSelected) androidx.compose.material.icons.Icons.Default.Star else androidx.compose.material.icons.Icons.Outlined.Star,
+                                        contentDescription = "$i stars",
+                                        tint = if (isSelected) Color(0xFF0F5C5C) else InkFaint,
+                                        modifier = Modifier.size(18.dp).scale(scale)
+                                    )
+                                }
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(8.dp))
 
                         // Comment Input Field
                         OutlinedTextField(
@@ -536,9 +579,10 @@ fun FirestoreCardDetailScreen(
                                 if (newCommentText.isNotBlank()) {
                                     coroutineScope.launch {
                                         isPostingComment = true
-                                        val success = CommentRepository.postComment(cardId, "साधक", newCommentText.trim())
+                                        val success = CommentRepository.postComment(cardId, "Sadhak", newCommentText.trim(), selectedRating)
                                         if (success) {
                                             newCommentText = ""
+                                            selectedRating = 5
                                             commentsList = CommentRepository.fetchComments(cardId)
                                         }
                                         isPostingComment = false
@@ -587,12 +631,28 @@ fun FirestoreCardDetailScreen(
                                                 horizontalArrangement = Arrangement.SpaceBetween,
                                                 verticalAlignment = Alignment.CenterVertically
                                             ) {
-                                                Text(
-                                                    text = comment.userName,
-                                                    fontWeight = FontWeight.Bold,
-                                                    fontSize = 12.5.sp,
-                                                    color = Ink
-                                                )
+                                                Row(
+                                                    verticalAlignment = Alignment.CenterVertically,
+                                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                                ) {
+                                                    Text(
+                                                        text = comment.userName,
+                                                        fontWeight = FontWeight.Bold,
+                                                        fontSize = 12.5.sp,
+                                                        color = Ink
+                                                    )
+                                                    Spacer(modifier = Modifier.width(6.dp))
+                                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                                        for (s in 1..5) {
+                                                            Icon(
+                                                                imageVector = if (s <= comment.rating) androidx.compose.material.icons.Icons.Default.Star else androidx.compose.material.icons.Icons.Outlined.Star,
+                                                                contentDescription = null,
+                                                                tint = if (s <= comment.rating) Color(0xFF0F5C5C) else InkFaint,
+                                                                modifier = Modifier.size(12.dp)
+                                                            )
+                                                        }
+                                                    }
+                                                }
                                                 val dateStr = java.text.SimpleDateFormat("d MMM, HH:mm", java.util.Locale.getDefault()).format(java.util.Date(comment.timestamp))
                                                 Text(
                                                     text = dateStr,

@@ -16,6 +16,7 @@ import androidx.compose.material.icons.automirrored.outlined.Chat
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.outlined.Phone
+import androidx.compose.material.icons.outlined.SupportAgent
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -30,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.ui.models.SadhakItem
 import com.example.ui.theme.*
+import com.example.utils.Pricing
 
 // Generic data class for Vedic problem categories
 data class LifeProblemCategory(
@@ -42,7 +44,7 @@ data class LifeProblemCategory(
 )
 
 /**
- * 1. HEALTH ISSUES (स्वास्थ्य समस्या व वैदिक आरोग्य समाधान)
+// English comment placeholder
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -133,7 +135,7 @@ fun BentoHealthIssuesScreen(
 }
 
 /**
- * 2. MONEY PROBLEM (धन समस्या व आर्थिक समृद्धि उपाय)
+// English comment placeholder
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -223,7 +225,7 @@ fun BentoMoneyProblemScreen(
 }
 
 /**
- * 3. NEGATIVITY (नकारात्मकता व नज़र दोष निवारण)
+// English comment placeholder
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -313,7 +315,7 @@ fun BentoNegativityScreen(
 }
 
 /**
- * 4. PITR DOSH (पितृ दोष निवारण व तर्पण उपाय)
+// English comment placeholder
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -426,10 +428,6 @@ private fun GenericProblemScreenTemplate(
     var problemNote by remember { mutableStateOf("") }
     var isMicActive by remember { mutableStateOf(false) }
     var submittedMessage by remember { mutableStateOf<String?>(null) }
-
-    val saffronGradient = Brush.horizontalGradient(
-        listOf(SaffronGradientStart, SaffronGradientEnd)
-    )
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -586,7 +584,7 @@ private fun GenericProblemScreenTemplate(
                         Spacer(modifier = Modifier.height(12.dp))
 
                         Text(
-                            text = if (currentLangCode == "hi") "✨ सरल शास्त्रीय शांति उपाय:" else "✨ Sacred Vedic Remedies:",
+                            text = if (currentLangCode == "hi") "सरल शास्त्रीय शांति उपाय:" else "Sacred Vedic Remedies:",
                             fontWeight = FontWeight.Bold,
                             fontSize = 13.sp,
                             color = Saffron
@@ -722,10 +720,10 @@ private fun GenericProblemScreenTemplate(
             // Consult Verified Sadhak
             item {
                 Surface(
-                    shape = RoundedCornerShape(20.dp),
+                    shape = RoundedCornerShape(16.dp),
                     color = Color.White,
                     border = BorderStroke(1.dp, BorderLight),
-                    shadowElevation = 2.dp,
+                    shadowElevation = 0.dp,
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Column(modifier = Modifier.padding(18.dp)) {
@@ -733,7 +731,20 @@ private fun GenericProblemScreenTemplate(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(10.dp)
                         ) {
-                            Text(text = "🕉️", fontSize = 24.sp)
+                            Surface(
+                                shape = RoundedCornerShape(10.dp),
+                                color = SaffronSoftBg,
+                                modifier = Modifier.size(38.dp)
+                            ) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    Icon(
+                                        imageVector = Icons.Outlined.SupportAgent,
+                                        contentDescription = null,
+                                        tint = Saffron,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                }
+                            }
                             Column {
                                 Text(
                                     text = if (currentLangCode == "hi") "पंडित जी से सीधा परामर्श" else "Direct Consultation with Sadhak",
@@ -743,7 +754,10 @@ private fun GenericProblemScreenTemplate(
                                     color = Color(0xFF000000)
                                 )
                                 Text(
-                                    text = if (currentLangCode == "hi") "गोपनीय चैट व सीधी वॉइस कॉल पर व्यक्तिगत मार्गदर्शन" else "Private chat & voice call guidance",
+                                    text = if (currentLangCode == "hi") 
+                                        "चैट ₹${Pricing.TEXT_QUESTION_PRICE_RUPEES} • कॉल ₹${Pricing.CONSULTATION_PRICE_RUPEES}/${Pricing.CONSULTATION_DURATION_MINUTES} मि (+5 मि ₹${Pricing.EXTRA_5MIN_PRICE_RUPEES})" 
+                                    else 
+                                        "Chat ₹${Pricing.TEXT_QUESTION_PRICE_RUPEES} • Call ₹${Pricing.CONSULTATION_PRICE_RUPEES}/${Pricing.CONSULTATION_DURATION_MINUTES} min (+5 min ₹${Pricing.EXTRA_5MIN_PRICE_RUPEES})",
                                     fontSize = 11.5.sp,
                                     color = Color(0xFF737373)
                                 )
@@ -792,7 +806,7 @@ private fun GenericProblemScreenTemplate(
                                     Icon(Icons.AutoMirrored.Outlined.Chat, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
                                     Spacer(modifier = Modifier.width(6.dp))
                                     Text(
-                                        text = if (currentLangCode == "hi") "चैट (₹499)" else "Chat (₹499)",
+                                        text = if (currentLangCode == "hi") "चैट (₹${Pricing.TEXT_QUESTION_PRICE_RUPEES})" else "Chat (₹${Pricing.TEXT_QUESTION_PRICE_RUPEES})",
                                         color = Color.White,
                                         fontWeight = FontWeight.Bold,
                                         fontSize = 13.sp
@@ -820,7 +834,7 @@ private fun GenericProblemScreenTemplate(
                                     Icon(Icons.Outlined.Phone, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
                                     Spacer(modifier = Modifier.width(6.dp))
                                     Text(
-                                        text = if (currentLangCode == "hi") "कॉल करें" else "Call Now",
+                                        text = if (currentLangCode == "hi") "कॉल (₹${Pricing.CONSULTATION_PRICE_RUPEES}/20m)" else "Call (₹${Pricing.CONSULTATION_PRICE_RUPEES}/20m)",
                                         color = Color.White,
                                         fontWeight = FontWeight.Bold,
                                         fontSize = 13.sp

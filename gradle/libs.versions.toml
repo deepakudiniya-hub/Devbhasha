@@ -45,6 +45,7 @@ credentials = "1.5.0"
 googleid = "1.1.1"
 razorpay = "1.6.38"
 kotlinxSerializationJson = "1.8.0"
+facebookLogin = "18.3.0"
 
 [libraries]
 razorpay-checkout = { group = "com.razorpay", name = "checkout", version.ref = "razorpay" }
@@ -104,8 +105,12 @@ agora-voice = { group = "io.agora.rtc", name = "full-rtc-basic", version.ref = "
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
 firebase-auth = { group = "com.google.firebase", name = "firebase-auth" }
 firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore" }
+firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging" }
 firebase-ai = { group = "com.google.firebase", name = "firebase-ai" }
 firebase-functions = { group = "com.google.firebase", name = "firebase-functions" }
+firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics" }
+firebase-storage = { group = "com.google.firebase", name = "firebase-storage" }
+facebook-login = { group = "com.facebook.android", name = "facebook-login", version.ref = "facebookLogin" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

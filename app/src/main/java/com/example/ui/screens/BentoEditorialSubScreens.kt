@@ -7,6 +7,7 @@ import android.widget.Toast
 import androidx.compose.animation.*
 import android.app.Activity
 import com.example.utils.RazorpayPaymentManager
+import com.example.utils.Pricing
 import com.example.utils.DreamSubmitter
 import com.example.utils.DreamSubmitResult
 import com.example.utils.PriceLabels
@@ -96,7 +97,7 @@ fun BentoEditorialSadhakScreen(
         ) {
             Text(
                 text = when (currentLangCode) {
-                    "hi" -> "साधक"
+                    "hi" -> "Sadhak"
                     "hgl" -> "Sadhak"
                     else -> "Sadhak"
                 },
@@ -124,7 +125,7 @@ fun BentoEditorialSadhakScreen(
             color = Color.White,
             border = BorderStroke(
                 1.2.dp,
-                if (isOfferClaimed) Color(0xFF16A34A).copy(alpha = 0.5f) else Saffron.copy(alpha = 0.5f)
+                if (isOfferClaimed) OnlineGreen else BorderBeige
             ),
             shadowElevation = 2.dp,
             modifier = Modifier
@@ -135,7 +136,7 @@ fun BentoEditorialSadhakScreen(
                     if (!isOfferClaimed) {
                         Toast.makeText(
                             context,
-                            if (currentLangCode == "hi") "पहली स्वप्न चैट 5 मिनट मुफ़्त — पात्रता सत्र शुरू होने पर सर्वर तय करेगा" else "First dream chat free for 5 min — eligibility is confirmed by the server",
+                            if (currentLangCode == "hi") "First dream chat free 5 min — पात्रता सत्र शुरू होने पर सर्वर तय करेगा" else "First dream chat free for 5 min — eligibility is confirmed by the server",
                             Toast.LENGTH_SHORT
                         ).show()
                     }
@@ -154,10 +155,10 @@ fun BentoEditorialSadhakScreen(
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         Surface(
-                            color = if (isOfferClaimed) Color(0xFFDCFCE7) else Color(0xFFFAF6EA),
+                            color = if (isOfferClaimed) Color(0xFFDCFCE7) else Color(0xFFF1F5F9),
                             border = BorderStroke(
                                 1.dp,
-                                if (isOfferClaimed) Color(0xFF86EFAC) else Saffron.copy(alpha = 0.35f)
+                                if (isOfferClaimed) OnlineGreen else BorderBeige
                             ),
                             shape = RoundedCornerShape(6.dp)
                         ) {
@@ -207,7 +208,7 @@ fun BentoEditorialSadhakScreen(
                     Spacer(modifier = Modifier.height(7.dp))
                     Text(
                         text = when (currentLangCode) {
-                            "hi" -> "पहली स्वप्न अर्थ चैट 5 मिनट मुफ़्त*"
+// English comment placeholder
                             "hgl" -> "Pehli dream chat 5 minute free*"
                             else -> "First dream chat free — 5 min*"
                         },
@@ -218,7 +219,7 @@ fun BentoEditorialSadhakScreen(
                     Spacer(modifier = Modifier.height(2.dp))
                     Text(
                         text = when (currentLangCode) {
-                            "hi" -> if (isOfferClaimed) "किसी भी साधक से तुरंत चैट करें" else "सत्यापित साधक • तुरंत चैट शुरू करें"
+                            "hi" -> if (isOfferClaimed) "किसी भी Sadhak से तुरंत चैट करें" else "सत्यापित Sadhak • तुरंत चैट शुरू करें"
                             "hgl" -> if (isOfferClaimed) "Kisi bhi sadhak se baat karein" else "Verified sadhak • Chat shuru karein"
                             else -> if (isOfferClaimed) "Use them with any guide" else "With any guide, no card needed"
                         },
@@ -298,7 +299,7 @@ fun BentoEditorialSadhakScreen(
                     else -> "No conversations yet"
                 },
                 description = when (currentLangCode) {
-                    "hi" -> "सत्यापित साधकों से अपनी कुंडली, दोष व उपायों पर सीधा परामर्श शुरू करें।"
+                    "hi" -> "सत्यापित Sadhakों से अपनी कुंडली, दोष व उपायों पर सीधा परामर्श शुरू करें।"
                     "hgl" -> "Verified sadhaks se kundli, dosha aur upay par seedha baat karein."
                     else -> "Start personalized spiritual guidance and remedy consultation with verified sadhaks."
                 },
@@ -403,7 +404,7 @@ fun BentoEditorialSadhakScreen(
         if (sadhaks.isEmpty()) {
             Text(
                 text = when (currentLangCode) {
-                    "hi" -> "नए साधक जल्द ही उपलब्ध होंगे"
+                    "hi" -> "नए Sadhak जल्द ही उपलब्ध होंगे"
                     "hgl" -> "Naye sadhak jald hi available honge"
                     else -> "New sadhaks will be available soon"
                 },
@@ -664,7 +665,7 @@ fun BentoEditorialRemedyScreen(
                                 color = Terra,
                                 modifier = Modifier
                                     .clip(RoundedCornerShape(999.dp))
-                                    .border(BorderStroke(1.dp, Terra.copy(alpha = 0.4f)), RoundedCornerShape(999.dp))
+                                    .border(BorderStroke(1.dp, BorderBeige), RoundedCornerShape(999.dp))
                                     .padding(horizontal = 9.dp, vertical = 2.dp)
                             )
                             if (byName.isNotBlank()) {
@@ -731,11 +732,7 @@ fun BentoEditorialRemedyScreen(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .height(92.dp)
-                                    .background(
-                                        Brush.radialGradient(
-                                            listOf(item.themeGradientStart, item.themeGradientEnd)
-                                        )
-                                    ),
+                                    .background(Color(0xFFFAFAFA)),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(text = item.iconEmoji, fontSize = 34.sp)
@@ -840,7 +837,7 @@ fun BentoEditorialDreamsScreen(
     var selectedMeaningEntryId by remember { mutableStateOf<String?>(null) }
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
-    val saffronColor = Color(0xFF0D656C)
+    val saffronColor = MaterialTheme.colorScheme.primary
 
     Column(
         modifier = modifier
@@ -1008,14 +1005,14 @@ fun BentoEditorialDreamsScreen(
                                                 dreamText = ""
                                                 isListeningVoice = false
                                                 val freeNote = if (res.isFreeTrial) " (${PriceLabels.FREE_TRIAL_BADGE})" else ""
-                                                Toast.makeText(context, "सपना दर्ज हुआ — साधक '${res.sadhakName}' को सौंपा गया ✨$freeNote", Toast.LENGTH_LONG).show()
+                                                Toast.makeText(context, "सपना दर्ज हुआ — Sadhak '${res.sadhakName}' को सौंपा गया ✨$freeNote", Toast.LENGTH_LONG).show()
                                             }
                                             is DreamSubmitResult.InsufficientBalance -> {
                                                 val activity = context as? Activity
                                                 if (activity != null) {
                                                     val started = RazorpayPaymentManager.startRechargePayment(
                                                         activity = activity,
-                                                        amount = 99.0,
+                                                        amount = Pricing.DREAM_CHAT_PRICE_RUPEES.toDouble(),
                                                         userId = userId,
                                                         userName = userName,
                                                         purpose = "dream_matlab",
@@ -1033,7 +1030,7 @@ fun BentoEditorialDreamsScreen(
                                                 Toast.makeText(context, res.message, Toast.LENGTH_LONG).show()
                                             }
                                             is DreamSubmitResult.Error -> {
-                                                Toast.makeText(context, "त्रुटि: ${res.message}", Toast.LENGTH_LONG).show()
+                                                Toast.makeText(context, "Error: ${res.message}", Toast.LENGTH_LONG).show()
                                             }
                                         }
                                     }
@@ -1066,7 +1063,7 @@ fun BentoEditorialDreamsScreen(
 
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = "वैदिक साधकों द्वारा 100% व्यक्तिगत स्वप्न फल मीमांसा",
+                            text = "वैदिक Sadhakों द्वारा 100% व्यक्तिगत स्वप्न फल मीमांसा",
                             fontSize = 11.sp,
                             color = Color(0xFF64748B),
                             textAlign = TextAlign.Center,
@@ -1246,14 +1243,14 @@ fun BentoEditorialDreamsScreen(
                                         val isHashtag = t.startsWith("#")
                                         Surface(
                                             shape = RoundedCornerShape(6.dp),
-                                            color = if (isHashtag) Color(0xFFF3E8FF) else saffronColor.copy(alpha = 0.08f),
-                                            border = BorderStroke(0.8.dp, if (isHashtag) Color(0xFFDDD6FE) else saffronColor.copy(alpha = 0.25f))
+                                            color = SaffronSoftBg,
+                                            border = BorderStroke(0.8.dp, saffronColor.copy(alpha = 0.25f))
                                         ) {
                                             Text(
                                                 text = t,
                                                 fontSize = 10.5.sp,
                                                 fontWeight = FontWeight.SemiBold,
-                                                color = if (isHashtag) Color(0xFF7C3AED) else saffronColor,
+                                                color = saffronColor,
                                                 modifier = Modifier.padding(horizontal = 7.dp, vertical = 2.5.dp)
                                             )
                                         }
@@ -1375,7 +1372,7 @@ fun BentoEditorialDreamsScreen(
                                 }
 
                                 if (entry.meaning.isNullOrBlank() && !isExpandedMeaning) {
-                                    // "स्वप्न फल देखें" (Swapna Phal) Action Button
+// English comment placeholder
                                     Button(
                                         onClick = {
                                             selectedMeaningEntryId = entry.id
