@@ -29,6 +29,7 @@ import java.util.Locale
 class SessionController internal constructor(
     val type: SessionType,
     val providerId: String,
+    private val mode: String,
     private val scope: CoroutineScope
 ) {
     var session by mutableStateOf<StartedSession?>(null)
@@ -57,8 +58,9 @@ class SessionController internal constructor(
     internal suspend fun start() {
         isStarting = true
         error = null
-        SessionBilling.startSession(type, providerId)
+        SessionBilling.startSession(type, providerId, mode)
             .onSuccess {
+                if (isEnded) { SessionBilling.endSessionAsync(it.sessionId); return@onSuccess }
                 session = it
                 endsAtMillis = it.endsAtMillis
                 lastAmountPaise = it.amountPaise
@@ -103,10 +105,11 @@ class SessionController internal constructor(
 fun rememberSessionController(
     type: SessionType,
     providerId: String,
+    mode: String = "call",
     onExpired: () -> Unit = {}
 ): SessionController {
     val scope = rememberCoroutineScope()
-    val controller = remember(type, providerId) { SessionController(type, providerId, scope) }
+    val controller = remember(type, providerId, mode) { SessionController(type, providerId, mode, scope) }
     val currentOnExpired by rememberUpdatedState(onExpired)
 
     LaunchedEffect(controller) { controller.start() }
@@ -179,7 +182,7 @@ fun SessionStatusBar(
             Spacer(Modifier.height(8.dp))
             Surface(
                 shape = RoundedCornerShape(12.dp),
-                color = Color(0xFFFAF6EA),
+                color = Color(0xFFF1F5F9),
                 border = BorderStroke(1.dp, Color(0xFF0D656C))
             ) {
                 Row(
@@ -213,9 +216,9 @@ fun sessionErrorText(e: Throwable, isHindi: Boolean): String {
     val be = e as? SessionBillingException
     return when {
         be?.isInsufficientBalance == true ->
-            if (isHindi) "वॉलेट में पर्याप्त राशि नहीं है। कृपया रिचार्ज करें।" else "Insufficient wallet balance. Please recharge."
+            if (isHindi) "Insufficient wallet balance. Please recharge." else "Insufficient wallet balance. Please recharge."
         be?.isUnauthenticated == true ->
-            if (isHindi) "कृपया पहले लॉगिन करें।" else "Please log in first."
+            if (isHindi) "Please login first." else "Please log in first."
         else -> if (isHindi) "सत्र शुरू नहीं हो सका। दोबारा प्रयास करें।" else "Could not start session. Please try again."
     }
 }

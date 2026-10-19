@@ -51,8 +51,8 @@ data class AgoraJoinInfo(
 object PriceLabels {
     const val SESSION = "₹499 / 20 min"
     const val EXTEND = "+5 min ₹99"
-    const val DREAM_CHAT = "₹99 / 7 min"
-    const val DREAM_CALL = "₹199 / 10 min"
+    const val DREAM_CHAT = "₹199"
+    const val DREAM_CALL = "₹499 / 20 min"
     const val FREE_TRIAL_BADGE = "पहली स्वप्न चैट 5 मिनट मुफ़्त"
     const val FREE_TRIAL_BADGE_EN = "First dream chat free · 5 min"
 
@@ -90,8 +90,8 @@ class SessionBillingException(
 object SessionBilling {
     private val functions: FirebaseFunctions by lazy { FirebaseFunctions.getInstance() }
 
-    suspend fun startSession(type: SessionType, providerId: String): Result<StartedSession> = runCall {
-        val data = call("startSession", mapOf("type" to type.wire, "providerId" to providerId))
+    suspend fun startSession(type: SessionType, providerId: String, mode: String = "call"): Result<StartedSession> = runCall {
+        val data = call("startSession", mapOf("type" to type.wire, "providerId" to providerId, "mode" to mode))
         StartedSession(
             sessionId = data.str("sessionId") ?: throw malformed("startSession"),
             endsAtMillis = parseEpochMillis(data["endsAt"]) ?: throw malformed("startSession"),

@@ -45,6 +45,7 @@ jobs:
         env:
           GOOGLE_SERVICES_JSON_B64: ${{ secrets.GOOGLE_SERVICES_JSON_B64 }}
         run: |
+          if [ -f app/google-services.json ]; then exit 0; fi
           if [ -z "$GOOGLE_SERVICES_JSON_B64" ]; then
             echo "::error::Repository secret GOOGLE_SERVICES_JSON_B64 is not set."
             echo "Add it (base64 of app/google-services.json) under Settings > Secrets."

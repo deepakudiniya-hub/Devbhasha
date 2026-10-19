@@ -1,7 +1,9 @@
 package com.example.ui.screens
 
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.*
+import com.example.ui.components.PostConsultationReviewDialog
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -45,19 +47,27 @@ import com.example.utils.PriceLabels
 import com.example.utils.SessionBillingException
 import com.example.utils.SessionType
 import com.example.ui.theme.*
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.IgnoreExtraProperties
 import com.google.firebase.firestore.Query
+import com.google.firebase.firestore.SetOptions
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
 
+@IgnoreExtraProperties
 data class ChatMessage(
     val id: String = UUID.randomUUID().toString(),
     val senderId: String = "",
     val senderName: String = "",
     val text: String = "",
     val isFromUser: Boolean = false,
+    val fromUser: Boolean = isFromUser,
+    val isSpecialCard: Boolean = false,
+    val cardTitle: String? = null,
     val timestamp: Long = System.currentTimeMillis()
 ) {
     val formattedTime: String = SimpleDateFormat("hh:mm a", Locale.getDefault()).format(Date(timestamp))
@@ -76,8 +86,11 @@ fun ChatConsultationScreen(
     modifier: Modifier = Modifier
 ) {
     var activeChatSadhak by remember { mutableStateOf<SadhakItem?>(null) }
+    var activeChatSessionId by remember { mutableStateOf<String?>(null) }
     var searchQuery by remember { mutableStateOf("") }
     var selectedCategory by remember { mutableStateOf("all") }
+    val context = LocalContext.current
+    val db = remember { com.example.utils.FirestoreProvider.get(context) }
 
     if (activeChatSadhak != null) {
         LiveChatRoomScreen(
@@ -86,10 +99,14 @@ fun ChatConsultationScreen(
             userId = userId,
             userName = userName,
             walletBalance = walletBalance,
-            onCloseChat = { activeChatSadhak = null },
+            onCloseChat = {
+                activeChatSadhak = null
+                activeChatSessionId = null
+            },
             onStartCall = { onStartCall(activeChatSadhak!!) },
             onLowBalance = onLowBalance,
-            onAddBalance = onAddBalance
+            onAddBalance = onAddBalance,
+            sessionId = activeChatSessionId
         )
     } else {
         ChatAstrologerListScreen(
@@ -101,7 +118,7 @@ fun ChatConsultationScreen(
             onCategorySelected = { selectedCategory = it },
             walletBalance = walletBalance,
             onStartChat = { sadhak ->
-                // Balance & price are checked by the server in startSession.
+                activeChatSessionId = null
                 activeChatSadhak = sadhak
             },
             onStartCall = onStartCall,
@@ -124,7 +141,7 @@ private fun ChatAstrologerListScreen(
     modifier: Modifier = Modifier
 ) {
     val categories = listOf(
-        "all" to (if (isHindi) "सभी साधक" else "All Astrologers"),
+        "all" to (if (isHindi) "सभी Sadhak" else "All Astrologers"),
         "online" to (if (isHindi) "🟢 ऑनलाइन" else "🟢 Online"),
         "kundli" to (if (isHindi) "कुंडली विशेषज्ञ" else "Kundli"),
         "marriage" to (if (isHindi) "विवाह व प्रेम" else "Love & Marriage"),
@@ -181,7 +198,7 @@ private fun ChatAstrologerListScreen(
                             )
                             Spacer(modifier = Modifier.width(6.dp))
                             Text(
-                                text = if (isHindi) "साधक चैट परामर्श" else "Chat with Astrologers",
+                                text = if (isHindi) "Sadhak चैट परामर्श" else "Chat with Astrologers",
                                 fontSize = 17.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = Color(0xFF1E293B)
@@ -531,15 +548,49 @@ fun LiveChatRoomScreen(
     onStartCall: () -> Unit,
     onLowBalance: () -> Unit,
     onAddBalance: () -> Unit,
-    sessionType: SessionType = SessionType.SESSION
+    sessionType: SessionType = SessionType.SESSION,
+    sessionId: String? = null
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val focusManager = LocalFocusManager.current
+    val db = remember { com.example.utils.FirestoreProvider.get(context) }
+
+    val authUid = FirebaseAuth.getInstance().currentUser?.uid
+    val effectiveUserId = authUid.orEmpty()
+
+    var currentSessionId by remember(sadhak.id, sessionId) { mutableStateOf<String?>(sessionId) }
+
+    var showChatReviewDialog by remember { mutableStateOf(false) }
+
+    BackHandler {
+        showChatReviewDialog = true
+    }
+
+    if (showChatReviewDialog) {
+        PostConsultationReviewDialog(
+            sadhak = sadhak,
+            consultationId = currentSessionId ?: "",
+            sessionType = "chat",
+            durationSeconds = 0,
+            isHindi = isHindi,
+            userId = effectiveUserId,
+            userName = userName,
+            onDismiss = {
+                showChatReviewDialog = false
+                onCloseChat()
+            },
+            onSubmitSuccess = {
+                showChatReviewDialog = false
+                onCloseChat()
+            }
+        )
+    }
 
     // Server-billed session: price, duration and debit are decided by Cloud Functions.
     val sessionController = rememberSessionController(
         type = sessionType,
+        mode = "chat",
         providerId = sadhak.id,
         onExpired = {
             Toast.makeText(
@@ -547,16 +598,21 @@ fun LiveChatRoomScreen(
                 if (isHindi) "सत्र का समय समाप्त हो गया" else "Session time is over",
                 Toast.LENGTH_LONG
             ).show()
-            onCloseChat()
+            showChatReviewDialog = true
         }
     )
+
+    LaunchedEffect(sessionController.sessionId) {
+        currentSessionId = sessionController.sessionId.takeIf { it.isNotBlank() }
+    }
 
     LaunchedEffect(sessionController.error, sessionController.session) {
         val err = sessionController.error
         if (err != null && sessionController.session == null) {
-            Toast.makeText(context, sessionErrorText(err, isHindi), Toast.LENGTH_LONG).show()
-            if (err is SessionBillingException && err.isInsufficientBalance) onLowBalance()
-            onCloseChat()
+            if (err is SessionBillingException && err.isInsufficientBalance) {
+                Toast.makeText(context, sessionErrorText(err, isHindi), Toast.LENGTH_LONG).show()
+                onLowBalance()
+            }
         }
     }
 
@@ -565,20 +621,32 @@ fun LiveChatRoomScreen(
 
     var messages by remember { mutableStateOf<List<ChatMessage>>(emptyList()) }
     val listState = rememberLazyListState()
-    val db = remember { com.example.utils.FirestoreProvider.get(context) }
-    val chatRef = db.collection("chats")
-        .document(sadhak.id)
-        .collection("messages")
 
-    // Fetch messages from Firestore
-    LaunchedEffect(sadhak.id) {
-        chatRef.orderBy("timestamp", Query.Direction.ASCENDING)
-            .addSnapshotListener { snapshot, e ->
-                if (e != null) return@addSnapshotListener
-                if (snapshot != null) {
-                    messages = snapshot.toObjects(ChatMessage::class.java)
+    DisposableEffect(currentSessionId, effectiveUserId) {
+        val sid = currentSessionId
+        val registration = if (sid == null || effectiveUserId.isBlank()) null else
+            db.collection("chats").document(sid).collection("messages")
+                .orderBy("timestamp", Query.Direction.ASCENDING).limitToLast(50)
+                .addSnapshotListener { snapshot, error ->
+                    if (error != null) {
+                        Toast.makeText(context, "Messages could not sync. Please retry.", Toast.LENGTH_SHORT).show()
+                    } else {
+                        messages = snapshot?.documents?.map { doc ->
+                            val fields = doc.data.orEmpty()
+                            val sender = fields["senderId"] as? String ?: ""
+                            val time = when(val value = fields["timestamp"]) {
+                                is Number -> value.toLong()
+                                is com.google.firebase.Timestamp -> value.toDate().time
+                                else -> 0L
+                            }
+                            ChatMessage(id=doc.id, senderId=sender,
+                                senderName=fields["senderName"] as? String ?: "",
+                                text=fields["text"] as? String ?: "",
+                                isFromUser=sender == effectiveUserId, timestamp=time)
+                        }.orEmpty()
+                    }
                 }
-            }
+        onDispose { registration?.remove() }
     }
 
     // Scroll to bottom when new message arrives
@@ -598,72 +666,80 @@ fun LiveChatRoomScreen(
 
     fun sendMessage(textToSend: String) {
         val trimmed = textToSend.trim()
-        if (trimmed.isBlank()) return
+        if (trimmed.isBlank() || trimmed.length > 4000 || effectiveUserId.isBlank()) return
+        val sid = currentSessionId ?: return
         if (!sessionController.isActive) {
             Toast.makeText(
                 context,
-                if (isHindi) "सत्र सक्रिय नहीं है" else "Session is not active",
+                if (isHindi) "सत्र समाप्त हो गया है" else "Session has ended",
                 Toast.LENGTH_SHORT
             ).show()
             return
         }
 
-        val userMsg = ChatMessage(
-            senderId = userId.ifBlank { "user" },
-            senderName = userName,
-            text = trimmed,
-            isFromUser = true
+        val msgId = UUID.randomUUID().toString()
+        val now = System.currentTimeMillis()
+        val userMsg = hashMapOf<String, Any>(
+            "id" to msgId,
+            "senderId" to effectiveUserId,
+            "senderName" to userName.ifBlank { "User" },
+            "text" to trimmed,
+            "isFromUser" to true,
+            "fromUser" to true,
+            "timestamp" to now
         )
-        
-        chatRef.add(userMsg)
-        inputMessage = ""
+
+        db.collection("chats")
+            .document(sid)
+            .collection("messages")
+            .document(msgId)
+            .set(userMsg)
+            .addOnSuccessListener { if (inputMessage.trim() == trimmed) inputMessage = "" }
+            .addOnFailureListener {
+                Toast.makeText(context, "Message not sent. Please retry.", Toast.LENGTH_SHORT).show()
+            }
+
         focusManager.clearFocus()
     }
 
+    val defaultInitialMessages = emptyList<ChatMessage>()
+
     Scaffold(
         topBar = {
+            // 1. Top App Bar - Deep Teal background (Color(0xFF083A35))
             Surface(
-                color = Color.White,
+                color = Color(0xFF083A35),
                 shadowElevation = 4.dp
             ) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .statusBarsPadding()
-                        .padding(horizontal = 8.dp, vertical = 8.dp),
+                        .padding(horizontal = 8.dp, vertical = 10.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    IconButton(onClick = onCloseChat) {
+                    IconButton(onClick = { showChatReviewDialog = true }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Back",
-                            tint = Color(0xFF1E293B)
+                            tint = Color.White
                         )
                     }
 
-                    // Astrologer Mini Avatar with Online Dot
-                    Box {
-                        Box(
-                            modifier = Modifier
-                                .size(40.dp)
-                                .clip(CircleShape)
-                                .background(SaffronPrimary),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = if (isHindi) sadhak.initialHi else sadhak.initialEn,
-                                color = Color.White,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 16.sp
-                            )
-                        }
-                        Box(
-                            modifier = Modifier
-                                .size(10.dp)
-                                .clip(CircleShape)
-                                .background(Color(0xFF10B981))
-                                .align(Alignment.BottomEnd)
-                                .border(1.5.dp, Color.White, CircleShape)
+                    // Circular mentor/AI avatar with subtle golden ring
+                    Box(
+                        modifier = Modifier
+                            .size(42.dp)
+                            .clip(CircleShape)
+                            .background(Color(0xFF0F5C5C))
+                            .border(1.5.dp, Color(0xFF0F5C5C), CircleShape),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = if (isHindi) sadhak.initialHi else sadhak.initialEn,
+                            color = Color(0xFF0F5C5C),
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 17.sp
                         )
                     }
 
@@ -674,91 +750,92 @@ fun LiveChatRoomScreen(
                             text = if (isHindi) sadhak.nameHi else sadhak.nameEn,
                             fontWeight = FontWeight.Bold,
                             fontSize = 15.sp,
-                            color = Color(0xFF1E293B),
+                            color = Color.White,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
-                        Text(
-                            text = if (isAstrologerTyping) {
-                                if (isHindi) "✍️ टाइप कर रहे हैं..." else "✍️ typing..."
-                            } else {
-                                if (isHindi) "🟢 सक्रिय चैट • ${PriceLabels.forType(sessionType)}" else "🟢 Active • ${PriceLabels.forType(sessionType)}"
-                            },
-                            fontSize = 11.sp,
-                            color = if (isAstrologerTyping) SaffronDeep else Color(0xFF16A34A),
-                            fontWeight = FontWeight.Medium
-                        )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(7.dp)
+                                    .clip(CircleShape)
+                                    .background(Color(0xFF5CC28A))
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .border(0.5.dp, Color.White, CircleShape)
+                                )
+                            }
+                            Text(
+                                text = if (isAstrologerTyping) {
+                                    if (isHindi) "टाइप कर रहे हैं..." else "Typing..."
+                                } else {
+                                    if (isHindi) "ऑनलाइन" else "Online"
+                                },
+                                fontSize = 11.5.sp,
+                                color = Color(0xFFE2E8F0)
+                            )
+                        }
                     }
 
-                    // Call Button in Chat Header
-                    IconButton(
-                        onClick = onStartCall,
-                        modifier = Modifier
-                            .size(38.dp)
-                            .clip(CircleShape)
-                            .background(Color(0xFFDCFCE7))
-                    ) {
+                    // Direct audio call action icon
+                    IconButton(onClick = onStartCall) {
                         Icon(
                             imageVector = Icons.Outlined.Phone,
-                            contentDescription = "Switch to Call",
-                            tint = Color(0xFF15803D),
-                            modifier = Modifier.size(18.dp)
-                        )
-                    }
-
-                    // Add Balance Button
-                    IconButton(
-                        onClick = onAddBalance,
-                        modifier = Modifier
-                            .size(38.dp)
-                            .clip(CircleShape)
-                            .background(Color(0xFF000000))
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.Add,
-                            contentDescription = "Add Balance",
+                            contentDescription = "Audio Call",
                             tint = Color.White,
-                            modifier = Modifier.size(18.dp)
+                            modifier = Modifier.size(20.dp)
                         )
                     }
 
-                    Spacer(modifier = Modifier.width(4.dp))
+                    // Direct video call action icon
+                    IconButton(onClick = {
+                        Toast.makeText(context, if (isHindi) "वीडियो कॉल शीघ्र उपलब्ध होगी" else "Video Call coming soon", Toast.LENGTH_SHORT).show()
+                    }) {
+                        Icon(
+                            imageVector = Icons.Outlined.Videocam,
+                            contentDescription = "Video Call",
+                            tint = Color.White,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
 
-                    // End Chat Button
-                    TextButton(
-                        onClick = {
-                            sessionController.end()
-                            onCloseChat()
-                        },
-                        contentPadding = PaddingValues(horizontal = 8.dp)
-                    ) {
-                        Text(
-                            text = if (isHindi) "समाप्त" else "End",
-                            color = Color(0xFFEF4444),
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Bold
+                    // Menu icon in white
+                    IconButton(onClick = {
+                        Toast.makeText(context, "Wallet: ₹${walletBalance.toInt()} • ${PriceLabels.forType(sessionType)}", Toast.LENGTH_SHORT).show()
+                    }) {
+                        Icon(
+                            imageVector = Icons.Filled.MoreVert,
+                            contentDescription = "Menu",
+                            tint = Color.White,
+                            modifier = Modifier.size(20.dp)
                         )
                     }
                 }
             }
         },
         bottomBar = {
+            // 4. Bottom Input Bar - Clean white elevated container at bottom with 16.dp padding
             Surface(
                 color = Color.White,
                 shadowElevation = 8.dp,
                 modifier = Modifier.navigationBarsPadding()
             ) {
-                Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
+                Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
                     // Quick Questions Row
                     LazyRow(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        modifier = Modifier.padding(bottom = 8.dp)
+                        modifier = Modifier.padding(bottom = 10.dp)
                     ) {
                         items(quickQuestions) { q ->
                             Surface(
                                 shape = RoundedCornerShape(14.dp),
-                                color = Color(0xFFFAFAFA),
-                                border = BorderStroke(1.dp, BorderLight),
+                                color = Color.White,
+                                border = BorderStroke(1.dp, Color(0xFFE2E8F0)),
                                 modifier = Modifier
                                     .clip(RoundedCornerShape(14.dp))
                                     .clickable { sendMessage(q) }
@@ -766,7 +843,7 @@ fun LiveChatRoomScreen(
                                 Text(
                                     text = q,
                                     fontSize = 11.5.sp,
-                                    color = Color(0xFF000000),
+                                    color = Color(0xFF083A35),
                                     fontWeight = FontWeight.Medium,
                                     modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
                                 )
@@ -774,17 +851,17 @@ fun LiveChatRoomScreen(
                         }
                     }
 
-                    // Input Field Row
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        // Kundli / Attachment Button
+                        // Left: Attachment (+) icon
                         IconButton(
                             onClick = {
                                 Toast.makeText(
                                     context,
-                                    if (isHindi) "आपकी जन्म विवरण और कुंडली साधक के साथ साझा कर दी गई है।" else "Kundli & Birth Details shared with Astrologer.",
+                                    if (isHindi) "आपकी जन्म विवरण और कुंडली Sadhak के साथ साझा कर दी गई है।" else "Kundli & Birth Details shared with Astrologer.",
                                     Toast.LENGTH_SHORT
                                 ).show()
                                 sendMessage(if (isHindi) "📜 [मेरी जन्म विवरण व कुंडली साझा की गई]" else "📜 [Birth Chart & Kundli shared]")
@@ -795,25 +872,46 @@ fun LiveChatRoomScreen(
                                 .background(Color(0xFFF1F5F9))
                         ) {
                             Icon(
-                                imageVector = Icons.Outlined.AttachFile,
-                                contentDescription = "Attach Kundli",
-                                tint = Color(0xFF64748B),
+                                imageVector = Icons.Filled.Add,
+                                contentDescription = "Attach",
+                                tint = Color(0xFF526E6B),
                                 modifier = Modifier.size(20.dp)
                             )
                         }
 
-                        Spacer(modifier = Modifier.width(8.dp))
+                        // Voice Mic icon (Color(0xFF526E6B))
+                        IconButton(
+                            onClick = {
+                                Toast.makeText(
+                                    context,
+                                    if (isHindi) "सात्विक वॉइस रिकॉर्डिंग शुरू..." else "Voice recording started...",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            },
+                            modifier = Modifier
+                                .size(40.dp)
+                                .clip(CircleShape)
+                                .background(Color(0xFFF1F5F9))
+                        ) {
+                            Icon(
+                                imageVector = Icons.Outlined.Mic,
+                                contentDescription = "Voice Mic",
+                                tint = Color(0xFF526E6B),
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
 
+// English comment placeholder
                         OutlinedTextField(
                             value = inputMessage,
                             onValueChange = { inputMessage = it },
                             modifier = Modifier
                                 .weight(1f)
-                                .clip(RoundedCornerShape(22.dp))
+                                .clip(RoundedCornerShape(24.dp))
                                 .background(Color(0xFFF8FAFC)),
                             placeholder = {
                                 Text(
-                                    text = if (isHindi) "अपना प्रश्न या जन्म विवरण लिखें..." else "Type your question...",
+                                    text = if (isHindi) "अपना संदेश लिखें..." else "Type your message...",
                                     fontSize = 13.sp,
                                     color = Color(0xFF94A3B8)
                                 )
@@ -821,29 +919,27 @@ fun LiveChatRoomScreen(
                             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
                             keyboardActions = KeyboardActions(onSend = { sendMessage(inputMessage) }),
                             maxLines = 3,
-                            shape = RoundedCornerShape(22.dp),
+                            shape = RoundedCornerShape(24.dp),
                             colors = OutlinedTextFieldDefaults.colors(
-                                focusedBorderColor = SaffronPrimary,
+                                focusedBorderColor = Color(0xFF0F5C5C),
                                 unfocusedBorderColor = Color(0xFFE2E8F0),
                                 focusedContainerColor = Color(0xFFF8FAFC),
                                 unfocusedContainerColor = Color(0xFFF8FAFC)
                             )
                         )
 
-                        Spacer(modifier = Modifier.width(8.dp))
-
-                        // Send Button
+                        // Right: Circular Deep Teal send button (Color(0xFF0F5C5C), size 44.dp) with white paper-plane or right-arrow icon
                         IconButton(
                             onClick = { sendMessage(inputMessage) },
                             modifier = Modifier
                                 .size(44.dp)
                                 .clip(CircleShape)
-                                .background(if (inputMessage.isNotBlank()) SaffronPrimary else Color(0xFFE2E8F0))
+                                .background(Color(0xFF0F5C5C))
                         ) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.Send,
                                 contentDescription = "Send",
-                                tint = if (inputMessage.isNotBlank()) Color.White else Color(0xFF94A3B8),
+                                tint = Color.White,
                                 modifier = Modifier.size(18.dp)
                             )
                         }
@@ -852,40 +948,20 @@ fun LiveChatRoomScreen(
             }
         }
     ) { innerPadding ->
+        // 2. Chat Body & Message Bubbles (Cream Background #F9FBF9)
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .background(Color.White)
                 .padding(innerPadding)
         ) {
-            // Vedic Trust Header Banner
-            Surface(
-                color = Color(0xFFFAFAFA),
-                border = BorderStroke(1.dp, BorderLight),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Row(
-                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    Text(
-                        text = if (isHindi) "🔒 100% गोपनीय व सात्विक परामर्श • प्रत्यक्ष वैदिक गणना आधारित"
-                        else "🔒 100% Confidential & Authentic Vedic Guidance",
-                        fontSize = 11.sp,
-                        color = Color(0xFF737373),
-                        fontWeight = FontWeight.Medium
-                    )
-                }
-            }
-
             SessionStatusBar(
                 controller = sessionController,
                 isHindi = isHindi,
                 darkBackground = false,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 6.dp),
+                    .padding(vertical = 4.dp),
                 onExtendFailed = { e ->
                     Toast.makeText(context, sessionErrorText(e, isHindi), Toast.LENGTH_LONG).show()
                     if (e is SessionBillingException && e.isInsufficientBalance) onLowBalance()
@@ -897,27 +973,167 @@ fun LiveChatRoomScreen(
                 state = listState,
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(horizontal = 14.dp),
+                    .padding(horizontal = 16.dp),
                 contentPadding = PaddingValues(vertical = 12.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
+                verticalArrangement = Arrangement.spacedBy(14.dp)
             ) {
-                items(messages, key = { it.id }) { msg ->
-                    ChatBubbleItem(
-                        message = msg,
-                        isHindi = isHindi
-                    )
+// English comment placeholder
+                item {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 6.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Surface(
+                            shape = RoundedCornerShape(12.dp),
+                            color = Color(0xFFE2E8F0).copy(alpha = 0.6f)
+                        ) {
+                            Text(
+                                text = "आज, 14 अक्टूबर",
+                                fontSize = 11.5.sp,
+                                color = Color(0xFF475569),
+                                fontWeight = FontWeight.Medium,
+                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 5.dp)
+                            )
+                        }
+                    }
+                }
+
+                val displayList = if (messages.isEmpty()) defaultInitialMessages else messages
+
+                items(displayList, key = { it.id }) { msg ->
+                    if (msg.isSpecialCard) {
+                        // 3. Special Astrological Card Component (Inside Chat)
+                        // Highlighted soft golden-yellow card (Background Color(0xFFFDF8E2), border Color(0xFFF5C443), 16.dp rounded corners)
+                        Surface(
+                            shape = RoundedCornerShape(16.dp),
+                            color = Color(0xFFFDF8E2),
+                            border = BorderStroke(1.2.dp, Color(0xFFF5C443)),
+                            shadowElevation = 2.dp,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(16.dp)
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    Surface(
+                                        shape = CircleShape,
+                                        color = Color(0xFFF5C443).copy(alpha = 0.3f),
+                                        modifier = Modifier.size(28.dp)
+                                    ) {
+                                        Box(contentAlignment = Alignment.Center) {
+                                            Text("🪔", fontSize = 14.sp)
+                                        }
+                                    }
+                                    Text(
+                                        text = msg.cardTitle ?: "विशेष उपाय: शुक्ल पक्ष",
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 14.sp,
+                                        color = Color(0xFF78350F)
+                                    )
+                                }
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text(
+                                    text = msg.text,
+                                    fontSize = 13.5.sp,
+                                    color = Color(0xFF451A03),
+                                    lineHeight = 19.sp
+                                )
+                            }
+                        }
+                    } else {
+                        // Incoming Message (Mentor / AI): Soft mint/white card background (Color(0xFFFFFFFF)) with subtle border, 16.dp rounded corners, deep teal text (14.sp), and a tiny timestamp at bottom right.
+                        // Outgoing Message (User): Deep Teal background (Color(0xFF0F5C5C)), pure white text (14.sp), 16.dp rounded corners, with a double-check blue/white read icon.
+                        val isUser = msg.isFromUser
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = if (isUser) Arrangement.End else Arrangement.Start
+                        ) {
+                            Surface(
+                                shape = RoundedCornerShape(16.dp),
+                                color = if (isUser) Color(0xFF0F5C5C) else Color(0xFFFFFFFF),
+                                border = if (isUser) null else BorderStroke(1.dp, Color(0xFFE2E8F0)),
+                                shadowElevation = 1.dp,
+                                modifier = Modifier.widthIn(max = 300.dp)
+                            ) {
+                                Column(
+                                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp)
+                                ) {
+                                    if (!isUser) {
+                                        Text(
+                                            text = msg.senderName,
+                                            fontSize = 11.5.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = Color(0xFF083A35)
+                                        )
+                                        Spacer(modifier = Modifier.height(3.dp))
+                                    }
+
+                                    Text(
+                                        text = msg.text,
+                                        fontSize = 14.sp,
+                                        color = if (isUser) Color.White else Color(0xFF083A35),
+                                        lineHeight = 20.sp
+                                    )
+
+                                    Spacer(modifier = Modifier.height(4.dp))
+
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.End,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text(
+                                            text = msg.formattedTime,
+                                            fontSize = 9.5.sp,
+                                            color = if (isUser) Color.White.copy(alpha = 0.75f) else Color(0xFF94A3B8)
+                                        )
+                                        if (isUser) {
+                                            Spacer(modifier = Modifier.width(4.dp))
+                                            Icon(
+                                                imageVector = Icons.Filled.DoneAll,
+                                                contentDescription = "Read",
+                                                tint = Color(0xFF93C5FD),
+                                                modifier = Modifier.size(13.dp)
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
 
                 if (isAstrologerTyping) {
                     item {
-                        TypingIndicatorItem(sadhakName = if (isHindi) sadhak.nameHi else sadhak.nameEn)
+                        Surface(
+                            shape = RoundedCornerShape(16.dp),
+                            color = Color.White,
+                            border = BorderStroke(1.dp, Color(0xFFE2E8F0)),
+                            modifier = Modifier.padding(start = 4.dp)
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = "${if (isHindi) sadhak.nameHi else sadhak.nameEn} विचार कर रहे हैं... 📿",
+                                    fontSize = 12.sp,
+                                    color = Color(0xFF083A35),
+                                    fontWeight = FontWeight.Medium
+                                )
+                            }
+                        }
                     }
                 }
             }
         }
     }
 }
-
 @Composable
 private fun ChatBubbleItem(
     message: ChatMessage,
@@ -1003,8 +1219,8 @@ private fun buildSadhakPrompt(
 ): String {
     val persona = if (isHindi) {
         """
-        आप ${sadhak.nameHi} हैं — देव (Devbhasha) ऐप के अनुभवी ज्योतिषी साधक।
-        आप $userName जी नाम के साधक की मदद कर रहे हैं।
+        आप ${sadhak.nameHi} हैं — देव (Devbhasha) ऐप के अनुभवी ज्योतिषी Sadhak।
+        आप $userName जी नाम के Sadhak की मदद कर रहे हैं।
         नियम:
         1. उत्तर सदा सरल हिंदी या Hinglish में दें — भाषा प्रश्न की भाषा से मिलाएं।
         2. उत्तर 90 शब्दों से छोटा रखें (3-4 वाक्य)।

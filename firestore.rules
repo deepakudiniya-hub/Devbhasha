@@ -40,7 +40,7 @@ service cloud.firestore {
               'earnings', 'totalEarnings', 'balance', 'walletBalance',
               'payout', 'payouts', 'payoutBalance', 'pendingPayout', 'payoutStatus',
               'totalPayout', 'totalPaidOut', 'lastPayoutAt', 'payoutAmount',
-              'role', 'admin', 'isAdmin', 'roles', 'blocked', 'disabled', 'approved'];
+              'role', 'admin', 'isAdmin', 'roles', 'blocked', 'disabled', 'approved', 'status', 'isVerified'];
     }
 
     // Admins may read everything (writes are granted per collection below;
@@ -160,15 +160,18 @@ service cloud.firestore {
         resource.data.callerId == request.auth.uid ||
         resource.data.providerId == request.auth.uid
       );
-      allow create: if isSignedIn()
-                    && request.resource.data.callerId == request.auth.uid
-                    && request.resource.data.status == 'ringing'
-                    && !request.resource.data.keys().hasAny(
-                         ['earnedAmount', 'settled', 'settledAt', 'agoraToken']);
+      allow create: if false;
       allow update: if isSignedIn() && (
-        resource.data.callerId == request.auth.uid ||
-        resource.data.providerId == request.auth.uid
-      ) && changedKeys().hasOnly(['status', 'durationSeconds']);
+        resource.data.callerId == request.auth.uid || resource.data.providerId == request.auth.uid
+      ) && changedKeys().hasOnly(['status', 'durationSeconds', 'connectedAt'])
+        && resource.data.status in ['Ringing', 'Connected', 'CALLING', 'CONNECTED']
+        && (
+          (resource.data.providerId == request.auth.uid
+            && request.resource.data.status == 'Connected'
+            && request.resource.data.connectedAt is int)
+          || (!changedKeys().hasAny(['connectedAt'])
+            && request.resource.data.status in ['ENDED', 'CONNECTED'])
+        );
       allow delete: if false;
     }
 
@@ -187,7 +190,9 @@ service cloud.firestore {
       allow read: if isSignedIn();
       allow create: if isAdmin() || (
         isSelf(providerId)
-        && !request.resource.data.keys().hasAny(providerProtectedKeys())
+        && !request.resource.data.keys().hasAny(providerProtectedKeys().removeAll(['status', 'isVerified']))
+        && request.resource.data.get('isVerified', false) == false
+        && request.resource.data.get('status', 'Pending') in ['Pending', 'PENDING', 'pending']
       );
       allow update: if isAdmin() || (
         isSelf(providerId)
@@ -245,6 +250,35 @@ service cloud.firestore {
                     && request.resource.data.get('userId', request.auth.uid) == request.auth.uid;
       allow update: if false;
       allow delete: if isAdmin();
+    }
+
+    // ---------------------------------------------------- consultation_requests
+    match /consultation_requests/{requestId} {
+      allow read: if isSignedIn() && (
+        resource.data.userId == request.auth.uid ||
+        resource.data.providerId == request.auth.uid ||
+        isAdmin()
+      );
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+      allow update: if isSignedIn() && (
+        resource.data.providerId == request.auth.uid ||
+        resource.data.userId == request.auth.uid ||
+        isAdmin()
+      );
+      allow delete: if isAdmin();
+    }
+
+    // ---------------------------------------------------- consultation_history
+    match /consultation_history/{historyId} {
+      allow read: if isSignedIn() && (
+        resource.data.userId == request.auth.uid ||
+        resource.data.providerId == request.auth.uid ||
+        isAdmin()
+      );
+      allow create: if isAdmin() || (
+        isSignedIn() && request.resource.data.userId == request.auth.uid
+      );
+      allow update, delete: if isAdmin();
     }
 
     // Everything else: denied by default (no matching allow).

@@ -1,5 +1,7 @@
+import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
+import java.util.Base64
 import java.util.Properties
 
 plugins {
@@ -28,54 +30,40 @@ val currentVersionName = if (versionPatch > 0) "$versionMajor.$versionMinor.$ver
 
 android {
   namespace = "com.example"
-  compileSdk { version = release(36) { minorApiLevel = 1 } }
+  compileSdk = 36
 
   defaultConfig {
     applicationId = "com.aistudio.devbhasha.kxmpzq"
     minSdk = 24
     targetSdk = 36
-    versionCode = 24
-  
-    versionName = "24.0"
+    versionCode = 36
+    versionName = "36.0"
     
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
   }
 
+  val releasePath = System.getenv("KEYSTORE_PATH")?.let { file(it) }
   signingConfigs {
-    create("release") {
-      val customKeystore = System.getenv("KEYSTORE_PATH") ?: "${rootDir}/my-upload-key.jks"
-      if (file(customKeystore).exists()) {
-        storeFile = file(customKeystore)
-        storePassword = System.getenv("STORE_PASSWORD")
-        keyAlias = "upload"
-        keyPassword = System.getenv("KEY_PASSWORD")
-      } else {
-        storeFile = file("${rootDir}/debug.keystore")
-        storePassword = "android"
-        keyAlias = "androiddebugkey"
-        keyPassword = "android"
-      }
-    }
-    create("debugConfig") {
-      storeFile = file("${rootDir}/debug.keystore")
-      storePassword = "android"
-      keyAlias = "androiddebugkey"
-      keyPassword = "android"
+    if (releasePath?.isFile == true) create("release") {
+      storeFile = releasePath
+      storePassword = System.getenv("KEYSTORE_PASSWORD")
+      keyAlias = System.getenv("KEY_ALIAS")
+      keyPassword = System.getenv("KEY_PASSWORD")
     }
   }
 
   buildTypes {
     release {
-      isMinifyEnabled = true
-      isShrinkResources = true
-      isCrunchPngs = true
+      isMinifyEnabled = false
+      isShrinkResources = false
+      
       proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-      signingConfig = signingConfigs.getByName("release")
+      if (releasePath?.isFile == true) signingConfig = signingConfigs.getByName("release")
       
       // Additional R8 configuration for better stability
       setMatchingFallbacks(listOf("release"))
     }
-    debug { signingConfig = signingConfigs.getByName("debugConfig") }
+    debug { }
   }
   compileOptions {
     sourceCompatibility = JavaVersion.VERSION_11
@@ -92,7 +80,7 @@ android {
   }
   lint {
     checkReleaseBuilds = false
-    abortOnError = false
+    abortOnError = true
   }
 }
 
@@ -156,8 +144,12 @@ dependencies {
   implementation(platform(libs.firebase.bom))
   implementation(libs.firebase.auth)
   implementation(libs.firebase.firestore)
+  implementation(libs.firebase.messaging)
   implementation(libs.firebase.ai)
   implementation(libs.firebase.functions)
+  implementation(libs.firebase.analytics)
+  implementation(libs.firebase.storage)
+  implementation(libs.facebook.login)
   testImplementation(libs.androidx.compose.ui.test.junit4)
   testImplementation(libs.androidx.core)
   testImplementation(libs.androidx.junit)
