@@ -296,7 +296,7 @@ fun HomeScreen(
     if (showLogDreamDialog) {
         AlertDialog(
             onDismissRequest = { showLogDreamDialog = false },
-            containerColor = Color.White,
+            containerColor = DevColorTokens.bgCard,
             shape = RoundedCornerShape(22.dp),
             title = {
                 Text(
@@ -312,13 +312,13 @@ fun HomeScreen(
                     Text(
                         text = "सपने में देखे गए दृश्य, प्रतीक व भावनाएँ यहाँ लिखें:",
                         fontSize = 12.5.sp,
-                        color = Color(0xFF64748B)
+                        color = DevColorTokens.neutralSlate500
                     )
                     Spacer(modifier = Modifier.height(12.dp))
                     OutlinedTextField(
                         value = newDreamText,
                         onValueChange = { newDreamText = it },
-                        placeholder = { Text("सपने का विवरण लिखें...", fontSize = 13.sp, color = Color(0xFF94A3B8)) },
+                        placeholder = { Text("सपने का विवरण लिखें...", fontSize = 13.sp, color = DevColorTokens.neutralSlate400) },
                         trailingIcon = {
                             IconButton(
                                 onClick = {
@@ -339,9 +339,9 @@ fun HomeScreen(
                         shape = RoundedCornerShape(16.dp),
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedBorderColor = SaffronPrimary,
-                            unfocusedBorderColor = Color(0xFFE2E8F0),
-                            focusedContainerColor = Color.White,
-                            unfocusedContainerColor = Color(0xFFF8FAFC)
+                            unfocusedBorderColor = DevColorTokens.neutralSlate200,
+                            focusedContainerColor = DevColorTokens.bgCard,
+                            unfocusedContainerColor = DevColorTokens.neutralSlate50
                         )
                     )
                 }
@@ -372,7 +372,7 @@ fun HomeScreen(
                     Icon(
                         imageVector = Icons.Filled.Add,
                         contentDescription = "Save",
-                        tint = Color.White,
+                        tint = DevColorTokens.textInverse,
                         modifier = Modifier.size(18.dp)
                     )
                     Spacer(modifier = Modifier.width(6.dp))
@@ -381,7 +381,7 @@ fun HomeScreen(
             },
             dismissButton = {
                 TextButton(onClick = { showLogDreamDialog = false }) {
-                    Text("रद्द करें (Cancel)", color = Color(0xFF64748B))
+                    Text("रद्द करें (Cancel)", color = DevColorTokens.neutralSlate500)
                 }
             }
         )
@@ -512,7 +512,7 @@ fun HomeScreen(
     // Main Scaffold in Bento Editorial Design
     Scaffold(
         modifier = modifier.fillMaxSize(),
-        containerColor = Color(0xFFFAF6EA), // Brand cream background
+        containerColor = DevColorTokens.brandCream, // Brand cream background
         topBar = {
             // Home ("today") draws its own teal header inside the scroll content.
             if (currentView == "sadhak") {
@@ -863,7 +863,7 @@ fun HomeScreen(
                 ) {
                     Text(
                         text = toastMessage ?: "",
-                        color = Color.White,
+                        color = DevColorTokens.textInverse,
                         fontSize = 12.5.sp,
                         fontWeight = FontWeight.SemiBold,
                         textAlign = TextAlign.Center,
@@ -1028,3 +1028,4 @@ fun HomeScreen(
         )
     }
 }
+

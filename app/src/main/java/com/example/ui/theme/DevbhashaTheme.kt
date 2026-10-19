@@ -28,108 +28,108 @@ import com.example.R
 // --bg-primary: #FFFFFF (pure white, all screens)
 // --bg-secondary: #FAFAFA (search bars, input fields, inactive pills)
 // --bg-card: #FFFFFF with 1px border #EFEFEF and shadow 0 2px 12px rgba(0,0,0,0.05)
-val BgPrimary = Color(0xFFFAF6EA)
-val BgSecondary = Color(0xFFFAFAFA)
-val BgCard = Color(0xFFFFFFFF)
+val BgPrimary = DevColorTokens.brandCream
+val BgSecondary = DevColorTokens.bgSecondary
+val BgCard = DevColorTokens.bgCard
 
 // Text:
 // --text-primary: #1F2937 (headings, names, prices)
 // --text-secondary: #49454F (subtitles, expertise, bio, timestamps)
 // --text-tertiary: #5F6368 (placeholders, disabled)
-val TextPrimary = Color(0xFF1F2937)
-val TextSecondary = Color(0xFF49454F)
-val TextTertiary = Color(0xFF5F6368)
+val TextPrimary = DevColorTokens.textBrandPrimary
+val TextSecondary = DevColorTokens.textBrandSecondary
+val TextTertiary = DevColorTokens.textBrandTertiary
 
 // Accent (ONLY FOR CTA):
 // Soothing Muted Terracotta (#E76F51) & Soft Peach (#F4A261) - Easier on the eyes
-val Saffron = Color(0xFF0D656C)
-val SaffronGradientStart = Color(0xFFD0BF75)
-val SaffronGradientEnd = Color(0xFF0D656C)
-val SaffronLight = Color(0xFFFFFFFF)
+val Saffron = DevColorTokens.brandTeal
+val SaffronGradientStart = DevColorTokens.brandGold
+val SaffronGradientEnd = DevColorTokens.brandTeal
+val SaffronLight = DevColorTokens.bgPrimary
 
 // Neutral:
 // --black-pill-active: #000000 (active filter pill text white)
 // --border-light: #EFEFEF
 // --border-medium: #DBDBDB (bottom nav top border)
 // --gray-nav-pill: #F5F5F5
-val BlackPillActive = Color(0xFF000000)
-val BorderLight = Color(0xFFEFEFEF)
-val BorderMedium = Color(0xFFDBDBDB)
-val GrayNavPill = Color(0xFFF5F5F5)
+val BlackPillActive = DevColorTokens.neutralPillActive
+val BorderLight = DevColorTokens.borderLight
+val BorderMedium = DevColorTokens.borderMedium
+val GrayNavPill = DevColorTokens.neutralNavPill
 
 // Compatibility tokens mapped strictly to Pure White + Black + Saffron
-val StageBg = Color(0xFFFAF6EA)
-val PaperBg = Color(0xFFFAF6EA)
-val PaperDeep = Color(0xFFFAFAFA)
-val PaperCard = Color(0xFFFFFFFF)
-val CardBg = Color(0xFFFFFFFF)
-val Background = Color(0xFFFAF6EA)
-val PageBg = Color(0xFFFAFAFA)
+val StageBg = DevColorTokens.brandCream
+val PaperBg = DevColorTokens.brandCream
+val PaperDeep = DevColorTokens.bgSecondary
+val PaperCard = DevColorTokens.bgCard
+val CardBg = DevColorTokens.bgCard
+val Background = DevColorTokens.brandCream
+val PageBg = DevColorTokens.bgSecondary
 
-val Ink = Color(0xFF000000)
-val InkPrimary = Color(0xFF000000)
-val InkSoft = Color(0xFF737373)
-val InkSecondary = Color(0xFF737373)
-val InkFaint = Color(0xFFA8A8A8)
-val TextDark = Color(0xFF000000)
-val TextLight = Color(0xFFFFFFFF)
-val TextMuted = Color(0xFF737373)
+val Ink = DevColorTokens.textPrimary
+val InkPrimary = DevColorTokens.textPrimary
+val InkSoft = DevColorTokens.textSecondary
+val InkSecondary = DevColorTokens.textSecondary
+val InkFaint = DevColorTokens.textTertiary
+val TextDark = DevColorTokens.textPrimary
+val TextLight = DevColorTokens.textInverse
+val TextMuted = DevColorTokens.textSecondary
 
-val Terra = Color(0xFF0D656C)
-val TerraDeep = Color(0xFF125157)
-val DevOrange = Color(0xFF0D656C)
-val SaffronPrimary = Color(0xFF0D656C)
-val SaffronDeep = Color(0xFF125157)
-val SaffronGold = Color(0xFFD0BF75)
-val SaffronSoftBg = Color(0xFFFAF6EA)
-val GoldStamp = Color(0xFF0D656C)
-val GoldStampSoft = Color(0xFFFAF6EA)
-val Sage = Color(0xFF16A34A)
-val SageDeep = Color(0xFF15803D)
-val GreenPrimary = Color(0xFF16A34A)
+val Terra = DevColorTokens.brandTeal
+val TerraDeep = DevColorTokens.brandTealDeep
+val DevOrange = DevColorTokens.brandTeal
+val SaffronPrimary = DevColorTokens.brandTeal
+val SaffronDeep = DevColorTokens.brandTealDeep
+val SaffronGold = DevColorTokens.brandGold
+val SaffronSoftBg = DevColorTokens.brandCream
+val GoldStamp = DevColorTokens.brandTeal
+val GoldStampSoft = DevColorTokens.brandCream
+val Sage = DevColorTokens.statusSuccess
+val SageDeep = DevColorTokens.statusSuccessDeep
+val GreenPrimary = DevColorTokens.statusSuccess
 
-val EditorialLine = Color(0xFFEFEFEF)
-val EditorialLineStrong = Color(0xFFDBDBDB)
-val Border = Color(0xFFEFEFEF)
+val EditorialLine = DevColorTokens.borderLight
+val EditorialLineStrong = DevColorTokens.borderMedium
+val Border = DevColorTokens.borderLight
 
 // Legacy Brand Palette
-val CosmicBlack = Color(0xFF000000)
-val CosmicIndigo = Color(0xFF000000)
-val GlassBackground = Color.White
-val GlassBorder = Color(0xFFEFEFEF)
+val CosmicBlack = DevColorTokens.textPrimary
+val CosmicIndigo = DevColorTokens.textPrimary
+val GlassBackground = DevColorTokens.bgPrimary
+val GlassBorder = DevColorTokens.borderLight
 
 // Shapes
-val ShapeCard = RoundedCornerShape(16.dp)
-val ShapeDialog = RoundedCornerShape(28.dp)
-val ShapePill = RoundedCornerShape(9999.dp)
-val ShapeChip = RoundedCornerShape(12.dp)
+val ShapeCard = RoundedCornerShape(DevRadiusTokens.themeCard)
+val ShapeDialog = RoundedCornerShape(DevRadiusTokens.themeDialog)
+val ShapePill = RoundedCornerShape(DevRadiusTokens.themePill)
+val ShapeChip = RoundedCornerShape(DevRadiusTokens.themeChip)
 
-val GoogleBlue = Color(0xFF4285F4)
-val BackgroundColor = Color(0xFFFAF6EA)
-val SurfaceColor = Color(0xFFFFFFFF)
-val BorderColor = Color(0xFFE0E0E0)
-val TextColor = Color(0xFF202124) // Google-like dark text
+val GoogleBlue = DevColorTokens.accentGoogleBlue
+val BackgroundColor = DevColorTokens.brandCream
+val SurfaceColor = DevColorTokens.bgCard
+val BorderColor = DevColorTokens.borderOutline
+val TextColor = DevColorTokens.textBody // Google-like dark text
 
 private val DevbhashaColorScheme = lightColorScheme(
     primary = DevOrange,
-    onPrimary = Color.White,
+    onPrimary = DevColorTokens.textInverse,
     background = BackgroundColor,
     onBackground = TextColor,
     surface = SurfaceColor,
     onSurface = TextColor,
-    surfaceVariant = Color(0xFFF8F9FA),
+    surfaceVariant = DevColorTokens.bgSurfaceVariant,
     onSurfaceVariant = TextColor,
     outline = BorderColor
 )
 
 private val DarkColorScheme = darkColorScheme(
     primary = DevOrange,
-    onPrimary = Color.Black,
-    background = Color.Black,
-    onBackground = Color.White,
-    surface = Color(0xFF1E1E1E),
-    onSurface = Color.White,
-    outline = Color(0xFF444444)
+    onPrimary = DevColorTokens.textPrimary,
+    background = DevColorTokens.textPrimary,
+    onBackground = DevColorTokens.textInverse,
+    surface = DevColorTokens.darkSurface,
+    onSurface = DevColorTokens.textInverse,
+    outline = DevColorTokens.darkOutline
 )
 
 val AppFontFamily = FontFamily(
@@ -253,45 +253,46 @@ fun DevbhashaTheme(
 // ==========================================
 
 // Neutrals (the slate scale the screens already use)
-val Neutral900 = Color(0xFF0F172A)
-val Neutral800 = Color(0xFF1E293B)
-val Neutral700 = Color(0xFF334155)
-val Neutral600 = Color(0xFF475569)
-val Neutral500 = Color(0xFF64748B)
-val Neutral400 = Color(0xFF94A3B8)
-val Neutral300 = Color(0xFFCBD5E1)
-val Neutral200 = Color(0xFFE2E8F0)
-val Neutral100 = Color(0xFFF1F5F9)
-val Neutral50  = Color(0xFFF8FAFC)
-val SurfaceWhite = Color(0xFFFFFFFF)
-val SurfaceAlt   = Color(0xFFFAFAFA)
-val BorderSoft   = Color(0xFFE5E5E5)
+val Neutral900 = DevColorTokens.neutralSlate900
+val Neutral800 = DevColorTokens.neutralSlate800
+val Neutral700 = DevColorTokens.neutralSlate700
+val Neutral600 = DevColorTokens.neutralSlate600
+val Neutral500 = DevColorTokens.neutralSlate500
+val Neutral400 = DevColorTokens.neutralSlate400
+val Neutral300 = DevColorTokens.neutralSlate300
+val Neutral200 = DevColorTokens.neutralSlate200
+val Neutral100 = DevColorTokens.neutralSlate100
+val Neutral50  = DevColorTokens.neutralSlate50
+val SurfaceWhite = DevColorTokens.bgPrimary
+val SurfaceAlt   = DevColorTokens.bgSecondary
+val BorderSoft   = DevColorTokens.borderSoft
 
 // Brand — Muted Terracotta & Soft Peach
-val SaffronBase = Color(0xFF0D656C)
-val SaffronDeep2 = Color(0xFF125157)
-val SaffronSoft = Color(0xFFFAF6EA)
-val SaffronSoftAlt = Color(0xFFFAF6EA)
+val SaffronBase = DevColorTokens.brandTeal
+val SaffronDeep2 = DevColorTokens.brandTealDeep
+val SaffronSoft = DevColorTokens.brandCream
+val SaffronSoftAlt = DevColorTokens.brandCream
 
 // Success — green
-val GreenBase = Color(0xFF16A34A)
-val GreenDeepBase = Color(0xFF15803D)
-val GreenSoftBase = Color(0xFFDCFCE7)
-val GreenLightBase = Color(0xFF86EFAC)
-val EmeraldBase = Color(0xFF10B981)
+val GreenBase = DevColorTokens.statusSuccess
+val GreenDeepBase = DevColorTokens.statusSuccessDeep
+val GreenSoftBase = DevColorTokens.statusSuccessSoft
+val GreenLightBase = DevColorTokens.statusSuccessLight
+val EmeraldBase = DevColorTokens.statusEmerald
 
 // Danger — red
-val DangerRed = Color(0xFFEF4444)
-val DangerRedDeep = Color(0xFFDC2626)
-val DangerSoft = Color(0xFFFEE2E2)
+val DangerRed = DevColorTokens.statusDanger
+val DangerRedDeep = DevColorTokens.statusDangerDeep
+val DangerSoft = DevColorTokens.statusDangerSoft
 
 // Warning — amber
-val WarningAmberBase = Color(0xFFD0BF75)
-val WarningAmberDeep = Color(0xFF125157)
-val WarningSoft = Color(0xFFFFF3C7)
+val WarningAmberBase = DevColorTokens.brandGold
+val WarningAmberDeep = DevColorTokens.brandTealDeep
+val WarningSoft = DevColorTokens.statusWarningSoft
 
 // Accents
-val AccentViolet = Color(0xFF7C3AED)
-val AccentVioletSoft = Color(0xFFF3E8FF)
-val AccentBlue = Color(0xFF2563EB)
-val AccentBlueSoft = Color(0xFFEFF6FF)
+val AccentViolet = DevColorTokens.accentViolet
+val AccentVioletSoft = DevColorTokens.accentVioletSoft
+val AccentBlue = DevColorTokens.accentBlue
+val AccentBlueSoft = DevColorTokens.accentBlueSoft
+

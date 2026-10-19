@@ -1,5 +1,7 @@
 package com.example.ui.screens
 
+import com.example.ui.theme.DevColorTokens
+
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
@@ -49,17 +51,17 @@ import java.util.Locale
  */
 
 internal object HomeV2Colors {
-    val Teal = Color(0xFF0D656C)
-    val TealDark = Color(0xFF125157)
-    val TealDeep = Color(0xFF0A484E)
-    val TealLight = Color(0xFFE3EFEF)
-    val Gold = Color(0xFFD0BF75)
-    val Cream = Color(0xFFFAF6EA)
-    val TextDark = Color(0xFF1F2A2B)
-    val TextSoft = Color(0xFF6B7476)
-    val PillTint = Color(0xFFFCEBD3)
-    val PillText = Color(0xFFA0521A)
-    val Online = Color(0xFF22A355)
+    val Teal = DevColorTokens.brandTeal
+    val TealDark = DevColorTokens.brandTealDeep
+    val TealDeep = DevColorTokens.homeTealDeep
+    val TealLight = DevColorTokens.homeTealLight
+    val Gold = DevColorTokens.brandGold
+    val Cream = DevColorTokens.brandCream
+    val TextDark = DevColorTokens.homeTextDark
+    val TextSoft = DevColorTokens.homeTextSoft
+    val PillTint = DevColorTokens.homePillTint
+    val PillText = DevColorTokens.homePillText
+    val Online = DevColorTokens.homeOnline
 }
 
 private fun homeLangCode(language: String, isHindi: Boolean): String = when {
@@ -138,7 +140,7 @@ fun HomeV2Header(
         // Faint concentric rings, top-right
         Canvas(modifier = Modifier.matchParentSize()) {
             val center = Offset(size.width * 0.86f, size.height * 0.12f)
-            val ringColor = Color.White.copy(alpha = 0.06f)
+            val ringColor = DevColorTokens.textInverse.copy(alpha = 0.06f)
             for (i in 1..7) {
                 drawCircle(
                     color = ringColor,
@@ -174,7 +176,7 @@ fun HomeV2Header(
                     fontFamily = AppFontFamily,
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color.White,
+                    color = DevColorTokens.textInverse,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.weight(1f)
@@ -183,7 +185,7 @@ fun HomeV2Header(
                 // Wallet chip
                 Surface(
                     shape = RoundedCornerShape(999.dp),
-                    color = Color.White,
+                    color = DevColorTokens.bgCard,
                     modifier = Modifier
                         .clip(RoundedCornerShape(999.dp))
                         .clickable { onBalanceClick() }
@@ -247,7 +249,7 @@ fun HomeV2Header(
                 fontSize = 27.sp,
                 lineHeight = 33.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color.White,
+                color = DevColorTokens.textInverse,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
@@ -259,7 +261,7 @@ fun HomeV2Header(
                     "How can we help you today?"
                 ),
                 fontSize = 15.sp,
-                color = Color.White.copy(alpha = 0.82f)
+                color = DevColorTokens.textInverse.copy(alpha = 0.82f)
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -274,7 +276,7 @@ private fun HomeV2TodayCard(code: String, onClick: () -> Unit) {
     val info = remember(code) { homeTodayInfo(code) }
     Surface(
         shape = RoundedCornerShape(22.dp),
-        color = Color.White,
+        color = DevColorTokens.bgCard,
         shadowElevation = 3.dp,
         modifier = Modifier
             .fillMaxWidth()
@@ -358,7 +360,7 @@ fun HomeV2AskCard(
                 fontFamily = AppFontFamily,
                 fontSize = 22.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color.White
+                color = DevColorTokens.textInverse
             )
             Text(
                 text = tr(
@@ -368,7 +370,7 @@ fun HomeV2AskCard(
                     "Get a private answer from a verified sadhak"
                 ),
                 fontSize = 13.5.sp,
-                color = Color.White.copy(alpha = 0.82f)
+                color = DevColorTokens.textInverse.copy(alpha = 0.82f)
             )
             Spacer(modifier = Modifier.height(14.dp))
             Row(
@@ -480,7 +482,7 @@ fun HomeV2CategoryRow(
                 ) {
                     Surface(
                         shape = RoundedCornerShape(18.dp),
-                        color = Color.White,
+                        color = DevColorTokens.bgCard,
                         shadowElevation = 1.dp,
                         modifier = Modifier
                             .fillMaxWidth()
@@ -582,7 +584,7 @@ private fun HomeV2SadhakCard(
 
     Surface(
         shape = RoundedCornerShape(22.dp),
-        color = Color.White,
+        color = DevColorTokens.bgCard,
         shadowElevation = 1.5.dp,
         modifier = Modifier
             .width(200.dp)
@@ -618,7 +620,7 @@ private fun HomeV2SadhakCard(
                             .size(16.dp)
                             .clip(CircleShape)
                             .background(HomeV2Colors.Online)
-                            .border(2.5.dp, Color.White, CircleShape)
+                            .border(2.5.dp, DevColorTokens.textInverse, CircleShape)
                     )
                 }
             }
@@ -669,7 +671,7 @@ private fun HomeV2SadhakCard(
                 shape = RoundedCornerShape(999.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = HomeV2Colors.Teal,
-                    contentColor = Color.White
+                    contentColor = DevColorTokens.textInverse
                 ),
                 contentPadding = PaddingValues(vertical = 8.dp),
                 modifier = Modifier
@@ -749,3 +751,4 @@ fun HomeV2DailySadhana(
         }
     }
 }
+

@@ -60,7 +60,7 @@ fun AskAnythingCard(
             .shadow(4.dp, RoundedCornerShape(22.dp))
             .clip(RoundedCornerShape(22.dp))
             .clickable { onOpenAskSheet() },
-        color = Color.White,
+        color = DevColorTokens.bgCard,
         border = BorderStroke(1.dp, BorderLight)
     ) {
         Column(
@@ -76,7 +76,7 @@ fun AskAnythingCard(
                     modifier = Modifier
                         .size(46.dp)
                         .clip(CircleShape)
-                        .background(Color(0xFFFAFAFA))
+                        .background(DevColorTokens.bgSecondary)
                         .border(1.dp, BorderLight, CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
@@ -95,13 +95,13 @@ fun AskAnythingCard(
                         text = if (isHindi) "पूछा — साधक से सीधा मार्गदर्शन" else "Puchhaa — Direct Sadhak Guidance",
                         fontSize = 15.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF1E293B)
+                        color = DevColorTokens.neutralSlate800
                     )
                     Spacer(modifier = Modifier.height(2.dp))
                     Text(
                         text = if (isHindi) "अपनी किसी भी समस्या का समाधान पाएं" else "Find spiritual solutions for your life",
                         fontSize = 12.sp,
-                        color = Color(0xFF64748B)
+                        color = DevColorTokens.neutralSlate500
                     )
                 }
 
@@ -120,7 +120,7 @@ fun AskAnythingCard(
                             modifier = Modifier
                                 .size(7.dp)
                                 .clip(CircleShape)
-                                .background(Color(0xFF10B981))
+                                .background(DevColorTokens.statusEmerald)
                         )
                         Spacer(modifier = Modifier.width(5.dp))
                         Text(
@@ -142,8 +142,8 @@ fun AskAnythingCard(
                     .clip(RoundedCornerShape(26.dp))
                     .clickable { onOpenAskSheet() },
                 shape = RoundedCornerShape(26.dp),
-                color = Color.White,
-                border = BorderStroke(1.dp, Color(0xFFE2E8F0))
+                color = DevColorTokens.bgCard,
+                border = BorderStroke(1.dp, DevColorTokens.neutralSlate200)
             ) {
                 Row(
                     modifier = Modifier
@@ -161,14 +161,14 @@ fun AskAnythingCard(
                     Text(
                         text = if (isHindi) "अपनी समस्या यहाँ लिखें या बोलें..." else "Write or speak your problem here...",
                         fontSize = 13.5.sp,
-                        color = Color(0xFF94A3B8),
+                        color = DevColorTokens.neutralSlate400,
                         modifier = Modifier.weight(1f)
                     )
                     Box(
                         modifier = Modifier
                             .size(34.dp)
                             .clip(CircleShape)
-                            .background(Color(0xFFFAFAFA)),
+                            .background(DevColorTokens.bgSecondary),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
@@ -200,7 +200,7 @@ fun DreamMeaningCard(
             .shadow(4.dp, RoundedCornerShape(22.dp))
             .clip(RoundedCornerShape(22.dp))
             .clickable { onOpenDreamSheet() },
-        color = Color.White,
+        color = DevColorTokens.bgCard,
         border = BorderStroke(1.dp, BorderLight)
     ) {
         Column(
@@ -216,7 +216,7 @@ fun DreamMeaningCard(
                     modifier = Modifier
                         .size(46.dp)
                         .clip(CircleShape)
-                        .background(Color(0xFFFAFAFA))
+                        .background(DevColorTokens.bgSecondary)
                         .border(1.dp, BorderLight, CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
@@ -235,20 +235,20 @@ fun DreamMeaningCard(
                         text = if (isHindi) "Dream Meaning — स्वप्न फल विचार" else "Dream Meaning — Spiritual Guidance",
                         fontSize = 15.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF000000)
+                        color = DevColorTokens.textPrimary
                     )
                     Spacer(modifier = Modifier.height(2.dp))
                     Text(
                         text = if (isHindi) "सपनों का आध्यात्मिक अर्थ व साधक से समाधान" else "Submit dream for genuine Sadhak interpretation",
                         fontSize = 12.sp,
-                        color = Color(0xFF64748B)
+                        color = DevColorTokens.neutralSlate500
                     )
                 }
 
                 // "स्वप्न ज्ञान" Saffron Pill Badge
                 Surface(
                     shape = RoundedCornerShape(50),
-                    color = Color(0xFFFAFAFA),
+                    color = DevColorTokens.bgSecondary,
                     border = BorderStroke(1.dp, BorderLight),
                     modifier = Modifier.padding(start = 6.dp)
                 ) {
@@ -282,8 +282,8 @@ fun DreamMeaningCard(
                     .clip(RoundedCornerShape(26.dp))
                     .clickable { onOpenDreamSheet() },
                 shape = RoundedCornerShape(26.dp),
-                color = Color.White,
-                border = BorderStroke(1.dp, Color(0xFFE2E8F0))
+                color = DevColorTokens.bgCard,
+                border = BorderStroke(1.dp, DevColorTokens.neutralSlate200)
             ) {
                 Row(
                     modifier = Modifier
@@ -301,14 +301,14 @@ fun DreamMeaningCard(
                     Text(
                         text = if (isHindi) "सपना यहाँ लिखें (जैसे: सांप, मंदिर, नदी, उड़ना...)" else "Write dream (e.g. snake, temple, flying...)",
                         fontSize = 13.5.sp,
-                        color = Color(0xFF94A3B8),
+                        color = DevColorTokens.neutralSlate400,
                         modifier = Modifier.weight(1f)
                     )
                     Box(
                         modifier = Modifier
                             .size(34.dp)
                             .clip(CircleShape)
-                            .background(Color(0xFFFAF6EA)),
+                            .background(DevColorTokens.brandCream),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
@@ -340,7 +340,7 @@ fun AskAnythingBottomSheet(
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
-        containerColor = Color.White,
+        containerColor = DevColorTokens.bgCard,
         shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
     ) {
         Column(
@@ -361,11 +361,11 @@ fun AskAnythingBottomSheet(
                         text = if (isHindi) "पूछा — साधक से सीधा समाधान" else "Puchhaa — Direct Sadhak Solution",
                         fontSize = 17.5.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF1E293B)
+                        color = DevColorTokens.neutralSlate800
                     )
                 }
                 IconButton(onClick = onDismiss) {
-                    Icon(Icons.Default.Close, contentDescription = "Close", tint = Color(0xFF64748B))
+                    Icon(Icons.Default.Close, contentDescription = "Close", tint = DevColorTokens.neutralSlate500)
                 }
             }
 
@@ -373,7 +373,7 @@ fun AskAnythingBottomSheet(
                 text = if (isHindi) "विवाह, करियर, स्वास्थ्य, व्यापार अथवा पारिवारिक कष्ट के निवारण हेतु अपना प्रश्न पूछें।"
                 else "Ask your query regarding career, marriage, family, or spiritual peace.",
                 fontSize = 13.sp,
-                color = Color(0xFF64748B),
+                color = DevColorTokens.neutralSlate500,
                 modifier = Modifier.padding(bottom = 16.dp)
             )
 
@@ -385,7 +385,7 @@ fun AskAnythingBottomSheet(
                 placeholder = {
                     Text(
                         if (isHindi) "अपनी समस्या का विवरण यहाँ लिखें..." else "Describe your question here...",
-                        color = Color(0xFF94A3B8)
+                        color = DevColorTokens.neutralSlate400
                     )
                 },
                 minLines = 3,
@@ -393,7 +393,7 @@ fun AskAnythingBottomSheet(
                 shape = RoundedCornerShape(16.dp),
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = SaffronPrimary,
-                    unfocusedBorderColor = Color(0xFFE2E8F0)
+                    unfocusedBorderColor = DevColorTokens.neutralSlate200
                 )
             )
 
@@ -456,8 +456,8 @@ fun AskAnythingBottomSheet(
                         .fillMaxWidth()
                         .padding(top = 18.dp),
                     shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFFFAF6EA)),
-                    border = BorderStroke(1.dp, Color(0xFFFAF6EA))
+                    colors = CardDefaults.cardColors(containerColor = DevColorTokens.brandCream),
+                    border = BorderStroke(1.dp, DevColorTokens.brandCream)
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -471,7 +471,7 @@ fun AskAnythingBottomSheet(
                             )
                         }
                         Spacer(modifier = Modifier.height(8.dp))
-                        Text(text = answeredText ?: "", fontSize = 13.5.sp, color = Color(0xFF1E293B), lineHeight = 20.sp)
+                        Text(text = answeredText ?: "", fontSize = 13.5.sp, color = DevColorTokens.neutralSlate800, lineHeight = 20.sp)
                     }
                 }
             }
@@ -599,7 +599,7 @@ fun DreamMeaningBottomSheet(
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
-        containerColor = Color.White,
+        containerColor = DevColorTokens.bgCard,
         shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
     ) {
         Column(
@@ -622,17 +622,17 @@ fun DreamMeaningBottomSheet(
                             text = if (isHindi) "स्वप्न विचार · साधक मार्गदर्शन" else "Vedic Dream Guidance",
                             fontSize = 17.5.sp,
                             fontWeight = FontWeight.Bold,
-                            color = Color(0xFF1E293B)
+                            color = DevColorTokens.neutralSlate800
                         )
                         Text(
                             text = if (isHindi) "सत्यापित साधकों द्वारा प्रामाणिक फल मीमांसा" else "Authentic interpretation by verified Sadhaks",
                             fontSize = 11.5.sp,
-                            color = Color(0xFF64748B)
+                            color = DevColorTokens.neutralSlate500
                         )
                     }
                 }
                 IconButton(onClick = onDismiss) {
-                    Icon(Icons.Default.Close, contentDescription = "Close", tint = Color(0xFF64748B))
+                    Icon(Icons.Default.Close, contentDescription = "Close", tint = DevColorTokens.neutralSlate500)
                 }
             }
 
@@ -684,7 +684,7 @@ fun DreamMeaningBottomSheet(
                     Text(
                         if (isHindi) "अपना सपना यहाँ विस्तार से लिखें..." else "Describe what you saw in your dream...",
                         fontSize = 13.sp,
-                        color = Color(0xFF94A3B8)
+                        color = DevColorTokens.neutralSlate400
                     )
                 },
                 trailingIcon = {
@@ -702,7 +702,7 @@ fun DreamMeaningBottomSheet(
                         Icon(
                             imageVector = Icons.Outlined.Mic,
                             contentDescription = "Voice",
-                            tint = if (isVoiceActive) SaffronPrimary else Color(0xFF64748B)
+                            tint = if (isVoiceActive) SaffronPrimary else DevColorTokens.neutralSlate500
                         )
                     }
                 },
@@ -712,9 +712,9 @@ fun DreamMeaningBottomSheet(
                 shape = RoundedCornerShape(16.dp),
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = SaffronPrimary,
-                    unfocusedBorderColor = Color(0xFFE2E8F0),
-                    focusedContainerColor = Color.White,
-                    unfocusedContainerColor = Color(0xFFF8FAFC)
+                    unfocusedBorderColor = DevColorTokens.neutralSlate200,
+                    focusedContainerColor = DevColorTokens.bgCard,
+                    unfocusedContainerColor = DevColorTokens.neutralSlate50
                 )
             )
 
@@ -731,7 +731,7 @@ fun DreamMeaningBottomSheet(
                 shape = RoundedCornerShape(14.dp)
             ) {
                 if (isSubmitting) {
-                    CircularProgressIndicator(modifier = Modifier.size(18.dp), color = Color.White, strokeWidth = 2.dp)
+                    CircularProgressIndicator(modifier = Modifier.size(18.dp), color = DevColorTokens.textInverse, strokeWidth = 2.dp)
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(if (isHindi) "साधक को भेजा जा रहा है..." else "Assigning to Sadhak...")
                 } else {
@@ -757,17 +757,17 @@ fun DreamMeaningBottomSheet(
                     text = if (isHindi) "आपके सपने व साधक समाधान" else "Your Dreams & Sadhak Answers",
                     fontWeight = FontWeight.Bold,
                     fontSize = 14.5.sp,
-                    color = Color(0xFF1E293B)
+                    color = DevColorTokens.neutralSlate800
                 )
                 Surface(
                     shape = RoundedCornerShape(50),
-                    color = Color(0xFFF1F5F9)
+                    color = DevColorTokens.neutralSlate100
                 ) {
                     Text(
                         text = "${userDreamsList.size}",
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF475569),
+                        color = DevColorTokens.neutralSlate600,
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
                     )
                 }
@@ -779,13 +779,13 @@ fun DreamMeaningBottomSheet(
                 Surface(
                     shape = RoundedCornerShape(14.dp),
                     color = Color(0xFFFAFAFC),
-                    border = BorderStroke(1.dp, Color(0xFFE2E8F0)),
+                    border = BorderStroke(1.dp, DevColorTokens.neutralSlate200),
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
                         text = if (isHindi) "अभी कोई सपना दर्ज नहीं है। ऊपर अपना सपना लिखकर साधक से फल जानें।" else "No dream questions submitted yet.",
                         fontSize = 12.sp,
-                        color = Color(0xFF64748B),
+                        color = DevColorTokens.neutralSlate500,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.padding(18.dp)
                     )
@@ -802,8 +802,8 @@ fun DreamMeaningBottomSheet(
 
                         Surface(
                             shape = RoundedCornerShape(14.dp),
-                            color = Color(0xFFFAF6EA),
-                            border = BorderStroke(1.dp, if (isAnswered) Color(0xFFA7F3D0) else Color(0xFFFAF6EA)),
+                            color = DevColorTokens.brandCream,
+                            border = BorderStroke(1.dp, if (isAnswered) Color(0xFFA7F3D0) else DevColorTokens.brandCream),
                             shadowElevation = 1.dp,
                             modifier = Modifier.fillMaxWidth()
                         ) {
@@ -838,7 +838,7 @@ fun DreamMeaningBottomSheet(
                                     } else {
                                         Surface(
                                             shape = RoundedCornerShape(50),
-                                            color = Color(0xFFFAFAFA),
+                                            color = DevColorTokens.bgSecondary,
                                             border = BorderStroke(1.dp, BorderLight)
                                         ) {
                                             Row(
@@ -858,7 +858,7 @@ fun DreamMeaningBottomSheet(
                                 Text(
                                     text = item.questionText,
                                     fontSize = 13.sp,
-                                    color = Color(0xFF1E293B),
+                                    color = DevColorTokens.neutralSlate800,
                                     lineHeight = 18.sp
                                 )
 
@@ -881,7 +881,7 @@ fun DreamMeaningBottomSheet(
                                             Text(
                                                 text = item.providerAnswer,
                                                 fontSize = 12.5.sp,
-                                                color = Color(0xFF1E293B),
+                                                color = DevColorTokens.neutralSlate800,
                                                 lineHeight = 17.sp
                                             )
                                         }
@@ -895,3 +895,4 @@ fun DreamMeaningBottomSheet(
         }
     }
 }
+

@@ -27,25 +27,25 @@ import com.example.ui.theme.*
  * Standardized Spacing Scale for DevBhasha
  */
 object DevSpacing {
-    val micro = 4.dp
-    val small = 8.dp
-    val compact = 12.dp
-    val standard = 16.dp
-    val comfortable = 20.dp
-    val section = 24.dp
-    val majorSection = 32.dp
+    val micro = DevSpacingTokens.micro
+    val small = DevSpacingTokens.small
+    val compact = DevSpacingTokens.compact
+    val standard = DevSpacingTokens.standard
+    val comfortable = DevSpacingTokens.comfortable
+    val section = DevSpacingTokens.section
+    val majorSection = DevSpacingTokens.majorSection
 }
 
 /**
  * Standardized Shapes & Radii for DevBhasha (Instagram-minimal: 24px card radius, 999px pill radius)
  */
 object DevRadius {
-    val micro = 4.dp
-    val compact = 8.dp
-    val card = 24.dp
-    val cardLarge = 24.dp
-    val sheet = 24.dp
-    val pill = 999.dp
+    val micro = DevRadiusTokens.micro
+    val compact = DevRadiusTokens.compact
+    val card = DevRadiusTokens.card
+    val cardLarge = DevRadiusTokens.cardLarge
+    val sheet = DevRadiusTokens.sheet
+    val pill = DevRadiusTokens.pill
 }
 
 /**
@@ -115,7 +115,7 @@ fun DevPrimaryButton(
     isLoading: Boolean = false,
     leadingIcon: ImageVector? = null,
     containerColor: Color = Saffron,
-    contentColor: Color = Color.White
+    contentColor: Color = DevColorTokens.textInverse
 ) {
     val saffronBrush = Brush.horizontalGradient(
         listOf(SaffronGradientStart, SaffronGradientEnd)
@@ -174,7 +174,7 @@ fun DevSecondaryButton(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     leadingIcon: ImageVector? = null,
-    borderColor: Color = Color(0xFF000000)
+    borderColor: Color = DevColorTokens.textPrimary
 ) {
     OutlinedButton(
         onClick = onClick,
@@ -182,9 +182,9 @@ fun DevSecondaryButton(
         shape = RoundedCornerShape(DevRadius.pill),
         border = BorderStroke(1.dp, if (enabled) borderColor else BorderLight),
         colors = ButtonDefaults.outlinedButtonColors(
-            containerColor = Color.White,
-            contentColor = Color(0xFF000000),
-            disabledContainerColor = Color.White.copy(alpha = 0.5f),
+            containerColor = DevColorTokens.bgCard,
+            contentColor = DevColorTokens.textPrimary,
+            disabledContainerColor = DevColorTokens.bgCard.copy(alpha = 0.5f),
             disabledContentColor = TextTertiary
         ),
         contentPadding = PaddingValues(horizontal = DevSpacing.comfortable, vertical = DevSpacing.compact),
@@ -195,7 +195,7 @@ fun DevSecondaryButton(
             Icon(
                 imageVector = leadingIcon,
                 contentDescription = null,
-                tint = if (enabled) Color(0xFF000000) else TextTertiary,
+                tint = if (enabled) DevColorTokens.textPrimary else TextTertiary,
                 modifier = Modifier.size(18.dp)
             )
             Spacer(modifier = Modifier.width(DevSpacing.small))
@@ -204,7 +204,7 @@ fun DevSecondaryButton(
             text = text,
             fontSize = 13.5.sp,
             fontWeight = FontWeight.SemiBold,
-            color = if (enabled) Color(0xFF000000) else TextTertiary
+            color = if (enabled) DevColorTokens.textPrimary else TextTertiary
         )
     }
 }
@@ -217,7 +217,7 @@ fun DevCard(
     modifier: Modifier = Modifier,
     onClick: (() -> Unit)? = null,
     shape: RoundedCornerShape = RoundedCornerShape(DevRadius.card),
-    backgroundColor: Color = Color.White,
+    backgroundColor: Color = DevColorTokens.bgCard,
     borderColor: Color = BorderLight,
     elevation: Dp = 2.dp,
     content: @Composable ColumnScope.() -> Unit
@@ -252,12 +252,12 @@ fun DevPill(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     leadingIcon: ImageVector? = null,
-    accentColor: Color = Color(0xFF000000)
+    accentColor: Color = DevColorTokens.textPrimary
 ) {
     Surface(
         shape = RoundedCornerShape(DevRadius.pill),
-        color = if (isSelected) Color(0xFF000000) else Color.White,
-        border = BorderStroke(1.dp, if (isSelected) Color(0xFF000000) else BorderLight),
+        color = if (isSelected) DevColorTokens.textPrimary else DevColorTokens.bgCard,
+        border = BorderStroke(1.dp, if (isSelected) DevColorTokens.textPrimary else BorderLight),
         shadowElevation = if (isSelected) 1.dp else 0.dp,
         modifier = modifier
             .clip(RoundedCornerShape(DevRadius.pill))
@@ -272,7 +272,7 @@ fun DevPill(
                 Icon(
                     imageVector = leadingIcon,
                     contentDescription = null,
-                    tint = if (isSelected) Color.White else TextSecondary,
+                    tint = if (isSelected) DevColorTokens.textInverse else TextSecondary,
                     modifier = Modifier.size(14.dp)
                 )
             }
@@ -280,7 +280,7 @@ fun DevPill(
                 text = text,
                 fontSize = 11.5.sp,
                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                color = if (isSelected) Color.White else TextSecondary
+                color = if (isSelected) DevColorTokens.textInverse else TextSecondary
             )
         }
     }
@@ -427,3 +427,4 @@ fun DevLoadingState(
         )
     }
 }
+

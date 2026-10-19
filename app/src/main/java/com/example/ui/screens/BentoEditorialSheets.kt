@@ -95,14 +95,14 @@ fun BentoEditorialRechargeSheet(
                 )
                 Surface(
                     shape = RoundedCornerShape(999.dp),
-                    color = Color(0xFFFAF6EA),
+                    color = DevColorTokens.brandCream,
                     border = BorderStroke(1.dp, Color(0xFFE9DB97))
                 ) {
                     Text(
                         text = "🔒 Secure Razorpay",
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF125157),
+                        color = DevColorTokens.brandTealDeep,
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
                     )
                 }
@@ -130,8 +130,8 @@ fun BentoEditorialRechargeSheet(
             // Price list (display labels only — amounts are decided by the server)
             Surface(
                 shape = RoundedCornerShape(14.dp),
-                color = Color(0xFFFAF6EA),
-                border = BorderStroke(1.2.dp, Color(0xFFD0BF75)),
+                color = DevColorTokens.brandCream,
+                border = BorderStroke(1.2.dp, DevColorTokens.brandGold),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column(modifier = Modifier.padding(12.dp)) {
@@ -139,12 +139,12 @@ fun BentoEditorialRechargeSheet(
                         text = "परामर्श सत्र ${PriceLabels.SESSION} · समय बढ़ाएँ ${PriceLabels.EXTEND}",
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF125157)
+                        color = DevColorTokens.brandTealDeep
                     )
                     Text(
                         text = "स्वप्न अर्थ चैट ${PriceLabels.DREAM_CHAT} · स्वप्न कॉल ${PriceLabels.DREAM_CALL}",
                         fontSize = 11.sp,
-                        color = Color(0xFF125157)
+                        color = DevColorTokens.brandTealDeep
                     )
                 }
             }
@@ -175,7 +175,7 @@ fun BentoEditorialRechargeSheet(
                                 text = "₹$amt",
                                 fontSize = 15.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = if (isSel) Color.White else Ink,
+                                color = if (isSel) DevColorTokens.textInverse else Ink,
                                 textAlign = TextAlign.Center
                             )
                         }
@@ -188,8 +188,8 @@ fun BentoEditorialRechargeSheet(
             // Summary Calculation
             Surface(
                 shape = RoundedCornerShape(12.dp),
-                color = Color(0xFFF8FAFC),
-                border = BorderStroke(1.dp, Color(0xFFE2E8F0)),
+                color = DevColorTokens.neutralSlate50,
+                border = BorderStroke(1.dp, DevColorTokens.neutralSlate200),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column(modifier = Modifier.padding(12.dp)) {
@@ -197,16 +197,16 @@ fun BentoEditorialRechargeSheet(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Text(text = "Recharge Amount:", fontSize = 12.sp, color = Color(0xFF64748B))
-                        Text(text = "₹$selectedAmount", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1E293B))
+                        Text(text = "Recharge Amount:", fontSize = 12.sp, color = DevColorTokens.neutralSlate500)
+                        Text(text = "₹$selectedAmount", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = DevColorTokens.neutralSlate800)
                     }
-                    HorizontalDivider(modifier = Modifier.padding(vertical = 6.dp), color = Color(0xFFE2E8F0))
+                    HorizontalDivider(modifier = Modifier.padding(vertical = 6.dp), color = DevColorTokens.neutralSlate200)
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Text(text = "Total Credited in Wallet:", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1E293B))
-                        Text(text = "₹$selectedAmount", fontSize = 14.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF16A34A))
+                        Text(text = "Total Credited in Wallet:", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = DevColorTokens.neutralSlate800)
+                        Text(text = "₹$selectedAmount", fontSize = 14.sp, fontWeight = FontWeight.ExtraBold, color = DevColorTokens.statusSuccess)
                     }
                 }
             }
@@ -226,7 +226,7 @@ fun BentoEditorialRechargeSheet(
                     text = "Pay ₹$selectedAmount & Get ₹${selectedAmount * 2}",
                     fontSize = 13.5.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color.White,
+                    color = DevColorTokens.textInverse,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.padding(vertical = 13.dp)
                 )
@@ -304,7 +304,7 @@ fun BentoEditorialProfileSheet(
                     Surface(
                         shape = CircleShape,
                         color = avatar.bgColor,
-                        border = BorderStroke(2.5.dp, Color(0xFFD0BF75)),
+                        border = BorderStroke(2.5.dp, DevColorTokens.brandGold),
                         shadowElevation = 3.dp,
                         modifier = Modifier.size(58.dp)
                     ) {
@@ -312,7 +312,7 @@ fun BentoEditorialProfileSheet(
                             Text(
                                 text = avatar.symbol,
                                 fontSize = 28.sp,
-                                color = Color.White
+                                color = DevColorTokens.textInverse
                             )
                         }
                     }
@@ -320,7 +320,7 @@ fun BentoEditorialProfileSheet(
                     Surface(
                         shape = CircleShape,
                         color = SaffronPrimary,
-                        border = BorderStroke(1.5.dp, Color.White),
+                        border = BorderStroke(1.5.dp, DevColorTokens.textInverse),
                         shadowElevation = 2.dp,
                         modifier = Modifier
                             .align(Alignment.BottomEnd)
@@ -330,7 +330,7 @@ fun BentoEditorialProfileSheet(
                             Icon(
                                 imageVector = Icons.Filled.AutoAwesome,
                                 contentDescription = "Edit avatar",
-                                tint = Color.White,
+                                tint = DevColorTokens.textInverse,
                                 modifier = Modifier.size(12.dp)
                             )
                         }
@@ -375,7 +375,7 @@ fun BentoEditorialProfileSheet(
             // Quick 1-Tap Sadhak Avatar Strip
             Surface(
                 shape = RoundedCornerShape(14.dp),
-                color = Color(0xFFFAF6EA),
+                color = DevColorTokens.brandCream,
                 border = BorderStroke(1.dp, Color(0xFFE9DB97)),
                 modifier = Modifier
                     .fillMaxWidth()
@@ -392,18 +392,18 @@ fun BentoEditorialProfileSheet(
                                 text = "✨ साधक अवतार चुनें",
                                 fontSize = 12.5.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = Color(0xFF125157)
+                                color = DevColorTokens.brandTealDeep
                             )
                             Spacer(modifier = Modifier.width(6.dp))
                             Surface(
                                 shape = RoundedCornerShape(999.dp),
-                                color = Color(0xFFD0BF75)
+                                color = DevColorTokens.brandGold
                             ) {
                                 Text(
                                     text = "12+ उपलब्ध",
                                     fontSize = 9.5.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = Color.White,
+                                    color = DevColorTokens.textInverse,
                                     modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                                 )
                             }
@@ -412,7 +412,7 @@ fun BentoEditorialProfileSheet(
                             text = "सभी देखें ›",
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Bold,
-                            color = Color(0xFF125157),
+                            color = DevColorTokens.brandTealDeep,
                             modifier = Modifier.clickable {
                                 HapticFeedbackHelper.playClick(haptic)
                                 showAvatarModalDialog = true
@@ -431,10 +431,10 @@ fun BentoEditorialProfileSheet(
                             val isSelected = (opt.id == currentAvatarId)
                             Surface(
                                 shape = RoundedCornerShape(12.dp),
-                                color = if (isSelected) Color.White else Color(0xFFFAF6EA),
+                                color = if (isSelected) DevColorTokens.bgCard else DevColorTokens.brandCream,
                                 border = BorderStroke(
                                     if (isSelected) 2.dp else 1.dp,
-                                    if (isSelected) Color(0xFFD0BF75) else Color(0xFFE9DB97)
+                                    if (isSelected) DevColorTokens.brandGold else Color(0xFFE9DB97)
                                 ),
                                 shadowElevation = if (isSelected) 2.dp else 0.dp,
                                 modifier = Modifier
@@ -464,7 +464,7 @@ fun BentoEditorialProfileSheet(
                                         text = opt.nameHi,
                                         fontSize = 11.sp,
                                         fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                                        color = if (isSelected) Color(0xFF125157) else Color(0xFF125157)
+                                        color = if (isSelected) DevColorTokens.brandTealDeep else DevColorTokens.brandTealDeep
                                     )
                                 }
                             }
@@ -528,7 +528,7 @@ fun BentoEditorialProfileSheet(
                                 Icon(
                                     imageVector = Icons.Outlined.Language,
                                     contentDescription = null,
-                                    tint = Color(0xFF1F2937),
+                                    tint = DevColorTokens.textBrandPrimary,
                                     modifier = Modifier.size(15.dp)
                                 )
                             }
@@ -538,7 +538,7 @@ fun BentoEditorialProfileSheet(
                             text = langLabel,
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Medium,
-                            color = Color(0xFF1F2937),
+                            color = DevColorTokens.textBrandPrimary,
                             modifier = Modifier.weight(1f)
                         )
                         Icon(
@@ -592,7 +592,7 @@ fun BentoEditorialProfileSheet(
                 shape = RoundedCornerShape(999.dp),
                 border = BorderStroke(1.5.dp, Color(0xFFF87171)), // Soft red border
                 colors = ButtonDefaults.outlinedButtonColors(
-                    contentColor = Color(0xFFEF4444)
+                    contentColor = DevColorTokens.statusDanger
                 )
             ) {
                 Icon(
@@ -645,7 +645,7 @@ fun BentoEditorialProfileSheet(
                                 fontFamily = AppFontFamily,
                                 fontSize = 18.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = Color(0xFF1E293B)
+                                color = DevColorTokens.neutralSlate800
                             )
                             IconButton(
                                 onClick = { showAvatarModalDialog = false },
@@ -654,7 +654,7 @@ fun BentoEditorialProfileSheet(
                                 Icon(
                                     imageVector = Icons.Filled.Close,
                                     contentDescription = "Close",
-                                    tint = Color(0xFF64748B),
+                                    tint = DevColorTokens.neutralSlate500,
                                     modifier = Modifier.size(20.dp)
                                 )
                             }
@@ -662,7 +662,7 @@ fun BentoEditorialProfileSheet(
                         Text(
                             text = "अपनी साधना एवं भक्ति अनुसार दिव्य अवतार चुनें",
                             fontSize = 11.5.sp,
-                            color = Color(0xFF64748B)
+                            color = DevColorTokens.neutralSlate500
                         )
                     }
                 },
@@ -689,7 +689,7 @@ fun BentoEditorialProfileSheet(
                                 Surface(
                                     shape = CircleShape,
                                     color = tempAvatar.bgColor,
-                                    border = BorderStroke(2.dp, Color.White),
+                                    border = BorderStroke(2.dp, DevColorTokens.textInverse),
                                     shadowElevation = 3.dp,
                                     modifier = Modifier.size(54.dp)
                                 ) {
@@ -704,7 +704,7 @@ fun BentoEditorialProfileSheet(
                                             text = tempAvatar.nameHi,
                                             fontSize = 15.sp,
                                             fontWeight = FontWeight.Bold,
-                                            color = Color(0xFF1E293B)
+                                            color = DevColorTokens.neutralSlate800
                                         )
                                         Spacer(modifier = Modifier.width(6.dp))
                                         Surface(
@@ -715,7 +715,7 @@ fun BentoEditorialProfileSheet(
                                                 text = tempAvatar.badgeHi,
                                                 fontSize = 9.5.sp,
                                                 fontWeight = FontWeight.Bold,
-                                                color = Color.White,
+                                                color = DevColorTokens.textInverse,
                                                 modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                                             )
                                         }
@@ -723,7 +723,7 @@ fun BentoEditorialProfileSheet(
                                     Text(
                                         text = tempAvatar.descriptionHi.ifBlank { "सात्विक साधना अवतार" },
                                         fontSize = 11.sp,
-                                        color = Color(0xFF475569),
+                                        color = DevColorTokens.neutralSlate600,
                                         lineHeight = 15.sp
                                     )
                                 }
@@ -741,7 +741,7 @@ fun BentoEditorialProfileSheet(
                                 val isSelected = (pkg.id == selectedPackageId)
                                 Surface(
                                     shape = RoundedCornerShape(10.dp),
-                                    color = if (isSelected) Color(0xFF125157) else Color(0xFFF1F5F9),
+                                    color = if (isSelected) DevColorTokens.brandTealDeep else DevColorTokens.neutralSlate100,
                                     modifier = Modifier
                                         .weight(1f)
                                         .clickable {
@@ -753,7 +753,7 @@ fun BentoEditorialProfileSheet(
                                         text = pkg.titleHi,
                                         fontSize = 11.sp,
                                         fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                                        color = if (isSelected) Color.White else Color(0xFF475569),
+                                        color = if (isSelected) DevColorTokens.textInverse else DevColorTokens.neutralSlate600,
                                         textAlign = TextAlign.Center,
                                         maxLines = 1,
                                         modifier = Modifier.padding(vertical = 7.dp, horizontal = 2.dp)
@@ -773,10 +773,10 @@ fun BentoEditorialProfileSheet(
                                 val isSelected = (opt.id == tempSelectedAvatarId)
                                 Surface(
                                     shape = RoundedCornerShape(14.dp),
-                                    color = if (isSelected) Color(0xFFFAF6EA) else Color.White,
+                                    color = if (isSelected) DevColorTokens.brandCream else DevColorTokens.bgCard,
                                     border = BorderStroke(
                                         if (isSelected) 2.dp else 1.dp,
-                                        if (isSelected) Color(0xFFD0BF75) else Color(0xFFE2E8F0)
+                                        if (isSelected) DevColorTokens.brandGold else DevColorTokens.neutralSlate200
                                     ),
                                     shadowElevation = if (isSelected) 2.dp else 0.5.dp,
                                     modifier = Modifier
@@ -807,7 +807,7 @@ fun BentoEditorialProfileSheet(
                                                     text = opt.nameHi,
                                                     fontSize = 13.sp,
                                                     fontWeight = FontWeight.Bold,
-                                                    color = Color(0xFF1E293B)
+                                                    color = DevColorTokens.neutralSlate800
                                                 )
                                                 Spacer(modifier = Modifier.width(6.dp))
                                                 Surface(
@@ -826,7 +826,7 @@ fun BentoEditorialProfileSheet(
                                             Text(
                                                 text = opt.descriptionHi,
                                                 fontSize = 10.5.sp,
-                                                color = Color(0xFF64748B),
+                                                color = DevColorTokens.neutralSlate500,
                                                 maxLines = 1,
                                                 overflow = TextOverflow.Ellipsis
                                             )
@@ -836,7 +836,7 @@ fun BentoEditorialProfileSheet(
                                             Icon(
                                                 imageVector = Icons.Filled.Check,
                                                 contentDescription = "Selected",
-                                                tint = Color(0xFF125157),
+                                                tint = DevColorTokens.brandTealDeep,
                                                 modifier = Modifier.size(20.dp)
                                             )
                                         }
@@ -856,14 +856,14 @@ fun BentoEditorialProfileSheet(
                             Toast.makeText(context, "साधक अवतार लागू हुआ: ${tempAvatar.nameHi} ✨", Toast.LENGTH_SHORT).show()
                         },
                         shape = RoundedCornerShape(12.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF125157)),
+                        colors = ButtonDefaults.buttonColors(containerColor = DevColorTokens.brandTealDeep),
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Text(
                             text = "यह अवतार सेट करें (Apply Avatar)",
                             fontSize = 13.5.sp,
                             fontWeight = FontWeight.Bold,
-                            color = Color.White
+                            color = DevColorTokens.textInverse
                         )
                     }
                 },
@@ -892,7 +892,7 @@ private fun ProfileStatBox(
             if (isActive) {
                 Surface(
                     shape = RoundedCornerShape(999.dp),
-                    color = Color(0xFFDCFCE7), // Soft green background
+                    color = DevColorTokens.statusSuccessSoft, // Soft green background
                     modifier = Modifier.padding(vertical = 2.dp)
                 ) {
                     Text(
@@ -900,7 +900,7 @@ private fun ProfileStatBox(
                         fontFamily = FontFamily.SansSerif,
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF16A34A), // Green text
+                        color = DevColorTokens.statusSuccess, // Green text
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
                     )
                 }
@@ -910,7 +910,7 @@ private fun ProfileStatBox(
                     fontFamily = FontFamily.SansSerif,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF1F2937)
+                    color = DevColorTokens.textBrandPrimary
                 )
             }
             Spacer(modifier = Modifier.height(2.dp))
@@ -950,7 +950,7 @@ private fun ProfileMenuRow(
                 Icon(
                     imageVector = icon,
                     contentDescription = null,
-                    tint = if (isDestructive) Color(0xFFEF4444) else Color(0xFF1F2937),
+                    tint = if (isDestructive) DevColorTokens.statusDanger else DevColorTokens.textBrandPrimary,
                     modifier = Modifier.size(15.dp)
                 )
             }
@@ -960,7 +960,7 @@ private fun ProfileMenuRow(
             text = title,
             fontSize = 16.sp,
             fontWeight = FontWeight.Medium,
-            color = if (isDestructive) Color(0xFFEF4444) else Color(0xFF1F2937),
+            color = if (isDestructive) DevColorTokens.statusDanger else DevColorTokens.textBrandPrimary,
             modifier = Modifier.weight(1f)
         )
 
@@ -1062,7 +1062,7 @@ fun BentoEditorialBookingSheet(
                                             fontFamily = AppFontFamily,
                                             fontSize = 14.sp,
                                             fontWeight = FontWeight.Bold,
-                                            color = Color.White
+                                            color = DevColorTokens.textInverse
                                         )
                                     }
                                 }
@@ -1101,7 +1101,7 @@ fun BentoEditorialBookingSheet(
                                             Icon(
                                                 imageVector = Icons.Filled.Check,
                                                 contentDescription = null,
-                                                tint = Color.White,
+                                                tint = DevColorTokens.textInverse,
                                                 modifier = Modifier.size(12.dp)
                                             )
                                         }
@@ -1129,7 +1129,7 @@ fun BentoEditorialBookingSheet(
                     text = "Request booking",
                     fontSize = 13.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color.White,
+                    color = DevColorTokens.textInverse,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.padding(vertical = 13.dp)
                 )
@@ -1173,7 +1173,7 @@ fun PoochhoProblemConsultSheet(
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
-        containerColor = Color.White,
+        containerColor = DevColorTokens.bgCard,
         shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
         dragHandle = {
             Surface(
@@ -1204,7 +1204,7 @@ fun PoochhoProblemConsultSheet(
                             fontFamily = AppFontFamily,
                             fontSize = 22.sp,
                             fontWeight = FontWeight.Bold,
-                            color = Color(0xFF000000)
+                            color = DevColorTokens.textPrimary
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Surface(
@@ -1223,13 +1223,13 @@ fun PoochhoProblemConsultSheet(
                     Text(
                         text = "अपनी किसी भी समस्या का समाधान पाएं — साधक से चैट अथवा वॉइस कॉल द्वारा",
                         fontSize = 12.sp,
-                        color = Color(0xFF737373)
+                        color = DevColorTokens.textSecondary
                     )
                 }
 
                 Surface(
                     shape = CircleShape,
-                    color = Color(0xFFFAFAFA),
+                    color = DevColorTokens.bgSecondary,
                     border = BorderStroke(1.dp, BorderLight),
                     modifier = Modifier.size(36.dp).clickable { onDismiss() }
                 ) {
@@ -1237,7 +1237,7 @@ fun PoochhoProblemConsultSheet(
                         Icon(
                             imageVector = Icons.Outlined.Close,
                             contentDescription = "Close",
-                            tint = Color(0xFF000000),
+                            tint = DevColorTokens.textPrimary,
                             modifier = Modifier.size(18.dp)
                         )
                     }
@@ -1255,8 +1255,8 @@ fun PoochhoProblemConsultSheet(
                     val isSelected = selectedCategory == cat
                     Surface(
                         shape = RoundedCornerShape(999.dp),
-                        color = if (isSelected) Color(0xFF000000) else Color.White,
-                        border = BorderStroke(1.dp, if (isSelected) Color(0xFF000000) else BorderLight),
+                        color = if (isSelected) DevColorTokens.textPrimary else DevColorTokens.bgCard,
+                        border = BorderStroke(1.dp, if (isSelected) DevColorTokens.textPrimary else BorderLight),
                         modifier = Modifier
                             .clip(RoundedCornerShape(999.dp))
                             .clickable {
@@ -1270,7 +1270,7 @@ fun PoochhoProblemConsultSheet(
                             text = cat,
                             fontSize = 11.5.sp,
                             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                            color = if (isSelected) Color.White else Color(0xFF737373),
+                            color = if (isSelected) DevColorTokens.textInverse else DevColorTokens.textSecondary,
                             modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
                         )
                     }
@@ -1282,7 +1282,7 @@ fun PoochhoProblemConsultSheet(
             // Problem Input Box
             Surface(
                 shape = RoundedCornerShape(16.dp),
-                color = Color(0xFFFAFAFA),
+                color = DevColorTokens.bgSecondary,
                 border = BorderStroke(1.dp, BorderLight),
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -1294,7 +1294,7 @@ fun PoochhoProblemConsultSheet(
                             Text(
                                 text = "अपनी समस्या या प्रश्न यहाँ लिखें या माइक दबाकर बोलें...",
                                 fontSize = 13.5.sp,
-                                color = Color(0xFFA8A8A8)
+                                color = DevColorTokens.textTertiary
                             )
                         },
                         colors = OutlinedTextFieldDefaults.colors(
@@ -1315,7 +1315,7 @@ fun PoochhoProblemConsultSheet(
                     ) {
                         Surface(
                             shape = RoundedCornerShape(999.dp),
-                            color = if (isListening) SaffronLight else Color.White,
+                            color = if (isListening) SaffronLight else DevColorTokens.bgCard,
                             border = BorderStroke(1.dp, if (isListening) Saffron else BorderLight),
                             modifier = Modifier
                                 .clip(RoundedCornerShape(999.dp))
@@ -1334,14 +1334,14 @@ fun PoochhoProblemConsultSheet(
                                 Icon(
                                     imageVector = Icons.Default.Mic,
                                     contentDescription = "Mic",
-                                    tint = if (isListening) Saffron else Color(0xFF000000),
+                                    tint = if (isListening) Saffron else DevColorTokens.textPrimary,
                                     modifier = Modifier.size(15.dp)
                                 )
                                 Text(
                                     text = if (isListening) "बोलें (Recording...)" else "माइक से बोलें",
                                     fontSize = 11.sp,
                                     fontWeight = FontWeight.SemiBold,
-                                    color = if (isListening) Saffron else Color(0xFF000000)
+                                    color = if (isListening) Saffron else DevColorTokens.textPrimary
                                 )
                             }
                         }
@@ -1350,7 +1350,7 @@ fun PoochhoProblemConsultSheet(
                             Text(
                                 text = "मिटाएं",
                                 fontSize = 11.sp,
-                                color = Color(0xFF737373),
+                                color = DevColorTokens.textSecondary,
                                 modifier = Modifier.clickable { problemText = "" }
                             )
                         }
@@ -1365,7 +1365,7 @@ fun PoochhoProblemConsultSheet(
                 text = "परामर्श हेतु साधक चुनें:",
                 fontSize = 12.5.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF000000)
+                color = DevColorTokens.textPrimary
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -1378,8 +1378,8 @@ fun PoochhoProblemConsultSheet(
                     val isSelected = selectedSadhak?.id == sadhak.id
                     Surface(
                         shape = RoundedCornerShape(16.dp),
-                        color = if (isSelected) Color(0xFFFAFAFA) else Color.White,
-                        border = BorderStroke(1.5.dp, if (isSelected) Color(0xFF000000) else BorderLight),
+                        color = if (isSelected) DevColorTokens.bgSecondary else DevColorTokens.bgCard,
+                        border = BorderStroke(1.5.dp, if (isSelected) DevColorTokens.textPrimary else BorderLight),
                         modifier = Modifier
                             .clip(RoundedCornerShape(16.dp))
                             .clickable { selectedSadhak = sadhak }
@@ -1401,7 +1401,7 @@ fun PoochhoProblemConsultSheet(
                                             text = sadhak.initialEn.take(2).ifEmpty { "SA" },
                                             fontSize = 13.sp,
                                             fontWeight = FontWeight.Bold,
-                                            color = Color(0xFF000000)
+                                            color = DevColorTokens.textPrimary
                                         )
                                     }
                                 }
@@ -1412,7 +1412,7 @@ fun PoochhoProblemConsultSheet(
                                             .size(9.dp)
                                             .clip(CircleShape)
                                             .background(Saffron)
-                                            .border(1.5.dp, Color.White, CircleShape)
+                                            .border(1.5.dp, DevColorTokens.textInverse, CircleShape)
                                     )
                                 }
                             }
@@ -1422,12 +1422,12 @@ fun PoochhoProblemConsultSheet(
                                     text = sadhak.nameEn,
                                     fontSize = 13.sp,
                                     fontWeight = FontWeight.SemiBold,
-                                    color = Color(0xFF000000)
+                                    color = DevColorTokens.textPrimary
                                 )
                                 Text(
                                     text = "${PriceLabels.SESSION} · ⭐ ${sadhak.rating}",
                                     fontSize = 10.5.sp,
-                                    color = Color(0xFF737373)
+                                    color = DevColorTokens.textSecondary
                                 )
                             }
                         }
@@ -1468,7 +1468,7 @@ fun PoochhoProblemConsultSheet(
                         Icon(
                             imageVector = Icons.AutoMirrored.Outlined.Chat,
                             contentDescription = "Chat",
-                            tint = Color.White,
+                            tint = DevColorTokens.textInverse,
                             modifier = Modifier.size(18.dp)
                         )
                         Spacer(modifier = Modifier.width(6.dp))
@@ -1476,7 +1476,7 @@ fun PoochhoProblemConsultSheet(
                             text = "चैट करें (Chat)",
                             fontSize = 13.5.sp,
                             fontWeight = FontWeight.Bold,
-                            color = Color.White
+                            color = DevColorTokens.textInverse
                         )
                     }
                 }
@@ -1484,8 +1484,8 @@ fun PoochhoProblemConsultSheet(
                 // Secondary: Call (White + Black border)
                 Surface(
                     shape = RoundedCornerShape(999.dp),
-                    color = Color.White,
-                    border = BorderStroke(1.5.dp, Color(0xFF000000)),
+                    color = DevColorTokens.bgCard,
+                    border = BorderStroke(1.5.dp, DevColorTokens.textPrimary),
                     modifier = Modifier
                         .weight(1f)
                         .height(50.dp)
@@ -1506,7 +1506,7 @@ fun PoochhoProblemConsultSheet(
                         Icon(
                             imageVector = Icons.Outlined.Phone,
                             contentDescription = "Call",
-                            tint = Color(0xFF000000),
+                            tint = DevColorTokens.textPrimary,
                             modifier = Modifier.size(18.dp)
                         )
                         Spacer(modifier = Modifier.width(6.dp))
@@ -1514,7 +1514,7 @@ fun PoochhoProblemConsultSheet(
                             text = "कॉल करें (Call)",
                             fontSize = 13.5.sp,
                             fontWeight = FontWeight.Bold,
-                            color = Color(0xFF000000)
+                            color = DevColorTokens.textPrimary
                         )
                     }
                 }
@@ -1575,7 +1575,7 @@ fun DreamQuickRecorderSheet(
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
-        containerColor = Color.White,
+        containerColor = DevColorTokens.bgCard,
         shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
         dragHandle = {
             Surface(
@@ -1606,7 +1606,7 @@ fun DreamQuickRecorderSheet(
                             fontFamily = AppFontFamily,
                             fontSize = 22.sp,
                             fontWeight = FontWeight.Bold,
-                            color = Color(0xFF000000)
+                            color = DevColorTokens.textPrimary
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Surface(
@@ -1625,13 +1625,13 @@ fun DreamQuickRecorderSheet(
                     Text(
                         text = "सपना दर्ज करें और साधक से उसका आध्यात्मिक अर्थ व फल जानें 🌙✨",
                         fontSize = 12.sp,
-                        color = Color(0xFF737373)
+                        color = DevColorTokens.textSecondary
                     )
                 }
 
                 Surface(
                     shape = CircleShape,
-                    color = Color(0xFFFAFAFA),
+                    color = DevColorTokens.bgSecondary,
                     border = BorderStroke(1.dp, BorderLight),
                     modifier = Modifier.size(36.dp).clickable { onDismiss() }
                 ) {
@@ -1639,7 +1639,7 @@ fun DreamQuickRecorderSheet(
                         Icon(
                             imageVector = Icons.Outlined.Close,
                             contentDescription = "Close",
-                            tint = Color(0xFF000000),
+                            tint = DevColorTokens.textPrimary,
                             modifier = Modifier.size(18.dp)
                         )
                     }
@@ -1655,8 +1655,8 @@ fun DreamQuickRecorderSheet(
             ) {
                 Surface(
                     shape = RoundedCornerShape(999.dp),
-                    color = if (mode == "write") Color(0xFF000000) else Color.White,
-                    border = BorderStroke(1.dp, if (mode == "write") Color(0xFF000000) else BorderLight),
+                    color = if (mode == "write") DevColorTokens.textPrimary else DevColorTokens.bgCard,
+                    border = BorderStroke(1.dp, if (mode == "write") DevColorTokens.textPrimary else BorderLight),
                     modifier = Modifier
                         .weight(1f)
                         .clip(RoundedCornerShape(999.dp))
@@ -1666,7 +1666,7 @@ fun DreamQuickRecorderSheet(
                         text = "✍️ लिखना (Write Dream)",
                         fontSize = 12.sp,
                         fontWeight = if (mode == "write") FontWeight.Bold else FontWeight.Medium,
-                        color = if (mode == "write") Color.White else Color(0xFF737373),
+                        color = if (mode == "write") DevColorTokens.textInverse else DevColorTokens.textSecondary,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.padding(vertical = 8.dp)
                     )
@@ -1674,8 +1674,8 @@ fun DreamQuickRecorderSheet(
 
                 Surface(
                     shape = RoundedCornerShape(999.dp),
-                    color = if (mode == "voice") Color(0xFF000000) else Color.White,
-                    border = BorderStroke(1.dp, if (mode == "voice") Color(0xFF000000) else BorderLight),
+                    color = if (mode == "voice") DevColorTokens.textPrimary else DevColorTokens.bgCard,
+                    border = BorderStroke(1.dp, if (mode == "voice") DevColorTokens.textPrimary else BorderLight),
                     modifier = Modifier
                         .weight(1f)
                         .clip(RoundedCornerShape(999.dp))
@@ -1685,7 +1685,7 @@ fun DreamQuickRecorderSheet(
                         text = "🎙️ वॉइस रिकॉर्डर (Voice Record)",
                         fontSize = 12.sp,
                         fontWeight = if (mode == "voice") FontWeight.Bold else FontWeight.Medium,
-                        color = if (mode == "voice") Color.White else Color(0xFF737373),
+                        color = if (mode == "voice") DevColorTokens.textInverse else DevColorTokens.textSecondary,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.padding(vertical = 8.dp)
                     )
@@ -1698,7 +1698,7 @@ fun DreamQuickRecorderSheet(
                 // Write Input Field
                 Surface(
                     shape = RoundedCornerShape(16.dp),
-                    color = Color(0xFFFAFAFA),
+                    color = DevColorTokens.bgSecondary,
                     border = BorderStroke(1.dp, BorderLight),
                     modifier = Modifier.fillMaxWidth()
                 ) {
@@ -1710,7 +1710,7 @@ fun DreamQuickRecorderSheet(
                                 Text(
                                     text = "सपने में क्या देखा? (उदा. पावन नदी, मंदिर के शिखर, सफेद अश्व अथवा उड़ते हुए दृश्य)...",
                                     fontSize = 13.5.sp,
-                                    color = Color(0xFFA8A8A8)
+                                    color = DevColorTokens.textTertiary
                                 )
                             },
                             colors = OutlinedTextFieldDefaults.colors(
@@ -1732,13 +1732,13 @@ fun DreamQuickRecorderSheet(
                             Text(
                                 text = "${dreamText.length} अक्षर",
                                 fontSize = 10.5.sp,
-                                color = Color(0xFFA8A8A8)
+                                color = DevColorTokens.textTertiary
                             )
                             if (dreamText.isNotBlank()) {
                                 Text(
                                     text = "हटाएं (Clear)",
                                     fontSize = 11.sp,
-                                    color = Color(0xFF737373),
+                                    color = DevColorTokens.textSecondary,
                                     modifier = Modifier.clickable { dreamText = "" }
                                 )
                             }
@@ -1749,7 +1749,7 @@ fun DreamQuickRecorderSheet(
                 // Voice Recorder Mode UI
                 Surface(
                     shape = RoundedCornerShape(16.dp),
-                    color = Color(0xFFFAFAFA),
+                    color = DevColorTokens.bgSecondary,
                     border = BorderStroke(1.dp, if (isRecording) Saffron else BorderLight),
                     modifier = Modifier.fillMaxWidth()
                 ) {
@@ -1762,7 +1762,7 @@ fun DreamQuickRecorderSheet(
                         // Pulsing Mic Button
                         Surface(
                             shape = CircleShape,
-                            color = if (isRecording) SaffronLight else Color.White,
+                            color = if (isRecording) SaffronLight else DevColorTokens.bgCard,
                             border = BorderStroke(2.dp, if (isRecording) Saffron else BorderLight),
                             modifier = Modifier
                                 .size(64.dp)
@@ -1783,7 +1783,7 @@ fun DreamQuickRecorderSheet(
                                 Icon(
                                     imageVector = if (isRecording) Icons.Default.Stop else Icons.Default.Mic,
                                     contentDescription = "Record",
-                                    tint = if (isRecording) Saffron else Color(0xFF000000),
+                                    tint = if (isRecording) Saffron else DevColorTokens.textPrimary,
                                     modifier = Modifier.size(28.dp)
                                 )
                             }
@@ -1796,21 +1796,21 @@ fun DreamQuickRecorderSheet(
                             text = if (isRecording) "रिकॉर्डिंग चालू • $formattedSec" else (if (dreamText.isNotBlank()) "ऑडियो तैयार • टैप कर पुनः रिकॉर्ड करें" else "टैप करें और अपना सपना बोलें"),
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold,
-                            color = if (isRecording) Saffron else Color(0xFF000000)
+                            color = if (isRecording) Saffron else DevColorTokens.textPrimary
                         )
 
                         if (dreamText.isNotBlank()) {
                             Spacer(modifier = Modifier.height(8.dp))
                             Surface(
                                 shape = RoundedCornerShape(10.dp),
-                                color = Color.White,
+                                color = DevColorTokens.bgCard,
                                 border = BorderStroke(1.dp, BorderLight),
                                 modifier = Modifier.fillMaxWidth()
                             ) {
                                 Text(
                                     text = "ट्रांसक्रिप्शन: $dreamText",
                                     fontSize = 11.5.sp,
-                                    color = Color(0xFF737373),
+                                    color = DevColorTokens.textSecondary,
                                     modifier = Modifier.padding(10.dp)
                                 )
                             }
@@ -1830,8 +1830,8 @@ fun DreamQuickRecorderSheet(
                     val isSelected = selectedTag == tag
                     Surface(
                         shape = RoundedCornerShape(999.dp),
-                        color = if (isSelected) Color(0xFF000000) else Color.White,
-                        border = BorderStroke(1.dp, if (isSelected) Color(0xFF000000) else BorderLight),
+                        color = if (isSelected) DevColorTokens.textPrimary else DevColorTokens.bgCard,
+                        border = BorderStroke(1.dp, if (isSelected) DevColorTokens.textPrimary else BorderLight),
                         modifier = Modifier
                             .clip(RoundedCornerShape(999.dp))
                             .clickable { selectedTag = tag }
@@ -1840,7 +1840,7 @@ fun DreamQuickRecorderSheet(
                             text = tag,
                             fontSize = 11.sp,
                             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                            color = if (isSelected) Color.White else Color(0xFF737373),
+                            color = if (isSelected) DevColorTokens.textInverse else DevColorTokens.textSecondary,
                             modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
                         )
                     }
@@ -1859,8 +1859,8 @@ fun DreamQuickRecorderSheet(
                 // Secondary: Save Dream
                 Surface(
                     shape = RoundedCornerShape(999.dp),
-                    color = Color.White,
-                    border = BorderStroke(1.5.dp, Color(0xFF000000)),
+                    color = DevColorTokens.bgCard,
+                    border = BorderStroke(1.5.dp, DevColorTokens.textPrimary),
                     modifier = Modifier
                         .weight(1f)
                         .height(50.dp)
@@ -1876,7 +1876,7 @@ fun DreamQuickRecorderSheet(
                             text = "💾 सपना सहेजें",
                             fontSize = 13.5.sp,
                             fontWeight = FontWeight.Bold,
-                            color = Color(0xFF000000)
+                            color = DevColorTokens.textPrimary
                         )
                     }
                 }
@@ -1902,7 +1902,7 @@ fun DreamQuickRecorderSheet(
                             text = "🔮 साधक से अर्थ पूछें",
                             fontSize = 13.5.sp,
                             fontWeight = FontWeight.Bold,
-                            color = Color.White
+                            color = DevColorTokens.textInverse
                         )
                     }
                 }
@@ -1922,9 +1922,10 @@ fun DreamQuickRecorderSheet(
                     text = "📖 पूरी स्वप्न डायरी देखें (Open Journal) →",
                     fontSize = 12.sp,
                     fontWeight = FontWeight.SemiBold,
-                    color = Color(0xFF000000)
+                    color = DevColorTokens.textPrimary
                 )
             }
         }
     }
 }
+
