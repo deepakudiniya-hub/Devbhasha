@@ -22,8 +22,10 @@ before(async()=>{
   if(name==='firebase-functions/params') return {defineSecret:()=>({value:()=> 'emulator'}),defineString:()=>({value:()=> 'a'.repeat(32)})};
   return req(name);
  };
- vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../functions/index.js'),'utf8'),
-  {require:custom,exports:handlers,process:{env:{FIRESTORE_DB_ID:'(default)'}},console,Buffer,Date,fetch});
+ // Same realm as Admin SDK: its transaction API checks instanceof Promise.
+ const run=vm.runInThisContext('(function(require,exports,process){\n' +
+  fs.readFileSync(path.join(__dirname,'../functions/index.js'),'utf8') + '\n})');
+ run(custom,handlers,{env:{FIRESTORE_DB_ID:'(default)'}});
  await db.doc('providers/live-provider').set({status:'APPROVED',isVerified:true,isOnline:true,name:'Provider'});
  await db.doc('users/live-seeker').set({walletBalance:100000,userName:'Seeker'});
 });
