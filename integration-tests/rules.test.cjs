@@ -63,3 +63,11 @@ test('account-scoped history and directory updates satisfy the actual rules',asy
  await assertSucceeds(updateDoc(doc(db('provider'),'providers/provider'),{isOnline:false,availabilityStatus:'Offline'}));
  await assertFails(getDoc(doc(db('stranger'),'users/seeker')));
 });
+
+test('provider consent is writable only by its owner; private verification profile is not public',async()=>{
+ const consent={uid:'provider',type:'data_processing',version:1,approved:true,approvedAt:Timestamp.now(),platform:'android',appVersion:'46.0'};
+ await assertSucceeds(setDoc(doc(db('provider'),'users/provider/consents/data_processing'),consent));
+ await assertFails(setDoc(doc(db('stranger'),'users/provider/consents/data_processing'),consent));
+ await assertSucceeds(getDoc(doc(db('provider'),'providers/provider')));
+ await assertFails(getDoc(doc(db('seeker'),'providers/provider')));
+});

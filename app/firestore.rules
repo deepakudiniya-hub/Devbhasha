@@ -58,6 +58,16 @@ service cloud.firestore {
       allow update: if isSelf(uid)
                     && !changedKeys().hasAny(userProtectedKeys());
       allow delete: if false;
+      match /consents/{consentId} {
+        allow read: if isSelf(uid);
+        allow create, update: if isSelf(uid)
+          && request.resource.data.uid == uid
+          && request.resource.data.type == 'data_processing'
+          && request.resource.data.version is int
+          && request.resource.data.approved is bool
+          && request.resource.data.keys().hasOnly(['uid', 'type', 'version', 'approved', 'approvedAt', 'appVersion', 'platform']);
+        allow delete: if false;
+      }
     }
 
     // ------------------------------------------------ money (functions only)
@@ -187,7 +197,7 @@ service cloud.firestore {
 
     // ------------------------------------------------- provider profiles
     match /providers/{providerId} {
-      allow read: if isSignedIn();
+      allow read: if isSelf(providerId);
       allow create: if isAdmin() || (
         isSelf(providerId)
         && !request.resource.data.keys().hasAny(providerProtectedKeys().removeAll(['status', 'isVerified']))

@@ -430,6 +430,7 @@ exports.startSession = onCall(async (request) => {
     });
     tx.set(db.collection("chats").doc(sessionId), {
       chatId: sessionId,
+      status: "active",
       sessionId,
       seekerId: uid,
       seekerName: (userSnap.data() || {}).userName || (userSnap.data() || {}).name || "Client",
@@ -646,6 +647,7 @@ async function settleSession(sessionId, endedBy) {
         status: "Ended", durationSeconds: Math.max(0, Math.floor((nowMs - millisOf(s.startedAt)) / 1000)),
       }, { merge: true });
     }
+    tx.set(db.collection("chats").doc(sessionId), { status: "ended" }, { merge: true });
     tx.update(sessionRef, update);
     return { settled: true, sadhakPayoutPaise };
   });
