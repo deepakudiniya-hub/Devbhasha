@@ -71,3 +71,14 @@ test('provider consent is writable only by its owner; private verification profi
  await assertSucceeds(getDoc(doc(db('provider'),'providers/provider')));
  await assertFails(getDoc(doc(db('seeker'),'providers/provider')));
 });
+
+test('consultation requests cannot be forged or reassigned by clients',async()=>{
+ const requestRef=doc(db('seeker'),'consultation_requests/request');
+ await assertFails(setDoc(requestRef,{userId:'seeker',providerId:'provider',status:'accepted'}));
+ await env.withSecurityRulesDisabled(ctx=>setDoc(doc(ctx.firestore(),'consultation_requests/request'),{
+  userId:'seeker',providerId:'provider',status:'pending'
+ }));
+ await assertFails(updateDoc(requestRef,{providerId:'stranger',status:'accepted'}));
+ await assertFails(updateDoc(doc(db('provider'),'consultation_requests/request'),{status:'completed'}));
+ await assertFails(updateDoc(doc(db('stranger'),'consultation_requests/request'),{status:'accepted'}));
+});
