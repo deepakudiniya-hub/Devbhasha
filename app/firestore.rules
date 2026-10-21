@@ -264,12 +264,9 @@ service cloud.firestore {
         resource.data.providerId == request.auth.uid ||
         isAdmin()
       );
-      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
-      allow update: if isSignedIn() && (
-        resource.data.providerId == request.auth.uid ||
-        resource.data.userId == request.auth.uid ||
-        isAdmin()
-      );
+      // Consultation request lifecycle is owned by trusted Cloud Functions.
+      // Clients must not forge provider assignment or acceptance/completion.
+      allow create, update: if false;
       allow delete: if isAdmin();
     }
 
