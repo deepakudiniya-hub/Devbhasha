@@ -26,7 +26,7 @@ const { RtcTokenBuilder, RtcRole } = require("agora-token");
 admin.initializeApp();
 // Firestore database id comes from functions/.env (FIRESTORE_DB_ID); "(default)" if unset.
 const { getFirestore } = require("firebase-admin/firestore");
-const FIRESTORE_DB_ID = process.env.FIRESTORE_DB_ID || "ai-studio-android-devbhash-c2b59e88-80f5-4209-81ce-859c3cb917d9";
+const FIRESTORE_DB_ID = process.env.FIRESTORE_DB_ID || "(default)";
 const db = FIRESTORE_DB_ID === "(default)" ? getFirestore() : getFirestore(FIRESTORE_DB_ID);
 const FieldValue = admin.firestore.FieldValue;
 const Timestamp = admin.firestore.Timestamp;
