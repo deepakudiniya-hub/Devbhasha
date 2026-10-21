@@ -1,0 +1,62 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "User Profile",
+      "description": "User profile data including streak, coins, and level",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "Owner UID" },
+        "displayName": { "type": "string", "description": "User display name" },
+        "streak": { "type": "integer", "description": "Current practice streak" },
+        "coins": { "type": "integer", "description": "User coins / gold balance" },
+        "level": { "type": "string", "description": "Sadhak level" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Creation timestamp" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Last update timestamp" }
+      },
+      "required": ["userId", "displayName", "streak", "coins", "level", "createdAt"]
+    },
+    "SadhanaLog": {
+      "title": "Sadhana Log",
+      "description": "Daily sadhana or mantra chanting session log",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Log ID" },
+        "userId": { "type": "string", "description": "Owner UID" },
+        "mantraName": { "type": "string", "description": "Name of mantra or practice" },
+        "count": { "type": "integer", "description": "Chanting count completed" },
+        "durationMinutes": { "type": "integer", "description": "Duration in minutes" },
+        "notes": { "type": "string", "description": "Personal reflections" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Creation timestamp" }
+      },
+      "required": ["id", "userId", "mantraName", "count", "createdAt"]
+    },
+    "DreamEntry": {
+      "title": "Dream Entry",
+      "description": "Dream journal entry with interpretation",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Dream ID" },
+        "userId": { "type": "string", "description": "Owner UID" },
+        "title": { "type": "string", "description": "Dream title" },
+        "description": { "type": "string", "description": "Dream description" },
+        "interpretation": { "type": "string", "description": "Spiritual interpretation" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Creation timestamp" }
+      },
+      "required": ["id", "userId", "title", "description", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "User profile document"
+    },
+    "/users/{userId}/sadhana_logs/{logId}": {
+      "schema": "SadhanaLog",
+      "description": "User sadhana practice logs"
+    },
+    "/users/{userId}/dreams/{dreamId}": {
+      "schema": "DreamEntry",
+      "description": "User dream journal entries"
+    }
+  }
+}

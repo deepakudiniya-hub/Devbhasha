@@ -35,6 +35,7 @@ const RAZORPAY_KEY_ID = defineSecret("RAZORPAY_KEY_ID");
 const RAZORPAY_KEY_SECRET = defineSecret("RAZORPAY_KEY_SECRET");
 const AGORA_APP_CERTIFICATE = defineSecret("AGORA_APP_CERTIFICATE");
 const AGORA_APP_ID = defineString("AGORA_APP_ID");
+const NVIDIA_API_KEY = defineSecret("NVIDIA_API_KEY");
 const RAZORPAY_SECRETS = [RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET];
 
 // Firestore triggers must point at the named database.
@@ -46,8 +47,8 @@ const FIRESTORE_TRIGGER_OPTS = { database: FIRESTORE_DB_ID };
 const PRICE_TABLE = Object.freeze({
   SESSION: Object.freeze({ amountPaise: 49900, durationMinutes: 20 }),   // ₹499 / 20 min
   EXTENSION: Object.freeze({ amountPaise: 9900, durationMinutes: 5 }),   // ₹99 / +5 min
-  DREAM_CHAT: Object.freeze({ amountPaise: 9900, durationMinutes: 7 }),  // ₹99 / 7 min
-  DREAM_CALL: Object.freeze({ amountPaise: 19900, durationMinutes: 10 }), // ₹199 / 10 min
+  DREAM_CHAT: Object.freeze({ amountPaise: 19900, durationMinutes: 7 }),  // ₹199
+  DREAM_CALL: Object.freeze({ amountPaise: 49900, durationMinutes: 20 }), // ₹499 / 20 min (same as consultation ₹499 / 20 min)
 });
 // First dream chat is free for 5 minutes, once per verified phone number.
 const FREE_TRIAL = Object.freeze({
@@ -336,7 +337,7 @@ async function loadProvider(tx, providerId) {
   const doc = p.exists ? p : s.exists ? s : null;
   if (!doc) return null;
   const d = doc.data() || {};
-  if (d.blocked === true || d.disabled === true) return null;
+  if (d.blocked === true || d.disabled === true || d.status !== "APPROVED" || d.isVerified !== true || d.isOnline !== true) return null;
   return d;
 }
 
@@ -410,9 +411,11 @@ exports.startSession = onCall(async (request) => {
     tx.set(sessionRef, {
       sessionId,
       seekerId: uid,
+      seekerName: (userSnap.data() || {}).userName || (userSnap.data() || {}).name || "Client",
       providerId,
       participants: [uid, providerId],
       type,
+      mode: data.mode === "chat" || type === "DREAM_CHAT" ? "chat" : "call",
       status: "active",
       isFreeTrial,
       startedAt: FieldValue.serverTimestamp(),
@@ -427,13 +430,24 @@ exports.startSession = onCall(async (request) => {
     });
     tx.set(db.collection("chats").doc(sessionId), {
       chatId: sessionId,
+      status: "active",
       sessionId,
       seekerId: uid,
+      seekerName: (userSnap.data() || {}).userName || (userSnap.data() || {}).name || "Client",
       providerId,
       participants: [uid, providerId],
       type,
       createdAt: FieldValue.serverTimestamp(),
     });
+
+    if (type !== "DREAM_CHAT" && data.mode !== "chat") {
+      tx.set(db.collection("active_calls").doc(sessionId), {
+        callId: sessionId, sessionId, callerId: uid, userId: uid, providerId,
+        callerName: (userSnap.data() || {}).userName || (userSnap.data() || {}).name || "Client",
+        status: "Ringing", channelName: channelFor(sessionId),
+        timestamp: FieldValue.serverTimestamp(), createdAt: FieldValue.serverTimestamp(),
+      });
+    }
 
     return {
       sessionId,
@@ -513,7 +527,7 @@ exports.getAgoraToken = onCall({ secrets: [AGORA_APP_CERTIFICATE] }, async (requ
   if (s.seekerId !== uid && s.providerId !== uid) {
     throw new HttpsError("permission-denied", "Not a participant of this session.");
   }
-  if (!CALL_TYPES.includes(s.type)) {
+  if (!CALL_TYPES.includes(s.type) || s.mode === "chat") {
     throw new HttpsError("failed-precondition", "This session type has no call.");
   }
   const nowMs = Date.now();
@@ -573,9 +587,12 @@ async function settleSession(sessionId, endedBy) {
     const providerWalletRef = db.collection("providers").doc(providerId)
       .collection("wallet").doc("summary");
     const providerTxSnap = await tx.get(providerTxRef);
+    const isCall = s.mode !== "chat" && s.type !== "DREAM_CHAT";
+    const callSnap = isCall ? await tx.get(db.collection("active_calls").doc(sessionId)) : null;
+    const unanswered = isCall && !(callSnap && callSnap.get("connectedAt"));
 
     const amountPaise = Number.isInteger(s.amountPaise) ? s.amountPaise : 0;
-    const sadhakPayoutPaise = s.isFreeTrial
+    const sadhakPayoutPaise = unanswered ? 0 : s.isFreeTrial
       ? FREE_TRIAL.sadhakPayoutPaise + sadhakPayoutFor(amountPaise) // amountPaise>0 only if trial was extended
       : sadhakPayoutFor(amountPaise);
     const platformSharePaise = amountPaise - sadhakPayoutPaise; // negative for an unextended free trial
@@ -596,6 +613,14 @@ async function settleSession(sessionId, endedBy) {
       if (millisOf(s.endsAt) > nowMs) update.endsAt = Timestamp.fromMillis(nowMs);
     }
 
+    if (unanswered && amountPaise > 0) {
+      tx.set(db.collection("users").doc(s.seekerId), { walletBalance: FieldValue.increment(amountPaise) }, { merge: true });
+      tx.set(db.collection("walletLedger").doc(`${s.seekerId}_session_${sessionId}_refund`), {
+        uid: s.seekerId, amountPaise, purpose: "unanswered_call_refund", sessionId,
+        createdAt: FieldValue.serverTimestamp(),
+      });
+      update.refundedPaise = amountPaise;
+    }
     if (!providerTxSnap.exists && sadhakPayoutPaise > 0) {
       tx.set(providerTxRef, {
         id: `session_${sessionId}`,
@@ -610,11 +635,19 @@ async function settleSession(sessionId, endedBy) {
         status: "completed",
       });
       tx.set(providerWalletRef, {
-        balance: FieldValue.increment(sadhakPayoutPaise),
-        totalEarnings: FieldValue.increment(sadhakPayoutPaise),
+        balance: FieldValue.increment(sadhakPayoutPaise / 100),
+        balancePaise: FieldValue.increment(sadhakPayoutPaise),
+        totalEarnings: FieldValue.increment(sadhakPayoutPaise / 100),
+        totalEarningsPaise: FieldValue.increment(sadhakPayoutPaise),
         updatedAt: FieldValue.serverTimestamp(),
       }, { merge: true });
     }
+    if (s.mode !== "chat" && s.type !== "DREAM_CHAT") {
+      tx.set(db.collection("active_calls").doc(sessionId), {
+        status: "Ended", durationSeconds: Math.max(0, Math.floor((nowMs - millisOf(s.startedAt)) / 1000)),
+      }, { merge: true });
+    }
+    tx.set(db.collection("chats").doc(sessionId), { status: "ended" }, { merge: true });
     tx.update(sessionRef, update);
     return { settled: true, sadhakPayoutPaise };
   });
@@ -698,12 +731,14 @@ async function executeSettleQuestion(questionId) {
       status: "completed",
     });
     tx.set(providerWalletRef, {
-      balance: FieldValue.increment(payoutPaise),
-      totalEarnings: FieldValue.increment(payoutPaise),
+      balance: FieldValue.increment(payoutPaise / 100),
+      balancePaise: FieldValue.increment(payoutPaise),
+      totalEarnings: FieldValue.increment(payoutPaise / 100),
+      totalEarningsPaise: FieldValue.increment(payoutPaise),
       updatedAt: FieldValue.serverTimestamp(),
     }, { merge: true });
     tx.update(questionRef, {
-      earningAmount: payoutPaise,
+      earningAmount: payoutPaise / 100,
       chargedPaise: chargePaise,
       settled: true,
       settlementStatus: "settled",
@@ -736,4 +771,266 @@ exports.adminSettleSession = onCall(async (request) => {
   requireAdmin(request);
   const sessionId = requireId((request.data || {}).sessionId, "sessionId");
   return settleSession(sessionId, `admin:${request.auth.uid}`);
+});
+
+// ---------------------------------------------------------------------------
+// AI Sahayak Agent Function with Tool Calling (NVIDIA API / OpenAI compatible)
+// ---------------------------------------------------------------------------
+const TOOLS_DEFINITION = [
+  {
+    type: "function",
+    function: {
+      name: "find_sadhaks",
+      description: "Query approved and verified sadhaks from Firestore where status == 'APPROVED' and isVerified == true, limit 20, optional specialty filter.",
+      parameters: {
+        type: "object",
+        properties: {
+          speciality: { type: "string", description: "Optional specialty or expertise filter keyword" }
+        }
+      }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "check_online",
+      description: "Return isOnline/availability for a specific sadhak id.",
+      parameters: {
+        type: "object",
+        properties: {
+          sadhakId: { type: "string", description: "The ID of the sadhak" }
+        },
+        required: ["sadhakId"]
+      }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "request_chat",
+      description: "Create a session with existing fields userId, providerId, type 'chat', status 'REQUESTED'.",
+      parameters: {
+        type: "object",
+        properties: {
+          providerId: { type: "string", description: "The ID of the sadhak/provider" }
+        },
+        required: ["providerId"]
+      }
+    }
+  }
+];
+
+async function executeAgentTool(name, args, uid) {
+  if (name === "find_sadhaks") {
+    let query = db.collection("sadhaks").where("status", "==", "APPROVED").where("isVerified", "==", true).limit(20);
+    const snap = await query.get();
+    let results = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    if (args && args.speciality) {
+      const sp = args.speciality.toLowerCase();
+      results = results.filter(s => 
+        (s.title && s.title.toLowerCase().includes(sp)) ||
+        (s.bio && s.bio.toLowerCase().includes(sp)) ||
+        (s.name && s.name.toLowerCase().includes(sp)) ||
+        (s.titleHi && s.titleHi.toLowerCase().includes(sp))
+      );
+    }
+    return results.map(s => ({
+      id: s.id,
+      name: s.name || s.nameHi || s.nameEn || "वैदिक साधक",
+      title: s.title || s.titleHi || "वैदिक विशेषज्ञ",
+      rating: s.rating || "4.9",
+      isOnline: s.isOnline || false
+    }));
+  } else if (name === "check_online") {
+    const sid = requireId(args.sadhakId, "sadhakId");
+    const doc = await db.collection("sadhaks").doc(sid).get();
+    if (!doc.exists) {
+      const pDoc = await db.collection("providers").doc(sid).get();
+      if (!pDoc.exists) return { error: "Sadhak not found" };
+      return { sadhakId: sid, isOnline: pDoc.data().isOnline || false, availability: pDoc.data().availability || "unavailable" };
+    }
+    return { sadhakId: sid, isOnline: doc.data().isOnline || false, availability: doc.data().availability || "available" };
+  } else if (name === "request_chat") {
+    const providerId = requireId(args.providerId, "providerId");
+    const sessionRef = db.collection("sessions").doc();
+    const sessionId = sessionRef.id;
+    await sessionRef.set({
+      sessionId,
+      userId: uid,
+      providerId,
+      participants: [uid, providerId],
+      type: "chat",
+      status: "REQUESTED",
+      createdAt: FieldValue.serverTimestamp()
+    });
+    await db.collection("chats").doc(sessionId).set({
+      chatId: sessionId,
+      sessionId,
+      seekerId: uid,
+      seekerName: (userSnap.data() || {}).userName || (userSnap.data() || {}).name || "Client",
+      providerId,
+      participants: [uid, providerId],
+      type: "chat",
+      createdAt: FieldValue.serverTimestamp()
+    });
+    return { success: true, sessionId, message: "चैट अनुरोध सफलतापूर्वक भेज दिया गया है।" };
+  }
+  return { error: "Unknown tool" };
+}
+
+exports.aiAgent = onCall({ secrets: [NVIDIA_API_KEY] }, async (request) => {
+  const uid = requireUid(request);
+  const data = request.data || {};
+  let messages = Array.isArray(data.messages) ? data.messages : [];
+  
+  // Keep last 10 messages as context
+  if (messages.length > 10) {
+    messages = messages.slice(-10);
+  }
+
+  const apiKey = NVIDIA_API_KEY.value();
+  const baseUrl = process.env.NVIDIA_BASE_URL || "https://integrate.api.nvidia.com/v1/chat/completions";
+  const modelName = process.env.NVIDIA_MODEL || "moonshotai/kimi-k3";
+
+  const systemMessage = {
+    role: "system",
+    content: "आप 'देवभाषा' (Devbhasha) ऐप के AI सहायक (AI Sahayak) हैं। आप वेदों, ज्योतिष, और आध्यात्मिक सलाह में सहायता करते हैं। हमेशा सरल हिंदी में उत्तर दें। उपयोगकर्ताओं को सही साधक ढूँढने (find_sadhaks), उनकी उपलब्धता जाँचने (check_online) और चैट अनुरोध भेजने (request_chat) में मदद करें।"
+  };
+
+  const payloadMessages = [systemMessage, ...messages];
+
+  let response = await fetch(baseUrl, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${apiKey}`
+    },
+    body: JSON.stringify({
+      model: modelName,
+      messages: payloadMessages,
+      tools: TOOLS_DEFINITION,
+      tool_choice: "auto"
+    })
+  });
+
+  if (!response.ok) {
+    const errText = await response.text();
+    throw new HttpsError("internal", `AI API error: ${response.status} ${errText}`);
+  }
+
+  let json = await response.json();
+  let choice = json.choices && json.choices[0];
+  if (!choice) {
+    throw new HttpsError("internal", "Invalid response from AI API.");
+  }
+
+  let assistantMessage = choice.message;
+
+  if (assistantMessage.tool_calls && assistantMessage.tool_calls.length > 0) {
+    payloadMessages.push(assistantMessage);
+
+    for (const toolCall of assistantMessage.tool_calls) {
+      const fnName = toolCall.function.name;
+      let fnArgs = {};
+      try {
+        fnArgs = JSON.parse(toolCall.function.arguments || "{}");
+      } catch (e) {
+        fnArgs = {};
+      }
+
+      const toolResult = await executeAgentTool(fnName, fnArgs, uid);
+
+      payloadMessages.push({
+        role: "tool",
+        tool_call_id: toolCall.id,
+        content: JSON.stringify(toolResult)
+      });
+    }
+
+    response = await fetch(baseUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({
+        model: modelName,
+        messages: payloadMessages
+      })
+    });
+
+    if (!response.ok) {
+      const errText = await response.text();
+      throw new HttpsError("internal", `AI API error on follow-up: ${response.status} ${errText}`);
+    }
+
+    json = await response.json();
+    choice = json.choices && json.choices[0];
+    if (!choice) {
+      throw new HttpsError("internal", "Invalid follow-up response from AI API.");
+    }
+    assistantMessage = choice.message;
+  }
+
+  return {
+    reply: assistantMessage.content || "नमस्ते! मैं आपकी सेवा में हूँ। बताइए, मैं आपकी क्या सहायता कर सकता हूँ?"
+  };
+});
+
+
+
+exports.mirrorProviderDirectory = onDocumentUpdated(
+  { document: "providers/{providerId}", ...FIRESTORE_TRIGGER_OPTS }, async (event) => {
+    const provider = event.data?.after?.data();
+    if (!provider) return;
+    // Public directory intentionally excludes phone, ID proof, FCM and payout data.
+    const allowed = ["name", "displayName", "bio", "expertise", "experienceYears", "rating",
+      "status", "isVerified", "isOnline", "photoUrl", "lastSeen", "lastHeartbeat"];
+    const directory = Object.fromEntries(allowed.filter(k => provider[k] !== undefined).map(k => [k, provider[k]]));
+    await db.collection("sadhaks").doc(event.params.providerId).set(directory);
+  }
+);
+
+
+// Creates an operations request and reserves funds. No payout is sent here.
+exports.requestProviderPayout = onCall(async request => {
+  const uid = requireUid(request), data = request.data || {};
+  const amountPaise = data.amountPaise;
+  if (!Number.isSafeInteger(amountPaise) || amountPaise < 50000) {
+    throw new HttpsError("invalid-argument", "Minimum payout is 500 rupees.");
+  }
+  const key = requireId(data.idempotencyKey, "idempotencyKey");
+  const requestId = `${uid}_${key}`;
+  const destination = data.payoutType === "UPI"
+    ? {payoutType:"UPI", upiId:String(data.upiId || "").trim()}
+    : {payoutType:"BANK_ACCOUNT", accountNumber:String(data.accountNumber || "").trim(),
+       ifscCode:String(data.ifscCode || "").trim().toUpperCase(),
+       accountHolderName:String(data.accountHolderName || "").trim()};
+  if ((destination.payoutType === "UPI" && !/^[a-zA-Z0-9._-]{2,256}@[a-zA-Z][a-zA-Z0-9.-]{1,63}$/.test(destination.upiId)) ||
+      (destination.payoutType === "BANK_ACCOUNT" && (!/^\d{9,18}$/.test(destination.accountNumber) ||
+       !/^[A-Z]{4}0[A-Z0-9]{6}$/.test(destination.ifscCode) || destination.accountHolderName.length < 2)) ||
+      !["UPI", "BANK_ACCOUNT"].includes(data.payoutType)) {
+    throw new HttpsError("invalid-argument", "Invalid payout destination.");
+  }
+  return db.runTransaction(async tx => {
+    const wallet = db.collection("providers").doc(uid).collection("wallet").doc("summary");
+    const own = db.collection("providers").doc(uid).collection("payout_requests").doc(requestId);
+    const [w, existing] = await Promise.all([tx.get(wallet), tx.get(own)]);
+    if (existing.exists) return {requestId, alreadyProcessed:true};
+    const balance = w.get("balancePaise");
+    // Refuse legacy mixed-unit wallets until the audited paise migration is complete.
+    if (!Number.isSafeInteger(balance) || balance < amountPaise) {
+      throw new HttpsError("failed-precondition", "Insufficient available balance.");
+    }
+    const record={requestId,providerId:uid,amountPaise,amount:amountPaise/100,
+      status:"pending",...destination,createdAt:FieldValue.serverTimestamp()};
+    tx.set(wallet,{balancePaise:FieldValue.increment(-amountPaise),balance:FieldValue.increment(-amountPaise/100),
+      pendingPayoutPaise:FieldValue.increment(amountPaise)}, {merge:true});
+    tx.set(own,record);
+    tx.set(db.collection("payout_requests").doc(requestId),record);
+    tx.set(db.collection("providers").doc(uid).collection("transactions").doc(`payout_${requestId}`),{
+      id:`payout_${requestId}`,type:"payout_reserved",amountPaise:-amountPaise,status:"pending",
+      timestamp:FieldValue.serverTimestamp(),referenceId:requestId});
+    return {requestId,alreadyProcessed:false};
+  });
 });

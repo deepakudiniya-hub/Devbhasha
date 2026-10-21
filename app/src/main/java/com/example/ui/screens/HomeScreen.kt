@@ -1,37 +1,56 @@
 package com.example.ui.screens
 
+import android.Manifest
 import android.app.Activity
+import android.os.Build
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.*
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Chat
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import com.example.ui.components.DynamicPromoBanner
+import com.example.ui.components.PromoBannerData
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.viewmodel.ProviderViewModel
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.R
 import com.example.ui.models.*
 import com.example.ui.theme.*
 import com.example.utils.DreamSubmitter
@@ -42,8 +61,13 @@ import com.example.utils.RazorpayPaymentManager
 import com.example.utils.UserManager
 import com.example.utils.UserSession
 import com.example.utils.WalletRepository
+import com.example.utils.FirestoreProvider
+import com.example.utils.SadhakRepository
 import com.example.utils.PriceLabels
 import com.example.utils.SessionType
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.SetOptions
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -51,10 +75,12 @@ import java.util.*
 
 @Composable
 fun HomeScreen(
-    userName: String = "साधक",
+    userName: String = "Sadhak",
     userId: String = "",
     currentUserId: String = userId,
     onLogoutClick: () -> Unit = {},
+    isDarkTheme: Boolean = false,
+    onThemeToggle: (Boolean) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -62,6 +88,16 @@ fun HomeScreen(
     val haptic = androidx.compose.ui.platform.LocalHapticFeedback.current
     val coroutineScope = rememberCoroutineScope()
     val targetUserDocId = userId.ifBlank { userSession.getUserId() }
+
+    // Request notification permission for Android 13+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        val launcher = rememberLauncherForActivityResult(
+            ActivityResultContracts.RequestPermission()
+        ) { _ -> }
+        LaunchedEffect(Unit) {
+            launcher.launch(Manifest.permission.POST_NOTIFICATIONS)
+        }
+    }
 
     // Dynamic user state
     var userDisplayName by remember {
@@ -85,29 +121,31 @@ fun HomeScreen(
     var isHindi by remember { mutableStateOf(userSession.isHindi()) } // Keep for logic compatibility
     var language by remember { mutableStateOf(userSession.getLanguage()) }
 
+    val providerViewModel: ProviderViewModel = viewModel()
+    val saadhakList by providerViewModel.sadhaks.collectAsStateWithLifecycle()
+    val filteredSaadhaks by providerViewModel.filteredSadhaks.collectAsStateWithLifecycle()
+    val isSadhaksLoading by providerViewModel.isLoading.collectAsStateWithLifecycle()
+    val activeChatSadhak by providerViewModel.activeChatSadhak.collectAsStateWithLifecycle()
+    val activeChatSessionId by providerViewModel.activeChatSessionId.collectAsStateWithLifecycle()
+    val activeCallingSadhak by providerViewModel.activeCallingSadhak.collectAsStateWithLifecycle()
+    val activeCallingCallId by providerViewModel.activeCallingCallId.collectAsStateWithLifecycle()
+
     // Navigation View: "today", "sadhak", "remedy", "dreams", "wallet"
-    var currentView by remember { mutableStateOf("sadhak") }
+    var currentView by remember { mutableStateOf("today") }
     var searchQuery by remember { mutableStateOf("") }
-    var activeJournalFilter by remember { mutableStateOf(JournalFilterType.ALL) }
-    var customFilterDateMillis by remember { mutableStateOf<Long?>(null) }
     var selectedEntryForDetail by remember { mutableStateOf<DreamJournalEntry?>(null) }
 
     // Sheets & Dialogs
+    var currentAvatarId by remember { mutableStateOf(userSession.getAvatarId()) }
+    var showAvatarPickerSheet by remember { mutableStateOf(false) }
     var showProfileSheet by remember { mutableStateOf(false) }
     var showRechargeSheet by remember { mutableStateOf(false) }
     var showBookingSheet by remember { mutableStateOf(false) }
-    var showLogDreamDialog by remember { mutableStateOf(false) }
-    var showEditNameDialog by remember { mutableStateOf(false) }
     var showPoochhoSheet by remember { mutableStateOf(false) }
     var showDreamsModalSheet by remember { mutableStateOf(false) }
     var selectedCategoryId by remember { mutableStateOf<String?>(null) }
     var selectedCardId by remember { mutableStateOf<String?>(null) }
-    var editedNameInput by remember { mutableStateOf("") }
-    var newDreamText by remember { mutableStateOf("") }
-
-    // Live Consultations
-    var activeChatSadhak by remember { mutableStateOf<SadhakItem?>(null) }
-    var activeCallingSadhak by remember { mutableStateOf<SadhakItem?>(null) }
+    var showLangDropdown by remember { mutableStateOf(false) }
 
     // Toast Notification Banner State
     var toastMessage by remember { mutableStateOf<String?>(null) }
@@ -120,86 +158,6 @@ fun HomeScreen(
                 toastMessage = null
             }
         }
-    }
-
-    val initialSadhaks = remember {
-        listOf(
-            SadhakItem(
-                id = "sadhak_1",
-                nameHi = "आचार्य देव शर्मा",
-                nameEn = "Acharya Dev Sharma",
-                titleHi = "वैदिक ज्योतिष एवं कुण्डली",
-                titleEn = "Vedic Astrologer & Kundli",
-                experienceHi = "18 वर्ष अनुभव",
-                experienceEn = "18 Years Exp",
-                rating = "4.9",
-                isOnline = true,
-                bio = "Expert in Vedic astrology, Kundli matching and spiritual remedies.",
-                phone = "",
-                initialHi = "आ",
-                initialEn = "AD"
-            ),
-            SadhakItem(
-                id = "sadhak_2",
-                nameHi = "पं. रामानंद शास्त्री",
-                nameEn = "Pt. Ramanand Shastri",
-                titleHi = "कर्मकांड एवं पूजा अनुष्ठान",
-                titleEn = "Karma Kand & Vedic Rituals",
-                experienceHi = "22 वर्ष अनुभव",
-                experienceEn = "22 Years Exp",
-                rating = "5.0",
-                isOnline = true,
-                bio = "Specialist in Vedic rituals, Mantras and Vastu Shastra.",
-                phone = "",
-                initialHi = "पं",
-                initialEn = "RS"
-            ),
-            SadhakItem(
-                id = "sadhak_3",
-                nameHi = "योगी आनंद नाथ",
-                nameEn = "Yogi Ananda Nath",
-                titleHi = "ध्यान एवं स्वप्न विशेषज्ञ",
-                titleEn = "Meditation & Dream Guide",
-                experienceHi = "15 वर्ष अनुभव",
-                experienceEn = "15 Years Exp",
-                rating = "4.8",
-                isOnline = true,
-                bio = "Guiding seekers through dream symbolism, meditation and inner peace.",
-                phone = "",
-                initialHi = "यो",
-                initialEn = "YA"
-            ),
-            SadhakItem(
-                id = "sadhak_4",
-                nameHi = "डॉ. राधिका वशिष्ठ",
-                nameEn = "Dr. Radhika Vashishta",
-                titleHi = "टैरो कार्ड एवं अंक ज्योतिष",
-                titleEn = "Tarot & Numerology",
-                experienceHi = "12 वर्ष अनुभव",
-                experienceEn = "12 Years Exp",
-                rating = "4.9",
-                isOnline = true,
-                bio = "Intuitive tarot reader, numerologist and spiritual life consultant.",
-                phone = "",
-                initialHi = "डॉ",
-                initialEn = "RV"
-            ),
-            SadhakItem(
-                id = "sadhak_5",
-                nameHi = "स्वामी प्रज्ञानंद",
-                nameEn = "Swami Pragyanand",
-                titleHi = "हस्तरेखा एवं वास्तु शास्त्र",
-                titleEn = "Palmistry & Sacred Vastu",
-                experienceHi = "25 वर्ष अनुभव",
-                experienceEn = "25 Years Exp",
-                rating = "4.9",
-                isOnline = false,
-                bio = "Master palmist, ancient Vastu architect and mantra practitioner.",
-                phone = "",
-                initialHi = "स्वा",
-                initialEn = "SP"
-            )
-        )
     }
 
     val initialDreams = remember {
@@ -220,7 +178,7 @@ fun HomeScreen(
                 title = "नदी किनारे जलता हुआ दीपक",
                 datePhase = "कल",
                 description = "संध्या समय किसी शांत नदी के तट पर घी का अखण्ड दीपक जलते हुए देखा।",
-                tag = "✨ आत्म-बोध (Awakening)",
+                tag = "आत्म-बोध (Awakening)",
                 tags = listOf("#deepak", "#river", "#spiritual"),
                 timestamp = System.currentTimeMillis() - 86400000L,
                 meaning = "ज्ञान, मार्गदर्शन और जीवन में नए प्रकाश का प्रतीक है।",
@@ -229,7 +187,6 @@ fun HomeScreen(
         )
     }
 
-    var saadhakList by remember { mutableStateOf(initialSadhaks) }
     var dreamList by remember { mutableStateOf(initialDreams) }
 
     // Listen to Razorpay
@@ -249,16 +206,16 @@ fun HomeScreen(
                             )
                             when (submitRes) {
                                 is DreamSubmitResult.Success -> {
-                                    showToast("पेमेंट सफल! सपना साधक '${submitRes.sadhakName}' को भेज दिया गया ✨")
+                                    showToast("पेमेंट सफल! सपना Sadhak '${submitRes.sadhakName}' को भेज दिया गया।")
                                 }
                                 is DreamSubmitResult.NoVerifiedSadhak -> {
-                                    showToast("पेमेंट सफल! राशि वॉलेट में जुड़ गई। अभी कोई साधक उपलब्ध नहीं है।")
+                                    showToast("पेमेंट सफल! राशि वॉलेट में जुड़ गई। अभी कोई Sadhak उपलब्ध नहीं है।")
                                 }
                                 is DreamSubmitResult.InsufficientBalance -> {
                                     showToast("पेमेंट सफल! राशि वॉलेट में जुड़ गई। कृपया दोबारा सपना भेजें।")
                                 }
                                 is DreamSubmitResult.Error -> {
-                                    showToast("पेमेंट सफल! राशि वॉलेट में जुड़ गई। सपना भेजने में त्रुटि: ${submitRes.message}")
+                                    showToast("पेमेंट सफल! राशि वॉलेट में जुड़ गई। सपना भेजने में Error: ${submitRes.message}")
                                 }
                             }
                         }
@@ -273,15 +230,17 @@ fun HomeScreen(
         }
     }
 
-    // Call / Chat Session Starter. Price, balance check and debit happen on the
-    // server in startSession (see SessionBilling); the client sends no amounts.
+    // Call / Chat Session Starter via ProviderViewModel
     val handleStartConsultation: (SadhakItem, String) -> Unit = { sadhak, type ->
         HapticFeedbackHelper.playClick(haptic)
-        if (type == "chat") {
-            activeChatSadhak = sadhak
-        } else {
-            activeCallingSadhak = sadhak
-        }
+        providerViewModel.startConsultation(
+            sadhak = sadhak,
+            type = type,
+            userId = targetUserDocId,
+            onStarted = { id ->
+                showToast(if (type == "chat") "चैट सत्र शुरू हो रहा है..." else "कॉल कनेक्ट हो रही है...")
+            }
+        )
     }
 
     fun handleClaimTicket() {
@@ -292,170 +251,6 @@ fun HomeScreen(
         showToast("${PriceLabels.FREE_TRIAL_BADGE} — पात्रता सत्र शुरू होने पर जाँची जाएगी")
     }
 
-    // Log Dream Dialog
-    if (showLogDreamDialog) {
-        AlertDialog(
-            onDismissRequest = { showLogDreamDialog = false },
-            containerColor = Color.White,
-            shape = RoundedCornerShape(22.dp),
-            title = {
-                Text(
-                    text = "नया सपना दर्ज करें · Log Dream",
-                    fontFamily = FontFamily.Default,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp,
-                    color = TextDark
-                )
-            },
-            text = {
-                Column {
-                    Text(
-                        text = "सपने में देखे गए दृश्य, प्रतीक व भावनाएँ यहाँ लिखें:",
-                        fontSize = 12.5.sp,
-                        color = Color(0xFF64748B)
-                    )
-                    Spacer(modifier = Modifier.height(12.dp))
-                    OutlinedTextField(
-                        value = newDreamText,
-                        onValueChange = { newDreamText = it },
-                        placeholder = { Text("सपने का विवरण लिखें...", fontSize = 13.sp, color = Color(0xFF94A3B8)) },
-                        trailingIcon = {
-                            IconButton(
-                                onClick = {
-                                    if (newDreamText.isBlank()) {
-                                        newDreamText = "सपने में बहती हुई पावन नदी और कमल का पुष्प दिखाई दिया..."
-                                    }
-                                    Toast.makeText(context, "माइक द्वारा सपना रिकॉर्ड हुआ ✨", Toast.LENGTH_SHORT).show()
-                                }
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Filled.Mic,
-                                    contentDescription = "Mic",
-                                    tint = SaffronPrimary
-                                )
-                            }
-                        },
-                        modifier = Modifier.fillMaxWidth().height(115.dp),
-                        shape = RoundedCornerShape(16.dp),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = SaffronPrimary,
-                            unfocusedBorderColor = Color(0xFFE2E8F0),
-                            focusedContainerColor = Color.White,
-                            unfocusedContainerColor = Color(0xFFF8FAFC)
-                        )
-                    )
-                }
-            },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        val text = newDreamText.trim()
-                        if (text.isNotBlank()) {
-                            val newEntry = DreamJournalEntry(
-                                id = "dream_" + System.currentTimeMillis(),
-                                title = text.take(42),
-                                datePhase = "आज",
-                                description = text,
-                                tag = "🌿 शुभ (Shubh)",
-                                tags = listOf("#lucid", "#spiritual"),
-                                timestamp = System.currentTimeMillis()
-                            )
-                            dreamList = listOf(newEntry) + dreamList
-                            newDreamText = ""
-                            showLogDreamDialog = false
-                            showToast("सपना सुरक्षित कर लिया गया ✨")
-                        }
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = SaffronPrimary),
-                    shape = RoundedCornerShape(12.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.Add,
-                        contentDescription = "Save",
-                        tint = Color.White,
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Text("सपना सुरक्षित करें", fontWeight = FontWeight.Bold)
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showLogDreamDialog = false }) {
-                    Text("रद्द करें (Cancel)", color = Color(0xFF64748B))
-                }
-            }
-        )
-    }
-
-    // Edit Name Dialog
-    if (showEditNameDialog) {
-        AlertDialog(
-            onDismissRequest = { showEditNameDialog = false },
-            containerColor = PaperBg,
-            shape = RoundedCornerShape(20.dp),
-            title = {
-                Text(
-                    text = "Edit Profile Name",
-                    fontFamily = AppFontFamily,
-                    fontWeight = FontWeight.Medium,
-                    fontSize = 18.sp,
-                    color = Ink
-                )
-            },
-            text = {
-                Column {
-                    Text(
-                        text = "Enter your sacred name or preferred name for consultations:",
-                        fontSize = 12.sp,
-                        color = InkSoft
-                    )
-                    Spacer(modifier = Modifier.height(10.dp))
-                    OutlinedTextField(
-                        value = editedNameInput,
-                        onValueChange = { editedNameInput = it },
-                        placeholder = { Text("e.g. Rahul Sharma", fontSize = 13.sp, color = InkFaint) },
-                        singleLine = true,
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(12.dp),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = Terra,
-                            unfocusedBorderColor = EditorialLineStrong,
-                            focusedContainerColor = PaperCard,
-                            unfocusedContainerColor = PaperCard
-                        )
-                    )
-                }
-            },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        val trimmed = editedNameInput.trim()
-                        if (trimmed.isNotBlank()) {
-                            userDisplayName = trimmed
-                            UserSession(context).saveUserSession(
-                                userName = trimmed,
-                                isLoggedIn = true,
-                                userId = targetUserDocId,
-                                phoneNumber = ""
-                            )
-                            showToast("Name updated to $trimmed ✨")
-                            showEditNameDialog = false
-                        }
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = Terra),
-                    shape = RoundedCornerShape(12.dp)
-                ) {
-                    Text("Save Name")
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showEditNameDialog = false }) {
-                    Text("Cancel", color = InkSoft)
-                }
-            }
-        )
-    }
-
     // Full Screen Live Chat Room Overlay
     if (activeChatSadhak != null) {
         LiveChatRoomScreen(
@@ -464,14 +259,17 @@ fun HomeScreen(
             userId = targetUserDocId,
             userName = userDisplayName,
             walletBalance = walletBalance,
-            onCloseChat = { activeChatSadhak = null },
+            onCloseChat = {
+                providerViewModel.endActiveChat()
+            },
             onStartCall = {
                 val s = activeChatSadhak!!
-                activeChatSadhak = null
-                activeCallingSadhak = s
+                providerViewModel.endActiveChat()
+                providerViewModel.startConsultation(s, "call", targetUserDocId, onStarted = {})
             },
             onLowBalance = { showRechargeSheet = true },
-            onAddBalance = { showRechargeSheet = true }
+            onAddBalance = { showRechargeSheet = true },
+            sessionId = activeChatSessionId
         )
         return
     }
@@ -484,84 +282,91 @@ fun HomeScreen(
             userId = targetUserDocId,
             userName = userDisplayName,
             walletBalance = walletBalance,
-            onEndCall = { activeCallingSadhak = null }
+            onEndCall = {
+                providerViewModel.endActiveCall()
+            },
+            callDocId = activeCallingCallId
         )
         return
     }
 
-    BackHandler(enabled = currentView != "sadhak") {
-        currentView = "sadhak"
-    }
-
-    // Home has a dark teal header behind the status bar: use light status bar icons there.
-    val hostView = androidx.compose.ui.platform.LocalView.current
-    if (!hostView.isInEditMode) {
-        DisposableEffect(currentView) {
-            val window = (hostView.context as? Activity)?.window
-            val controller = window?.let { androidx.core.view.WindowCompat.getInsetsController(it, hostView) }
-            val previous = controller?.isAppearanceLightStatusBars
-            if (currentView == "today") {
-                controller?.isAppearanceLightStatusBars = false
-            }
-            onDispose {
-                if (controller != null && previous != null) controller.isAppearanceLightStatusBars = previous
-            }
-        }
+    // Fixed BackHandler: Returns to 'today' tab when in secondary view, enables system back when already on 'today'
+    BackHandler(enabled = currentView != "today") {
+        currentView = "today"
     }
 
     // Main Scaffold in Bento Editorial Design
     Scaffold(
         modifier = modifier.fillMaxSize(),
-        containerColor = Color(0xFFFAF6EA), // Brand cream background
+        containerColor = MaterialTheme.colorScheme.background, // Theme background
         topBar = {
-            // Home ("today") draws its own teal header inside the scroll content.
-            if (currentView == "sadhak") {
+            if (currentView in listOf("today", "sadhak", "dreams", "remedy")) {
                 Surface(
-                    color = Color(0xFFFAF7F2), // Matches Scaffold off-white
-                    modifier = Modifier.statusBarsPadding()
+                    color = Color.White, // Pure white background
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    BentoEditorialMasthead(
-                        userName = userDisplayName,
-                        balanceAmount = walletBalance,
-                        language = language,
-                        isHindi = isHindi,
-                        onProfileClick = {
-                            HapticFeedbackHelper.playClick(haptic)
-                            showProfileSheet = true
-                        },
-                        onLanguageSelect = { newLang ->
-                            HapticFeedbackHelper.playClick(haptic)
-                            language = newLang
-                            isHindi = (newLang == "hi")
-                            userSession.setLanguage(newLang)
-                            UserManager.updateLanguagePreference(targetUserDocId, newLang)
-                            val toastText = when (newLang) {
-                                "hi" -> "भाषा: हिंदी (Hindi) सक्रिय ✨"
-                                "hgl" -> "Bhasha: Hinglish active ✨"
-                                else -> "Language: English active ✨"
+                    Column(modifier = Modifier.statusBarsPadding()) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 12.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = if (userDisplayName.isBlank()) "नमस्ते, Sadhak 🙏" else "नमस्ते, $userDisplayName 🙏",
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = Color(0xFF1E2A2A) // Main text
+                            )
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                // Language toggle removed from here in favor of Profile Sheet
+
+                                Surface(
+                                    shape = RoundedCornerShape(999.dp),
+                                    color = Color.White,
+                                    border = BorderStroke(1.dp, Color(0xFFDCCFB4)), // Outline
+                                    modifier = Modifier.clickable { currentView = "wallet" }
+                                ) {
+                                    Row(
+                                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                    ) {
+                                        Text(
+                                            text = "₹${walletBalance.toInt()}",
+                                            fontSize = 13.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = Color(0xFF1E2A2A)
+                                        )
+                                        Icon(
+                                            imageVector = Icons.Default.Add,
+                                            contentDescription = "Add Balance",
+                                            modifier = Modifier.size(14.dp),
+                                            tint = Color(0xFF0F5C5C)
+                                        )
+                                    }
+                                }
+                                Surface(
+                                    shape = CircleShape,
+                                    border = BorderStroke(1.5.dp, Color(0xFF0F5C5C)), // Gold
+                                    modifier = Modifier
+                                        .size(40.dp)
+                                        .clip(CircleShape)
+                                        .clickable { currentView = "profile" }
+                                ) {
+                                    Image(
+                                        painter = painterResource(id = getAvatarDrawableRes(currentAvatarId)),
+                                        contentDescription = "प्रोफ़ाइल",
+                                        contentScale = ContentScale.Crop
+                                    )
+                                }
                             }
-                            showToast(toastText)
-                        },
-                        onToggleLanguage = {
-                            HapticFeedbackHelper.playClick(haptic)
-                            val nextLang = when (language) {
-                                "en" -> "hi"
-                                "hi" -> "hgl"
-                                else -> "en"
-                            }
-                            language = nextLang
-                            isHindi = (nextLang == "hi")
-                            userSession.setLanguage(nextLang)
-                            UserManager.updateLanguagePreference(targetUserDocId, nextLang)
-                            val toastText = when (nextLang) {
-                                "hi" -> "भाषा: हिंदी (Hindi) सक्रिय ✨"
-                                "hgl" -> "Bhasha: Hinglish active ✨"
-                                else -> "Language: English active ✨"
-                            }
-                            showToast(toastText)
-                        },
-                        onBalanceClick = { currentView = "wallet" }
-                    )
+                        }
+                    }
                 }
             }
         },
@@ -583,14 +388,7 @@ fun HomeScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .then(
-                    if (currentView == "today") {
-                        // Teal header extends behind the status bar; it pads itself.
-                        Modifier.padding(bottom = innerPadding.calculateBottomPadding())
-                    } else {
-                        Modifier.padding(innerPadding)
-                    }
-                )
+                .padding(innerPadding)
         ) {
             AnimatedContent(
                 // ... (existing content)
@@ -604,145 +402,212 @@ fun HomeScreen(
             ) { view ->
                 when (view) {
                     "today" -> {
-                        Column(
+                        var isVisible by remember { mutableStateOf(false) }
+                        LaunchedEffect(Unit) {
+                            isVisible = true
+                        }
+                        LazyColumn(
                             modifier = Modifier
                                 .fillMaxSize()
-                                .verticalScroll(rememberScrollState())
-                                .padding(bottom = 28.dp)
+                                .background(Color(0xFFF8F9FA)),
+                            contentPadding = PaddingValues(bottom = 120.dp)
                         ) {
-                            // 1 + 2. Teal header: brand, wallet, avatar, greeting, today card
-                            HomeV2Header(
-                                userName = userDisplayName,
-                                balanceAmount = walletBalance,
-                                language = language,
-                                isHindi = isHindi,
-                                onBalanceClick = { currentView = "wallet" },
-                                onAddMoneyClick = {
-                                    HapticFeedbackHelper.playClick(haptic)
-                                    showRechargeSheet = true
-                                },
-                                onProfileClick = {
-                                    HapticFeedbackHelper.playClick(haptic)
-                                    showProfileSheet = true
-                                },
-                                onTodayClick = {
-                                    HapticFeedbackHelper.playClick(haptic)
-                                    currentView = "pooja"
+                            item {
+                                AnimatedVisibility(
+                                    visible = isVisible,
+                                    enter = fadeIn(animationSpec = tween(400, delayMillis = 0)) +
+                                            slideInVertically(animationSpec = tween(400, delayMillis = 0), initialOffsetY = { 60 })
+                                ) {
+                                    OutlinedTextField(
+                                        value = searchQuery,
+                                        onValueChange = { searchQuery = it },
+                                        placeholder = { Text(if (isHindi) "खोजें..." else "Search...") },
+                                        leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(16.dp),
+                                        shape = RoundedCornerShape(12.dp)
+                                    )
                                 }
-                            )
+                            }
+                            item {
+                                AnimatedVisibility(
+                                    visible = isVisible,
+                                    enter = fadeIn(animationSpec = tween(400, delayMillis = 0)) +
+                                            slideInVertically(animationSpec = tween(400, delayMillis = 0), initialOffsetY = { 60 })
+                                ) {
+                                    Box(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+                                    DynamicPromoBanner(
+                                        dataList = listOf(
+                                            PromoBannerData(
+                                                title = if (isHindi) "आज का आध्यात्मिक उत्सव" else "Today's Spiritual Event",
+                                                description = if (isHindi) "अभी भाग लें और विशेष आशीष प्राप्त करें।" else "Join now and receive special blessings.",
+                                                buttonText = if (isHindi) "भाग लें" else "Join Now"
+                                            ),
+                                            PromoBannerData(
+                                                title = if (isHindi) "वैदिक ज्योतिष परामर्श" else "Vedic Astrology Consult",
+                                                description = if (isHindi) "अपने भविष्य के बारे में जानें।" else "Gain insights into your future.",
+                                                buttonText = if (isHindi) "अभी देखें" else "Check Now",
+                                                gradientColors = listOf(Color(0xFF8B4513), Color(0xFFD2691E))
+                                            )
+                                        ),
+                                        onButtonClick = { _ -> showToast("उत्सव में आपका स्वागत है! 🙏") }
+                                    )
+                                    }
+                                }
+                            }
+                            item {
+                                AnimatedVisibility(
+                                    visible = isVisible,
+                                    enter = fadeIn(animationSpec = tween(400, delayMillis = 0)) +
+                                            slideInVertically(animationSpec = tween(400, delayMillis = 0), initialOffsetY = { 60 })
+                                ) {
+                                    BentoEditorialPoochhaHeroCard(
+                                        onAskClick = { showPoochhoSheet = true },
+                                        isHindi = isHindi,
+                                        language = language
+                                    )
+                                }
+                            }
+                            item {
+                                AnimatedVisibility(
+                                    visible = isVisible,
+                                    enter = fadeIn(animationSpec = tween(400, delayMillis = 25)) +
+                                            slideInVertically(animationSpec = tween(400, delayMillis = 25), initialOffsetY = { 60 })
+                                ) {
+                                    DailyAffirmationCard(isHindi = isHindi)
+                                }
+                            }
+                            item {
+                                AnimatedVisibility(
+                                    visible = isVisible,
+                                    enter = fadeIn(animationSpec = tween(400, delayMillis = 50)) +
+                                            slideInVertically(animationSpec = tween(400, delayMillis = 50), initialOffsetY = { 60 })
+                                ) {
+                                    BentoEditorialAskBar(
+                                        query = searchQuery,
+                                        onQueryChange = { searchQuery = it },
+                                        onGoClick = { currentView = "ai_sahayak" },
+                                        isHindi = isHindi,
+                                        language = language
+                                    )
+                                }
+                            }
+                            item {
+                                AnimatedVisibility(
+                                    visible = isVisible,
+                                    enter = fadeIn(animationSpec = tween(400, delayMillis = 100)) +
+                                            slideInVertically(animationSpec = tween(400, delayMillis = 100), initialOffsetY = { 60 })
+                                ) {
+                                    BentoEditorialPanchangHeadline(
+                                        isHindi = isHindi,
+                                        language = language
+                                    )
+                                }
+                            }
+                            item {
+                                AnimatedVisibility(
+                                    visible = isVisible,
+                                    enter = fadeIn(animationSpec = tween(400, delayMillis = 150)) +
+                                            slideInVertically(animationSpec = tween(400, delayMillis = 150), initialOffsetY = { 60 })
+                                ) {
+                                    BentoEditorialToolsGrid(
+                                        currentView = currentView,
+                                        onPoochhoClick = { showPoochhoSheet = true },
+                                        onDreamsClick = { currentView = "dreams" },
+                                        onKundliClick = { currentView = "kundli" },
+                                        onTarotClick = { currentView = "tarot" },
+                                        onMatchClick = { currentView = "match" },
+                                        onHabitsClick = { currentView = "remedy" },
+                                        onTimerClick = { currentView = "remedy" },
+                                        isHindi = isHindi,
+                                        language = language
+                                    )
+                                }
+                            }
+                            item {
+                                AnimatedVisibility(
+                                    visible = isVisible,
+                                    enter = fadeIn(animationSpec = tween(400, delayMillis = 200)) +
+                                            slideInVertically(animationSpec = tween(400, delayMillis = 200), initialOffsetY = { 60 })
+                                ) {
+                                    BentoEditorialOnlineSadhaksCarousel(
+                                        sadhaks = filteredSaadhaks,
+                                        onChatClick = { sadhak -> handleStartConsultation(sadhak, "chat") },
+                                        onCallClick = { sadhak -> handleStartConsultation(sadhak, "call") },
+                                        onSeeAllClick = { currentView = "sadhak" },
+                                        isHindi = isHindi,
+                                        language = language
+                                    )
+                                }
+                            }
+                            item {
+                                AnimatedVisibility(
+                                    visible = isVisible,
+                                    enter = fadeIn(animationSpec = tween(400, delayMillis = 220)) +
+                                            slideInVertically(animationSpec = tween(400, delayMillis = 220), initialOffsetY = { 60 })
+                                ) {
+                                    BentoEditorialHoroscopeCard(
+                                        isHindi = isHindi
+                                    )
+                                }
+                            }
 
-                            // 3. Ask card -> existing पूछो sheet
-                            Spacer(modifier = Modifier.height(12.dp))
-                            HomeV2AskCard(
-                                onAskClick = {
-                                    HapticFeedbackHelper.playClick(haptic)
-                                    showPoochhoSheet = true
-                                },
-                                language = language,
-                                isHindi = isHindi
-                            )
-
-                            // 4. Problem categories -> existing Firestore card detail
-                            Spacer(modifier = Modifier.height(26.dp))
-                            HomeV2CategoryRow(
-                                onCategoryClick = { category ->
-                                    HapticFeedbackHelper.playClick(haptic)
-                                    selectedCardId = category
-                                    currentView = "firestore_card"
-                                },
-                                language = language,
-                                isHindi = isHindi
-                            )
-
-                            // 5. Online sadhaks
-                            Spacer(modifier = Modifier.height(26.dp))
-                            HomeV2OnlineSadhaks(
-                                sadhaks = saadhakList,
-                                onChatClick = { sadhak -> handleStartConsultation(sadhak, "chat") },
-                                onCallClick = { sadhak -> handleStartConsultation(sadhak, "call") },
-                                onSeeAllClick = { showBookingSheet = true },
-                                language = language,
-                                isHindi = isHindi
-                            )
-
-                            // 6. Daily sadhana tools
-                            Spacer(modifier = Modifier.height(26.dp))
-                            HomeV2DailySadhana(
-                                onJapaClick = {
-                                    HapticFeedbackHelper.playClick(haptic)
-                                    currentView = "japa"
-                                },
-                                onPanchangClick = {
-                                    HapticFeedbackHelper.playClick(haptic)
-                                    currentView = "panchang"
-                                },
-                                onKundliClick = {
-                                    HapticFeedbackHelper.playClick(haptic)
-                                    currentView = "kundli"
-                                },
-                                onDreamsClick = {
-                                    HapticFeedbackHelper.playClick(haptic)
-                                    currentView = "dreams"
-                                },
-                                language = language,
-                                isHindi = isHindi
-                            )
+                            item {
+                                AnimatedVisibility(
+                                    visible = isVisible,
+                                    enter = fadeIn(animationSpec = tween(400, delayMillis = 280)) +
+                                            slideInVertically(animationSpec = tween(400, delayMillis = 280), initialOffsetY = { 60 })
+                                ) {
+                                    BentoEditorialReferAndEarn()
+                                }
+                            }
+                            item {
+                                AnimatedVisibility(
+                                    visible = isVisible,
+                                    enter = fadeIn(animationSpec = tween(400, delayMillis = 320)) +
+                                            slideInVertically(animationSpec = tween(400, delayMillis = 320), initialOffsetY = { 60 })
+                                ) {
+                                    BentoEditorialExpertsSection(
+                                        sadhaks = filteredSaadhaks,
+                                        onChatClick = { sadhak -> handleStartConsultation(sadhak, "chat") },
+                                        onCallClick = { sadhak -> handleStartConsultation(sadhak, "call") },
+                                        onSeeAllClick = { currentView = "sadhak" },
+                                        isHindi = isHindi,
+                                        language = language
+                                    )
+                                }
+                            }
                         }
                     }
 
                     "sadhak" -> {
-                        Column {
-                            BentoEditorialPromoBanner(
-                                isOfferClaimed = isOfferClaimed,
-                                onClaimOffer = { handleClaimTicket() },
-                                onTalkNowClick = {
-                                    val firstSadhak = saadhakList.firstOrNull()
-                                    if (firstSadhak != null) {
-                                        handleStartConsultation(firstSadhak, "call")
-                                    } else {
-                                        showBookingSheet = true
-                                    }
-                                },
-                                isHindi = isHindi,
-                                language = language
-                            )
-                            SadhakDirectoryScreen(
-                                sadhaks = saadhakList,
-                                isHindi = isHindi,
-                                onConsultSadhak = { sadhak ->
-                                    handleStartConsultation(sadhak, "chat")
-                                },
-                                onCallClick = { sadhak ->
-                                    handleStartConsultation(sadhak, "call")
-                                },
-                                onChatClick = { sadhak ->
-                                    handleStartConsultation(sadhak, "chat")
-                                }
-                            )
-                        }
+                        SadhakScreen(
+                            sadhakList = saadhakList,
+                            onChatClick = { sadhak -> handleStartConsultation(sadhak, "chat") },
+                            onCallClick = { sadhak -> handleStartConsultation(sadhak, "call") },
+                            onSadhakClick = { sadhak -> handleStartConsultation(sadhak, "chat") }
+                        )
+                    }
+
+                    "ai_sahayak" -> {
+                        AiSahayakChatScreen(
+                            onBackClick = { currentView = "today" },
+                            isHindi = isHindi,
+                            language = language
+                        )
                     }
 
                     "remedy" -> {
-                        BentoEditorialRemedyScreen()
+                        UpayScreen(isHindi = isHindi, language = language)
                     }
 
                     "dreams" -> {
-                        DreamJournalScreen(
+                        SvapnaScreen(
                             userId = targetUserDocId,
                             userName = userDisplayName,
-                            onBackClick = { currentView = "today" },
-                            onLogDream = {
-                                val savedMsg = when (language) {
-                                    "hi" -> "सपना सुरक्षित कर लिया गया ✨"
-                                    "hgl" -> "Sapna save kar liya gaya ✨"
-                                    else -> "Dream saved to journal ✨"
-                                }
-                                showToast(savedMsg)
-                            },
-                            onChatWithSadhak = { currentView = "sadhak" },
                             dreamHistory = dreamList,
-                            isHindi = isHindi,
-                            language = language
+                            onChatWithSadhak = { currentView = "sadhak" }
                         )
                     }
 
@@ -794,14 +659,6 @@ fun HomeScreen(
                         BentoDailyPoojaScreen(onBackClick = { currentView = "today" })
                     }
 
-                    "japa" -> {
-                        BentoJapaTimerScreen(onBackClick = { currentView = "today" })
-                    }
-
-                    "panchang" -> {
-                        RemedyScreen(isHindi = isHindi)
-                    }
-
                     "habits", "negativity" -> {
                         BentoNegativityScreen(
                             onBackClick = { currentView = "today" },
@@ -841,7 +698,39 @@ fun HomeScreen(
                             userId = targetUserDocId,
                             userNameInitial = userDisplayName,
                             onBackClick = { currentView = "today" },
-                            onLogoutClick = onLogoutClick
+                            onLogoutClick = onLogoutClick,
+                            onOpenHelpSupport = { currentView = "help_support" },
+                            onOpenSettings = { currentView = "settings" },
+                            onOpenConsultationHistory = { currentView = "consultation_history" },
+                            isDarkTheme = isDarkTheme,
+                            onThemeToggle = onThemeToggle
+                        )
+                    }
+
+                    "consultation_history" -> {
+                        ConsultationHistoryScreen(
+                            userId = targetUserDocId,
+                            onBackClick = { currentView = "profile" },
+                            sadhaks = saadhakList,
+                            isHindi = isHindi
+                        )
+                    }
+
+                    "settings" -> {
+                        SettingsScreen(
+                            userId = targetUserDocId,
+                            userNameInitial = userDisplayName,
+                            onBackClick = { currentView = "profile" },
+                            onLogoutClick = onLogoutClick,
+                            onOpenHelpSupport = { currentView = "help_support" },
+                            isDarkTheme = isDarkTheme,
+                            onThemeToggle = onThemeToggle
+                        )
+                    }
+
+                    "help_support" -> {
+                        HelpSupportScreen(
+                            onBack = { currentView = "profile" }
                         )
                     }
                 }
@@ -878,6 +767,7 @@ fun HomeScreen(
     if (showRechargeSheet) {
         BentoEditorialRechargeSheet(
             currentBalance = walletBalance,
+            language = language,
             onDismiss = { showRechargeSheet = false },
             onConfirmRecharge = { addedAmt ->
                 val activity = context as? android.app.Activity
@@ -900,23 +790,23 @@ fun HomeScreen(
     // Bottom Sheet: Poochho Problem & Consult Sheet (Tile 01)
     if (showPoochhoSheet) {
         val categoryMap = mapOf(
-            "family" to "🏡 पारिवारिक क्लेश",
-            "career" to "💼 करियर / व्यापार",
-            "marriage" to "❤️ विवाह / संबंध",
-            "health" to "🩺 स्वास्थ्य / शांति"
+            "family" to "पारिवारिक क्लेश",
+            "career" to "करियर / व्यापार",
+            "marriage" to "विवाह / संबंध",
+            "health" to "स्वास्थ्य / शांति"
         )
         PoochhoProblemConsultSheet(
             sadhaks = saadhakList,
             onStartChat = { sadhak, problemText ->
                 handleStartConsultation(sadhak, "chat")
                 if (problemText.isNotBlank()) {
-                    showToast("परामर्श शुरू: $problemText ✨")
+                    showToast("परामर्श शुरू: $problemText")
                 }
             },
             onStartCall = { sadhak, problemText ->
                 handleStartConsultation(sadhak, "call")
                 if (problemText.isNotBlank()) {
-                    showToast("कॉल शुरू: $problemText ✨")
+                    showToast("कॉल शुरू: $problemText")
                 }
             },
             onDismiss = {
@@ -935,7 +825,7 @@ fun HomeScreen(
             userId = targetUserDocId,
             userName = userDisplayName,
             onSaveDream = { text, tag ->
-                showToast("सपना सुरक्षित हो गया ✨")
+                showToast("सपना सुरक्षित हो गया")
             },
             onAskSadhak = { text ->
                 val firstSadhak = saadhakList.firstOrNull()
@@ -944,7 +834,7 @@ fun HomeScreen(
                 } else {
                     currentView = "sadhak"
                 }
-                showToast("सपना साधक को व्याख्या हेतु भेजा गया ✨")
+                showToast("सपना Sadhak को व्याख्या हेतु भेजा गया")
             },
             onOpenJournal = {
                 currentView = "dreams"
@@ -952,6 +842,20 @@ fun HomeScreen(
             onDismiss = { showDreamsModalSheet = false },
             isHindi = isHindi,
             language = language
+        )
+    }
+
+    // Bottom Sheet: Devbhasha Avatar Picker Sheet
+    if (showAvatarPickerSheet) {
+        DevbhashaAvatarPickerSheet(
+            currentAvatarId = currentAvatarId,
+            onDismiss = { showAvatarPickerSheet = false },
+            onAvatarSelected = { newAvatarId ->
+                currentAvatarId = newAvatarId
+                userSession.setAvatarId(newAvatarId)
+                UserManager.updateAvatarPreference(targetUserDocId, newAvatarId)
+                showToast("अवतार सफलतापूर्वक सहेजा गया ✓")
+            }
         )
     }
 

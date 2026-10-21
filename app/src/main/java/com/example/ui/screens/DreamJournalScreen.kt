@@ -39,13 +39,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.ui.models.DreamJournalEntry
-import com.example.ui.theme.TextDark
+import com.example.ui.theme.*
 import com.example.utils.UserSession
 import java.text.SimpleDateFormat
 import java.util.*
 
-private val SaffronOrange = Color(0xFF0D656C)
-private val SoftGreyBorder = Color(0xFFEFEFEF)
+private val TealPrimary = PrimaryPeacock
+private val SoftGreyBorder = LightTeal
 private val CardBackground = Color(0xFFFFFFFF)
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -53,7 +53,7 @@ private val CardBackground = Color(0xFFFFFFFF)
 fun DreamJournalScreen(
     onBackClick: () -> Unit,
     userId: String = "",
-    userName: String = "साधक",
+    userName: String = "Sadhak",
     onLogDream: ((String) -> Unit)? = null,
     onChatWithSadhak: () -> Unit = {},
     dreamHistory: List<DreamJournalEntry> = emptyList(),
@@ -264,7 +264,7 @@ fun DreamJournalScreen(
                         showCustomTagDialog = false
                         customTagInput = ""
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = SaffronOrange),
+                    colors = ButtonDefaults.buttonColors(containerColor = TealPrimary),
                     shape = RoundedCornerShape(10.dp)
                 ) {
                     Text("जोड़ें", color = Color.White, fontWeight = FontWeight.Bold)
@@ -337,7 +337,7 @@ fun DreamJournalScreen(
                 CircularProgressIndicator(
                     modifier = Modifier.size(20.dp),
                     strokeWidth = 2.dp,
-                    color = SaffronOrange
+                    color = TealPrimary
                 )
             }
         }
@@ -367,7 +367,7 @@ fun DreamJournalScreen(
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Surface(
                                     shape = CircleShape,
-                                    color = SaffronOrange.copy(alpha = 0.12f),
+                                    color = TealPrimary.copy(alpha = 0.12f),
                                     modifier = Modifier.size(34.dp)
                                 ) {
                                     Box(contentAlignment = Alignment.Center) {
@@ -390,7 +390,7 @@ fun DreamJournalScreen(
                             if (isMicActive) {
                                 Surface(
                                     shape = RoundedCornerShape(50),
-                                    color = SaffronOrange.copy(alpha = 0.15f)
+                                    color = TealPrimary.copy(alpha = 0.15f)
                                 ) {
                                     Text(
                                         text = when (currentLangCode) {
@@ -400,7 +400,7 @@ fun DreamJournalScreen(
                                         },
                                         fontSize = 11.sp,
                                         fontWeight = FontWeight.Bold,
-                                        color = SaffronOrange,
+                                        color = TealPrimary,
                                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
                                     )
                                 }
@@ -450,7 +450,7 @@ fun DreamJournalScreen(
                                     Icon(
                                         imageVector = Icons.Filled.Mic,
                                         contentDescription = "Voice Input Mic",
-                                        tint = if (isMicActive) SaffronOrange else Color(0xFF64748B),
+                                        tint = if (isMicActive) TealPrimary else Color(0xFF64748B),
                                         modifier = Modifier.size(24.dp)
                                     )
                                 }
@@ -460,7 +460,7 @@ fun DreamJournalScreen(
                                 .height(120.dp),
                             shape = RoundedCornerShape(16.dp),
                             colors = OutlinedTextFieldDefaults.colors(
-                                focusedBorderColor = SaffronOrange,
+                                focusedBorderColor = TealPrimary,
                                 unfocusedBorderColor = SoftGreyBorder,
                                 focusedContainerColor = Color.White,
                                 unfocusedContainerColor = Color(0xFFF8FAFC)
@@ -483,8 +483,8 @@ fun DreamJournalScreen(
                                 val isSelected = selectedTag == tag
                                 Surface(
                                     shape = RoundedCornerShape(50),
-                                    color = if (isSelected) SaffronOrange.copy(alpha = 0.12f) else Color(0xFFF1F5F9),
-                                    border = if (isSelected) BorderStroke(1.dp, SaffronOrange) else null,
+                                    color = if (isSelected) TealPrimary.copy(alpha = 0.12f) else Color(0xFFF1F5F9),
+                                    border = if (isSelected) BorderStroke(1.dp, TealPrimary) else null,
                                     modifier = Modifier
                                         .clip(RoundedCornerShape(50))
                                         .clickable { selectedTag = tag }
@@ -493,7 +493,7 @@ fun DreamJournalScreen(
                                         text = tag,
                                         fontSize = 11.sp,
                                         fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                                        color = if (isSelected) SaffronOrange else Color(0xFF475569),
+                                        color = if (isSelected) TealPrimary else Color(0xFF475569),
                                         modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
                                     )
                                 }
@@ -529,10 +529,10 @@ fun DreamJournalScreen(
                                 val isTagSelected = selectedTags.contains(tag)
                                 Surface(
                                     shape = RoundedCornerShape(8.dp),
-                                    color = if (isTagSelected) Color(0xFFF3E8FF) else Color(0xFFF8FAFC),
+                                    color = if (isTagSelected) SaffronSoftBg else Color(0xFFF8FAFC),
                                     border = BorderStroke(
                                         1.dp,
-                                        if (isTagSelected) Color(0xFF9333EA) else Color(0xFFE2E8F0)
+                                        if (isTagSelected) Saffron else Color(0xFFE2E8F0)
                                     ),
                                     modifier = Modifier
                                         .clip(RoundedCornerShape(8.dp))
@@ -548,7 +548,7 @@ fun DreamJournalScreen(
                                         text = tag,
                                         fontSize = 11.sp,
                                         fontWeight = if (isTagSelected) FontWeight.Bold else FontWeight.Medium,
-                                        color = if (isTagSelected) Color(0xFF7C3AED) else Color(0xFF64748B),
+                                        color = if (isTagSelected) Saffron else Color(0xFF64748B),
                                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                                     )
                                 }
@@ -582,8 +582,8 @@ fun DreamJournalScreen(
                             enabled = dreamInput.isNotBlank() && !isSaving,
                             shape = RoundedCornerShape(14.dp),
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = SaffronOrange,
-                                disabledContainerColor = SaffronOrange.copy(alpha = 0.45f)
+                                containerColor = TealPrimary,
+                                disabledContainerColor = TealPrimary.copy(alpha = 0.45f)
                             ),
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -681,7 +681,7 @@ fun DreamJournalScreen(
                                 val isAllSelected = activeCategoryFilterTag == null
                                 Surface(
                                     shape = RoundedCornerShape(16.dp),
-                                    color = if (isAllSelected) SaffronOrange else Color(0xFFF1F5F9),
+                                    color = if (isAllSelected) TealPrimary else Color(0xFFF1F5F9),
                                     modifier = Modifier
                                         .clip(RoundedCornerShape(16.dp))
                                         .clickable { activeCategoryFilterTag = null }
@@ -700,10 +700,10 @@ fun DreamJournalScreen(
                                 val isTagSelected = activeCategoryFilterTag == filterTag
                                 Surface(
                                     shape = RoundedCornerShape(16.dp),
-                                    color = if (isTagSelected) Color(0xFF7C3AED) else Color(0xFFFAF5FF),
+                                    color = if (isTagSelected) Saffron else SaffronSoftBg,
                                     border = BorderStroke(
                                         1.dp,
-                                        if (isTagSelected) Color(0xFF7C3AED) else Color(0xFFE9D5FF)
+                                        if (isTagSelected) Saffron else Saffron.copy(alpha = 0.3f)
                                     ),
                                     modifier = Modifier
                                         .clip(RoundedCornerShape(16.dp))
@@ -713,7 +713,7 @@ fun DreamJournalScreen(
                                 ) {
                                     Text(
                                         text = filterTag,
-                                        color = if (isTagSelected) Color.White else Color(0xFF7C3AED),
+                                        color = if (isTagSelected) Color.White else Saffron,
                                         fontSize = 11.sp,
                                         fontWeight = if (isTagSelected) FontWeight.Bold else FontWeight.Medium,
                                         modifier = Modifier.padding(horizontal = 9.dp, vertical = 5.dp)
@@ -758,7 +758,7 @@ fun DreamJournalScreen(
                             ) {
                                 Surface(
                                     shape = CircleShape,
-                                    color = SaffronOrange.copy(alpha = 0.12f),
+                                    color = TealPrimary.copy(alpha = 0.12f),
                                     modifier = Modifier.size(76.dp)
                                 ) {}
                                 Text(text = "🌙", fontSize = 40.sp)
@@ -859,7 +859,7 @@ private fun SwipeableDreamItemCard(
     val moodColor = when {
         moodTag.contains("शुभ") || moodTag.contains("Shubh") || moodTag.contains("Auspicious") -> Color(0xFF16A34A)
         moodTag.contains("Scary") || moodTag.contains("डरावना") || moodTag.contains("Darawna") -> Color(0xFFDC2626)
-        else -> SaffronOrange
+        else -> TealPrimary
     }
 
     SwipeToDismissBox(
@@ -928,7 +928,7 @@ private fun SwipeableDreamItemCard(
                         Icon(
                             imageVector = Icons.Outlined.CalendarToday,
                             contentDescription = "Date",
-                            tint = SaffronOrange,
+                            tint = TealPrimary,
                             modifier = Modifier.size(13.dp)
                         )
                         Spacer(modifier = Modifier.width(6.dp))
@@ -1013,14 +1013,14 @@ private fun SwipeableDreamItemCard(
                             val isHashtag = t.startsWith("#")
                             Surface(
                                 shape = RoundedCornerShape(6.dp),
-                                color = if (isHashtag) Color(0xFFF3E8FF) else SaffronOrange.copy(alpha = 0.08f),
-                                border = BorderStroke(0.8.dp, if (isHashtag) Color(0xFFDDD6FE) else SaffronOrange.copy(alpha = 0.25f))
+                                color = SaffronSoftBg,
+                                border = BorderStroke(0.8.dp, Saffron.copy(alpha = 0.25f))
                             ) {
                                 Text(
                                     text = t,
                                     fontSize = 10.5.sp,
                                     fontWeight = FontWeight.SemiBold,
-                                    color = if (isHashtag) Color(0xFF7C3AED) else SaffronOrange,
+                                    color = Saffron,
                                     modifier = Modifier.padding(horizontal = 7.dp, vertical = 2.5.dp)
                                 )
                             }
@@ -1034,8 +1034,8 @@ private fun SwipeableDreamItemCard(
                 if (isMeaningExpanded || !dream.meaning.isNullOrBlank()) {
                     Surface(
                         shape = RoundedCornerShape(12.dp),
-                        color = SaffronOrange.copy(alpha = 0.08f),
-                        border = BorderStroke(1.dp, SaffronOrange.copy(alpha = 0.25f)),
+                        color = TealPrimary.copy(alpha = 0.08f),
+                        border = BorderStroke(1.dp, TealPrimary.copy(alpha = 0.25f)),
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Column(modifier = Modifier.padding(12.dp)) {
@@ -1043,7 +1043,7 @@ private fun SwipeableDreamItemCard(
                                 Icon(
                                     imageVector = Icons.Filled.AutoAwesome,
                                     contentDescription = "Meaning",
-                                    tint = SaffronOrange,
+                                    tint = TealPrimary,
                                     modifier = Modifier.size(16.dp)
                                 )
                                 Spacer(modifier = Modifier.width(6.dp))
@@ -1055,7 +1055,7 @@ private fun SwipeableDreamItemCard(
                                     },
                                     fontSize = 12.5.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = SaffronOrange
+                                    color = TealPrimary
                                 )
                             }
                             Spacer(modifier = Modifier.height(6.dp))
@@ -1129,7 +1129,7 @@ private fun SwipeableDreamItemCard(
                             Icon(
                                 imageVector = Icons.Outlined.Share,
                                 contentDescription = "Share",
-                                tint = SaffronOrange,
+                                tint = TealPrimary,
                                 modifier = Modifier.size(14.dp)
                             )
                             Text(
@@ -1138,7 +1138,7 @@ private fun SwipeableDreamItemCard(
                                     "hgl" -> "Share"
                                     else -> "Share"
                                 },
-                                color = SaffronOrange,
+                                color = TealPrimary,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 11.5.sp
                             )
@@ -1150,15 +1150,15 @@ private fun SwipeableDreamItemCard(
                             onClick = onToggleMeaning,
                             shape = RoundedCornerShape(10.dp),
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = SaffronOrange.copy(alpha = 0.12f),
-                                contentColor = SaffronOrange
+                                containerColor = TealPrimary.copy(alpha = 0.12f),
+                                contentColor = TealPrimary
                             ),
                             contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
                         ) {
                             Icon(
                                 imageVector = Icons.Filled.AutoAwesome,
                                 contentDescription = "Swapna Phal",
-                                tint = SaffronOrange,
+                                tint = TealPrimary,
                                 modifier = Modifier.size(13.dp)
                             )
                             Spacer(modifier = Modifier.width(4.dp))
@@ -1170,7 +1170,7 @@ private fun SwipeableDreamItemCard(
                                 },
                                 fontSize = 11.5.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = SaffronOrange
+                                color = TealPrimary
                             )
                         }
                     }

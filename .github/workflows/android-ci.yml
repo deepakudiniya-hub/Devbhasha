@@ -45,6 +45,7 @@ jobs:
         env:
           GOOGLE_SERVICES_JSON_B64: ${{ secrets.GOOGLE_SERVICES_JSON_B64 }}
         run: |
+          if [ -f app/google-services.json ]; then exit 0; fi
           if [ -z "$GOOGLE_SERVICES_JSON_B64" ]; then
             echo "::error::Repository secret GOOGLE_SERVICES_JSON_B64 is not set."
             echo "Add it (base64 of app/google-services.json) under Settings > Secrets."
@@ -59,8 +60,8 @@ jobs:
           RAZORPAY_KEY: ${{ secrets.RAZORPAY_KEY }}
         run: |
           {
-            echo "AGORA_APP_ID=${AGORA_APP_ID}"
-            echo "RAZORPAY_KEY=${RAZORPAY_KEY}"
+            echo "AGORA_APP_ID=${AGORA_APP_ID:-YOUR_AGORA_APP_ID}"
+            echo "RAZORPAY_KEY=${RAZORPAY_KEY:-YOUR_RAZORPAY_KEY}"
           } > .env
 
       - name: Assemble (debug)

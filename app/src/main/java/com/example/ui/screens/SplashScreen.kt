@@ -35,7 +35,7 @@ import kotlinx.coroutines.delay
 
 /**
  * Splash Screen shown when the app launches ("app ke shuru hone pe").
- * Displays the iconic "देव" logo with smooth entrance animations.
+// English comment placeholder
  */
 @Composable
 fun SplashScreen(
@@ -95,7 +95,7 @@ fun SplashScreen(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // App Name / Brand Title: देव भाषा
+// English comment placeholder
             Text(
                 text = "देव भाषा",
                 fontFamily = AppFontFamily,
@@ -110,7 +110,7 @@ fun SplashScreen(
 
             // Subtitle / Tagline
             Text(
-                text = "वैदिक साधक • स्वप्न विचार • सीधा समाधान",
+                text = "वैदिक Sadhak • स्वप्न विचार • सीधा समाधान",
                 fontFamily = AppFontFamily,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Medium,

@@ -1,10 +1,12 @@
 package com.example.ui.screens
 
 import com.example.utils.PriceLabels
+import com.example.utils.Pricing
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -27,7 +29,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -55,6 +59,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun BentoEditorialRechargeSheet(
     currentBalance: Double,
+    language: String = "en",
     onDismiss: () -> Unit,
     onConfirmRecharge: (Int) -> Unit
 ) {
@@ -95,7 +100,7 @@ fun BentoEditorialRechargeSheet(
                 )
                 Surface(
                     shape = RoundedCornerShape(999.dp),
-                    color = Color(0xFFFAF6EA),
+                    color = Color(0xFFF1F5F9),
                     border = BorderStroke(1.dp, Color(0xFFE9DB97))
                 ) {
                     Text(
@@ -130,7 +135,7 @@ fun BentoEditorialRechargeSheet(
             // Price list (display labels only — amounts are decided by the server)
             Surface(
                 shape = RoundedCornerShape(14.dp),
-                color = Color(0xFFFAF6EA),
+                color = Color(0xFFF1F5F9),
                 border = BorderStroke(1.2.dp, Color(0xFFD0BF75)),
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -197,7 +202,7 @@ fun BentoEditorialRechargeSheet(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Text(text = "Recharge Amount:", fontSize = 12.sp, color = Color(0xFF64748B))
+                        Text(text = if (language == "hi") "टॉप-अप राशि:" else "Recharge Amount:", fontSize = 12.sp, color = Color(0xFF64748B))
                         Text(text = "₹$selectedAmount", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1E293B))
                     }
                     HorizontalDivider(modifier = Modifier.padding(vertical = 6.dp), color = Color(0xFFE2E8F0))
@@ -205,7 +210,7 @@ fun BentoEditorialRechargeSheet(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Text(text = "Total Credited in Wallet:", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1E293B))
+                        Text(text = if (language == "hi") "कुल वॉलेट क्रेडिट:" else "Total Credited in Wallet:", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1E293B))
                         Text(text = "₹$selectedAmount", fontSize = 14.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF16A34A))
                     }
                 }
@@ -223,7 +228,7 @@ fun BentoEditorialRechargeSheet(
                     .clickable { onConfirmRecharge(selectedAmount * 2) }
             ) {
                 Text(
-                    text = "Pay ₹$selectedAmount & Get ₹${selectedAmount * 2}",
+                    text = if (language == "hi") "भुगतान करें ₹$selectedAmount और पाएं ₹${selectedAmount * 2}" else "Pay ₹$selectedAmount & Get ₹${selectedAmount * 2}",
                     fontSize = 13.5.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.White,
@@ -303,18 +308,16 @@ fun BentoEditorialProfileSheet(
                 ) {
                     Surface(
                         shape = CircleShape,
-                        color = avatar.bgColor,
-                        border = BorderStroke(2.5.dp, Color(0xFFD0BF75)),
+                        border = BorderStroke(2.5.dp, MaterialTheme.colorScheme.secondary),
                         shadowElevation = 3.dp,
                         modifier = Modifier.size(58.dp)
                     ) {
-                        Box(contentAlignment = Alignment.Center) {
-                            Text(
-                                text = avatar.symbol,
-                                fontSize = 28.sp,
-                                color = Color.White
-                            )
-                        }
+                        Image(
+                            painter = painterResource(id = avatar.drawableRes),
+                            contentDescription = avatar.nameHi,
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier.fillMaxSize()
+                        )
                     }
                     // Small edit icon badge at the corner
                     Surface(
@@ -342,7 +345,7 @@ fun BentoEditorialProfileSheet(
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
-                            text = userName.ifBlank { "साधक" },
+                            text = userName.ifBlank { "Sadhak" },
                             fontFamily = AppFontFamily,
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Bold,
@@ -375,7 +378,7 @@ fun BentoEditorialProfileSheet(
             // Quick 1-Tap Sadhak Avatar Strip
             Surface(
                 shape = RoundedCornerShape(14.dp),
-                color = Color(0xFFFAF6EA),
+                color = Color(0xFFF1F5F9),
                 border = BorderStroke(1.dp, Color(0xFFE9DB97)),
                 modifier = Modifier
                     .fillMaxWidth()
@@ -389,7 +392,7 @@ fun BentoEditorialProfileSheet(
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(
-                                text = "✨ साधक अवतार चुनें",
+                                text = "✨ Sadhak अवतार चुनें",
                                 fontSize = 12.5.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = Color(0xFF125157)
@@ -431,7 +434,7 @@ fun BentoEditorialProfileSheet(
                             val isSelected = (opt.id == currentAvatarId)
                             Surface(
                                 shape = RoundedCornerShape(12.dp),
-                                color = if (isSelected) Color.White else Color(0xFFFAF6EA),
+                                color = if (isSelected) Color.White else Color(0xFFF1F5F9),
                                 border = BorderStroke(
                                     if (isSelected) 2.dp else 1.dp,
                                     if (isSelected) Color(0xFFD0BF75) else Color(0xFFE9DB97)
@@ -495,7 +498,7 @@ fun BentoEditorialProfileSheet(
                 Column {
                     ProfileMenuRow(
                         icon = Icons.Filled.AutoAwesome,
-                        title = if (isHi) "साधक अवतार बदलें (12+ विकल्प)" else "Change Sadhak Avatar",
+                        title = if (isHi) "Sadhak अवतार बदलें (12+ विकल्प)" else "Change Sadhak Avatar",
                         onClick = {
                             HapticFeedbackHelper.playClick(haptic)
                             showAvatarModalDialog = true
@@ -565,7 +568,7 @@ fun BentoEditorialProfileSheet(
                                     modifier = Modifier.weight(1f),
                                     shape = RoundedCornerShape(8.dp),
                                     colors = ButtonDefaults.outlinedButtonColors(
-                                        containerColor = if (isSelected) Terra.copy(alpha = 0.1f) else Color.Transparent,
+                                        containerColor = if (isSelected) SaffronSoftBg else Color.Transparent,
                                         contentColor = if (isSelected) Terra else Ink
                                     ),
                                     border = BorderStroke(1.dp, if (isSelected) Terra else EditorialLine),
@@ -613,261 +616,15 @@ fun BentoEditorialProfileSheet(
         // Full Sadhak Avatar Picker Dialog (12+ Spiritual & Devotional Avatars)
         // =========================================================================
         if (showAvatarModalDialog) {
-            var selectedPackageId by remember { mutableStateOf("sadhaks") }
-            var avatarSearchQuery by remember { mutableStateOf("") }
-            var tempSelectedAvatarId by remember { mutableStateOf(currentAvatarId) }
-            val tempAvatar = remember(tempSelectedAvatarId) { getAvatarById(tempSelectedAvatarId) }
-
-            val filteredAvatars = remember(selectedPackageId, avatarSearchQuery) {
-                ALL_AVATAR_OPTIONS.filter { opt ->
-                    val matchesPkg = (opt.packageId == selectedPackageId)
-                    val matchesQuery = if (avatarSearchQuery.isBlank()) true else {
-                        opt.nameHi.contains(avatarSearchQuery, ignoreCase = true) ||
-                        opt.nameEn.contains(avatarSearchQuery, ignoreCase = true) ||
-                        opt.descriptionHi.contains(avatarSearchQuery, ignoreCase = true) ||
-                        opt.badgeHi.contains(avatarSearchQuery, ignoreCase = true)
-                    }
-                    matchesPkg && matchesQuery
+            DevbhashaAvatarPickerSheet(
+                currentAvatarId = currentAvatarId,
+                onDismiss = { showAvatarModalDialog = false },
+                onAvatarSelected = { newAvatarId ->
+                    currentAvatarId = newAvatarId
+                    userSession.setAvatarId(newAvatarId)
+                    showAvatarModalDialog = false
+                    Toast.makeText(context, "अवतार सफलतापूर्वक सहेजा गया ✓", Toast.LENGTH_SHORT).show()
                 }
-            }
-
-            AlertDialog(
-                onDismissRequest = { showAvatarModalDialog = false },
-                title = {
-                    Column {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = "✨ साधक अवतार चुनें",
-                                fontFamily = AppFontFamily,
-                                fontSize = 18.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = Color(0xFF1E293B)
-                            )
-                            IconButton(
-                                onClick = { showAvatarModalDialog = false },
-                                modifier = Modifier.size(28.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Filled.Close,
-                                    contentDescription = "Close",
-                                    tint = Color(0xFF64748B),
-                                    modifier = Modifier.size(20.dp)
-                                )
-                            }
-                        }
-                        Text(
-                            text = "अपनी साधना एवं भक्ति अनुसार दिव्य अवतार चुनें",
-                            fontSize = 11.5.sp,
-                            color = Color(0xFF64748B)
-                        )
-                    }
-                },
-                text = {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .heightIn(max = 480.dp)
-                    ) {
-                        // Live Preview Header Card
-                        Surface(
-                            shape = RoundedCornerShape(16.dp),
-                            color = tempAvatar.bgColor.copy(alpha = 0.12f),
-                            border = BorderStroke(1.5.dp, tempAvatar.bgColor),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(bottom = 12.dp)
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(12.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(12.dp)
-                            ) {
-                                Surface(
-                                    shape = CircleShape,
-                                    color = tempAvatar.bgColor,
-                                    border = BorderStroke(2.dp, Color.White),
-                                    shadowElevation = 3.dp,
-                                    modifier = Modifier.size(54.dp)
-                                ) {
-                                    Box(contentAlignment = Alignment.Center) {
-                                        Text(text = tempAvatar.symbol, fontSize = 26.sp)
-                                    }
-                                }
-
-                                Column(modifier = Modifier.weight(1f)) {
-                                    Row(verticalAlignment = Alignment.CenterVertically) {
-                                        Text(
-                                            text = tempAvatar.nameHi,
-                                            fontSize = 15.sp,
-                                            fontWeight = FontWeight.Bold,
-                                            color = Color(0xFF1E293B)
-                                        )
-                                        Spacer(modifier = Modifier.width(6.dp))
-                                        Surface(
-                                            shape = RoundedCornerShape(999.dp),
-                                            color = tempAvatar.bgColor
-                                        ) {
-                                            Text(
-                                                text = tempAvatar.badgeHi,
-                                                fontSize = 9.5.sp,
-                                                fontWeight = FontWeight.Bold,
-                                                color = Color.White,
-                                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-                                            )
-                                        }
-                                    }
-                                    Text(
-                                        text = tempAvatar.descriptionHi.ifBlank { "सात्विक साधना अवतार" },
-                                        fontSize = 11.sp,
-                                        color = Color(0xFF475569),
-                                        lineHeight = 15.sp
-                                    )
-                                }
-                            }
-                        }
-
-                        // Category Tabs (Sadhaks, Symbols, Deities)
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(bottom = 10.dp),
-                            horizontalArrangement = Arrangement.spacedBy(6.dp)
-                        ) {
-                            AVATAR_PACKAGES.forEach { pkg ->
-                                val isSelected = (pkg.id == selectedPackageId)
-                                Surface(
-                                    shape = RoundedCornerShape(10.dp),
-                                    color = if (isSelected) Color(0xFF125157) else Color(0xFFF1F5F9),
-                                    modifier = Modifier
-                                        .weight(1f)
-                                        .clickable {
-                                            HapticFeedbackHelper.playClick(haptic)
-                                            selectedPackageId = pkg.id
-                                        }
-                                ) {
-                                    Text(
-                                        text = pkg.titleHi,
-                                        fontSize = 11.sp,
-                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                                        color = if (isSelected) Color.White else Color(0xFF475569),
-                                        textAlign = TextAlign.Center,
-                                        maxLines = 1,
-                                        modifier = Modifier.padding(vertical = 7.dp, horizontal = 2.dp)
-                                    )
-                                }
-                            }
-                        }
-
-                        // Grid List of Avatars
-                        LazyColumn(
-                            verticalArrangement = Arrangement.spacedBy(8.dp),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .weight(1f)
-                        ) {
-                            items(filteredAvatars) { opt ->
-                                val isSelected = (opt.id == tempSelectedAvatarId)
-                                Surface(
-                                    shape = RoundedCornerShape(14.dp),
-                                    color = if (isSelected) Color(0xFFFAF6EA) else Color.White,
-                                    border = BorderStroke(
-                                        if (isSelected) 2.dp else 1.dp,
-                                        if (isSelected) Color(0xFFD0BF75) else Color(0xFFE2E8F0)
-                                    ),
-                                    shadowElevation = if (isSelected) 2.dp else 0.5.dp,
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .clickable {
-                                            HapticFeedbackHelper.playClick(haptic)
-                                            tempSelectedAvatarId = opt.id
-                                        }
-                                ) {
-                                    Row(
-                                        modifier = Modifier.padding(10.dp),
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(10.dp)
-                                    ) {
-                                        Surface(
-                                            shape = CircleShape,
-                                            color = opt.bgColor,
-                                            modifier = Modifier.size(38.dp)
-                                        ) {
-                                            Box(contentAlignment = Alignment.Center) {
-                                                Text(text = opt.symbol, fontSize = 20.sp)
-                                            }
-                                        }
-
-                                        Column(modifier = Modifier.weight(1f)) {
-                                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                                Text(
-                                                    text = opt.nameHi,
-                                                    fontSize = 13.sp,
-                                                    fontWeight = FontWeight.Bold,
-                                                    color = Color(0xFF1E293B)
-                                                )
-                                                Spacer(modifier = Modifier.width(6.dp))
-                                                Surface(
-                                                    shape = RoundedCornerShape(999.dp),
-                                                    color = opt.bgColor.copy(alpha = 0.15f)
-                                                ) {
-                                                    Text(
-                                                        text = opt.badgeHi,
-                                                        fontSize = 9.sp,
-                                                        fontWeight = FontWeight.Bold,
-                                                        color = opt.bgColor,
-                                                        modifier = Modifier.padding(horizontal = 5.dp, vertical = 1.dp)
-                                                    )
-                                                }
-                                            }
-                                            Text(
-                                                text = opt.descriptionHi,
-                                                fontSize = 10.5.sp,
-                                                color = Color(0xFF64748B),
-                                                maxLines = 1,
-                                                overflow = TextOverflow.Ellipsis
-                                            )
-                                        }
-
-                                        if (isSelected) {
-                                            Icon(
-                                                imageVector = Icons.Filled.Check,
-                                                contentDescription = "Selected",
-                                                tint = Color(0xFF125157),
-                                                modifier = Modifier.size(20.dp)
-                                            )
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                },
-                confirmButton = {
-                    Button(
-                        onClick = {
-                            HapticFeedbackHelper.playClick(haptic)
-                            currentAvatarId = tempSelectedAvatarId
-                            userSession.setAvatarId(tempSelectedAvatarId)
-                            showAvatarModalDialog = false
-                            Toast.makeText(context, "साधक अवतार लागू हुआ: ${tempAvatar.nameHi} ✨", Toast.LENGTH_SHORT).show()
-                        },
-                        shape = RoundedCornerShape(12.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF125157)),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text(
-                            text = "यह अवतार सेट करें (Apply Avatar)",
-                            fontSize = 13.5.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.White
-                        )
-                    }
-                },
-                dismissButton = null
             )
         }
     }
@@ -1154,21 +911,17 @@ fun PoochhoProblemConsultSheet(
     language: String = if (isHindi) "hi" else "en"
 ) {
     var problemText by remember { mutableStateOf("") }
-    var selectedCategory by remember { mutableStateOf(initialCategory ?: "💼 करियर / व्यापार") }
+    var selectedCategory by remember { mutableStateOf(initialCategory ?: "करियर / व्यापार") }
     var selectedSadhak by remember { mutableStateOf<SadhakItem?>(sadhaks.firstOrNull()) }
     var isListening by remember { mutableStateOf(false) }
 
     val quickProblems = listOf(
-        "💼 करियर / व्यापार",
-        "❤️ विवाह / संबंध",
-        "🩺 स्वास्थ्य / शांति",
-        "🔮 कुंडली / ग्रह दोष",
-        "🏡 पारिवारिक क्लेश",
-        "🕉️ साधना / मंत्र"
-    )
-
-    val saffronGradient = Brush.horizontalGradient(
-        listOf(SaffronGradientStart, SaffronGradientEnd)
+        "करियर / व्यापार",
+        "विवाह / संबंध",
+        "स्वास्थ्य / शांति",
+        "कुंडली / ग्रह दोष",
+        "पारिवारिक क्लेश",
+        "साधना / मंत्र"
     )
 
     ModalBottomSheet(
@@ -1221,7 +974,7 @@ fun PoochhoProblemConsultSheet(
                         }
                     }
                     Text(
-                        text = "अपनी किसी भी समस्या का समाधान पाएं — साधक से चैट अथवा वॉइस कॉल द्वारा",
+                        text = "अपनी किसी भी समस्या का समाधान पाएं — Sadhak से चैट अथवा वॉइस कॉल द्वारा",
                         fontSize = 12.sp,
                         color = Color(0xFF737373)
                     )
@@ -1362,7 +1115,7 @@ fun PoochhoProblemConsultSheet(
 
             // Sadhak Selection Row
             Text(
-                text = "परामर्श हेतु साधक चुनें:",
+                text = "परामर्श हेतु Sadhak चुनें:",
                 fontSize = 12.5.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color(0xFF000000)
@@ -1442,16 +1195,15 @@ fun PoochhoProblemConsultSheet(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                // Primary: Chat (Saffron Gradient)
+                // Primary: Chat (Solid Saffron)
                 Surface(
-                    shape = RoundedCornerShape(999.dp),
-                    color = Color.Transparent,
-                    shadowElevation = 3.dp,
+                    shape = RoundedCornerShape(12.dp),
+                    color = Saffron,
+                    shadowElevation = 0.dp,
                     modifier = Modifier
                         .weight(1f)
-                        .height(50.dp)
-                        .clip(RoundedCornerShape(999.dp))
-                        .background(saffronGradient)
+                        .height(48.dp)
+                        .clip(RoundedCornerShape(12.dp))
                         .clickable {
                             val active = selectedSadhak ?: sadhaks.firstOrNull()
                             if (active != null) {
@@ -1473,7 +1225,7 @@ fun PoochhoProblemConsultSheet(
                         )
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
-                            text = "चैट करें (Chat)",
+                            text = "चैट (₹${Pricing.TEXT_QUESTION_PRICE_RUPEES})",
                             fontSize = 13.5.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color.White
@@ -1511,7 +1263,7 @@ fun PoochhoProblemConsultSheet(
                         )
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
-                            text = "कॉल करें (Call)",
+                            text = "कॉल (₹${Pricing.CONSULTATION_PRICE_RUPEES})",
                             fontSize = 13.5.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color(0xFF000000)
@@ -1561,16 +1313,12 @@ fun DreamQuickRecorderSheet(
         }
     }
 
-    val saffronGradient = Brush.horizontalGradient(
-        listOf(SaffronGradientStart, SaffronGradientEnd)
-    )
-
     val moodTags = listOf(
-        "🌿 शुभ (Shubh)",
-        "⚡ चेतावनी (Warning)",
-        "🕊️ मुक्ति (Peace)",
-        "✨ रहस्यमय (Mystic)",
-        "🌊 नदी / प्रकृति"
+        "शुभ (Shubh)",
+        "चेतावनी (Warning)",
+        "मुक्ति (Peace)",
+        "रहस्यमय (Mystic)",
+        "नदी / प्रकृति"
     )
 
     ModalBottomSheet(
@@ -1623,7 +1371,7 @@ fun DreamQuickRecorderSheet(
                         }
                     }
                     Text(
-                        text = "सपना दर्ज करें और साधक से उसका आध्यात्मिक अर्थ व फल जानें 🌙✨",
+                        text = "सपना दर्ज करें और Sadhak से उसका आध्यात्मिक अर्थ व फल जानें 🌙✨",
                         fontSize = 12.sp,
                         color = Color(0xFF737373)
                     )
@@ -1881,25 +1629,35 @@ fun DreamQuickRecorderSheet(
                     }
                 }
 
-                // Primary: Ask Sadhak (Saffron Gradient)
+                // Primary: Ask Sadhak (Solid Saffron)
                 Surface(
-                    shape = RoundedCornerShape(999.dp),
-                    color = Color.Transparent,
-                    shadowElevation = 3.dp,
+                    shape = RoundedCornerShape(12.dp),
+                    color = Saffron,
+                    shadowElevation = 0.dp,
                     modifier = Modifier
                         .weight(1f)
-                        .height(50.dp)
-                        .clip(RoundedCornerShape(999.dp))
-                        .background(saffronGradient)
+                        .height(48.dp)
+                        .clip(RoundedCornerShape(12.dp))
                         .clickable {
                             val textToAsk = dreamText.trim().ifBlank { "सपने का अर्थ व समाधान बताएं" }
                             onAskSadhak(textToAsk)
                             onDismiss()
                         }
                 ) {
-                    Box(contentAlignment = Alignment.Center) {
+                    Row(
+                        modifier = Modifier.fillMaxSize(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Outlined.Chat,
+                            contentDescription = null,
+                            tint = Color.White,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
                         Text(
-                            text = "🔮 साधक से अर्थ पूछें",
+                            text = "Sadhak से अर्थ पूछें",
                             fontSize = 13.5.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color.White

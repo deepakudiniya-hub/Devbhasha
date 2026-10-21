@@ -15,6 +15,9 @@ object AgoraVoiceManager {
     var isSimulationMode = true
         private set
 
+    private var channel: String? = null
+    private val handler = android.os.Handler(android.os.Looper.getMainLooper())
+    var onError: ((Int) -> Unit)? = null
     var onRemoteJoined: (() -> Unit)? = null
     var onRemoteLeft: (() -> Unit)? = null
     var onJoined: (() -> Unit)? = null
@@ -36,14 +39,15 @@ object AgoraVoiceManager {
         return try {
             rtcEngine = RtcEngine.create(context, appId.trim(), object : IRtcEngineEventHandler() {
                 override fun onJoinChannelSuccess(channel: String?, uid: Int, elapsed: Int) {
-                    onJoined?.invoke()
+                    handler.post { onJoined?.invoke() }
                 }
                 override fun onUserJoined(uid: Int, elapsed: Int) {
-                    onRemoteJoined?.invoke()
+                    handler.post { onRemoteJoined?.invoke() }
                 }
                 override fun onUserOffline(uid: Int, reason: Int) {
-                    onRemoteLeft?.invoke()
+                    handler.post { onRemoteLeft?.invoke() }
                 }
+                override fun onError(err: Int) { handler.post { onError?.invoke(err) } }
             })
             rtcEngine?.setChannelProfile(Constants.CHANNEL_PROFILE_COMMUNICATION)
             isSimulationMode = false
@@ -64,10 +68,18 @@ object AgoraVoiceManager {
             Log.w(TAG, "Refusing to join Agora channel without a server-issued token")
             return false
         }
-        return engine.joinChannel(token, channelName.trim(), "", uid) == 0
+        val ok = engine.joinChannel(token, channelName.trim(), "", uid) == 0
+        if (ok) channel = channelName.trim()
+        return ok
+    }
+
+    fun joinOrRenew(channelName: String, token: String, uid: Int): Boolean {
+        if (channel == channelName) return rtcEngine?.renewToken(token) == 0
+        return join(channelName, token, uid)
     }
 
     fun leave() {
+        channel = null
         try { rtcEngine?.leaveChannel() } catch (e: Exception) { }
     }
 

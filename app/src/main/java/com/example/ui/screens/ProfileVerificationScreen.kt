@@ -57,8 +57,8 @@ fun ProfileVerificationScreen(
                 profile = UserProfile(
                     authUid = uid,
                     displayName = name,
-                    email = "devotee@devbhasha.in",
-                    role = "साधक"
+                    email = "devotee@devbhasha.com",
+                    role = "Sadhak"
                 )
                 statusMessage = "Profile verified locally!"
                 isLoading = false

@@ -1,0 +1,8 @@
+{
+  "firestore": [
+    {
+      "database": "devbhasha-d9e22",
+      "rules": "firestore.rules"
+    }
+  ]
+}

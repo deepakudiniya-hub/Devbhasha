@@ -11,23 +11,25 @@ enum class BottomNavTab(val labelHi: String, val labelEn: String) {
     CALL("कॉल", "Call"),
     REMEDY("उपाय", "Remedy"),
     PROFILE("प्रोफ़ाइल", "Profile"),
-    SADHAK("साधक", "Sadhak")
+    SADHAK("Sadhak", "Sadhak")
 }
 
 enum class AppLanguage {
-    HINDI, ENGLISH, HINGLISH;
+    HINDI, ENGLISH, HINGLISH, SANSKRIT;
 
     val code: String
         get() = when (this) {
             HINDI -> "hi"
             ENGLISH -> "en"
             HINGLISH -> "hgl"
+            SANSKRIT -> "sa"
         }
 
     companion object {
         fun fromCode(code: String): AppLanguage = when (code.lowercase()) {
             "hi", "hindi" -> HINDI
             "hgl", "hinglish" -> HINGLISH
+            "sa", "sanskrit" -> SANSKRIT
             else -> ENGLISH
         }
     }
@@ -46,10 +48,10 @@ data class CircleCategoryItem(
 
 val DEFAULT_CIRCLE_CATEGORIES = listOf(
     CircleCategoryItem(
-        id = "horoscope",
-        titleHi = "दैनिक राशिफल",
-        titleEn = "Horoscope",
-        symbol = "🌟",
+        id = "vedic_shloka",
+        titleHi = "वैदिक श्लोक",
+        titleEn = "Vedic Shloka",
+        symbol = "📖",
         primaryColor = Color(0xFF0D656C),
         softBgColor = Color(0xFFFAFAFA),
         borderColor = Color(0xFFEFEFEF)
@@ -64,17 +66,17 @@ val DEFAULT_CIRCLE_CATEGORIES = listOf(
         borderColor = Color(0xFFEFEFEF)
     ),
     CircleCategoryItem(
-        id = "kundli_matching",
-        titleHi = "कुंडली मिलान",
-        titleEn = "Matching",
-        symbol = "💍",
+        id = "upanishad",
+        titleHi = "उपनिषद सार",
+        titleEn = "Upanishad Essence",
+        symbol = "📜",
         primaryColor = Color(0xFFE11D48),
         softBgColor = Color(0xFFFEE2E2),
         borderColor = Color(0xFFFECDD3)
     ),
     CircleCategoryItem(
         id = "chat_astrologer",
-        titleHi = "साधक चैट",
+        titleHi = "Sadhak चैट",
         titleEn = "Chat",
         symbol = "💬",
         primaryColor = Color(0xFF0284C7),
@@ -83,7 +85,7 @@ val DEFAULT_CIRCLE_CATEGORIES = listOf(
     ),
     CircleCategoryItem(
         id = "call_astrologer",
-        titleHi = "साधक कॉल",
+        titleHi = "Sadhak कॉल",
         titleEn = "Call",
         symbol = "📞",
         primaryColor = Color(0xFF16A34A),
@@ -302,21 +304,31 @@ val DEFAULT_RASHIS = listOf(
 )
 
 data class SadhakItem(
-    val id: String,
-    val nameHi: String,
-    val nameEn: String,
-    val titleHi: String,
-    val titleEn: String,
+    val id: String = "",
+    val nameHi: String = "",
+    val nameEn: String = "",
+    val titleHi: String = "",
+    val titleEn: String = "",
     val experienceHi: String = "10+ वर्ष",
     val experienceEn: String = "10+ yrs",
     val rating: String = "4.9",
     val initialHi: String = "सा",
     val initialEn: String = "S",
-    val isOnline: Boolean = true,
+    val isVerified: Boolean = false,
+    val isOnline: Boolean = false,
     val consultationFee: String = "₹499 / 20 min",
     val bio: String = "वैदिक परंपरा के अनुसार सटीक मार्गदर्शन और अचूक उपाय प्रदान करते हैं।",
     val phone: String = ""
-)
+) {
+    fun getAvatarRes(): Int {
+        val hash = if (id.isNotBlank()) Math.abs(id.hashCode()) else Math.abs(nameHi.hashCode())
+        val index = (hash % 15) + 1
+        val avatarId = String.format(java.util.Locale.US, "avatar_%02d", index)
+        return getAvatarDrawableRes(avatarId)
+    }
+}
+
+typealias Sadhak = SadhakItem
 
 
 
@@ -336,13 +348,14 @@ data class Seeker(
     val name: String = "",
     val rating: Double = 0.0,
     val status: String = "",
+    val isVerified: Boolean = false,
     val isOnline: Boolean = false
 )
 
 fun Seeker.toSadhakItem(): SadhakItem {
-    val displayName = if (name.isNotBlank()) name else "वैदिक साधक"
+    val displayName = if (name.isNotBlank()) name else "Vedic Sadhak"
     val displayRating = if (rating > 0.0) String.format(java.util.Locale.US, "%.1f", rating) else "5.0"
-    val displayTitle = if (status.isNotBlank()) status else "वैदिक मार्गदर्शन"
+    val displayTitle = if (status.isNotBlank()) status else "Vedic Guidance"
     val checkOnline = isOnline ||
         status.equals("online", ignoreCase = true) ||
         status.contains("online", ignoreCase = true) ||
@@ -354,14 +367,15 @@ fun Seeker.toSadhakItem(): SadhakItem {
         nameEn = displayName,
         titleHi = displayTitle,
         titleEn = displayTitle,
-        experienceHi = "अनुभवी",
+        experienceHi = "Experienced",
         experienceEn = "Experienced",
         rating = displayRating,
         initialHi = displayName.firstOrNull()?.toString() ?: "सा",
         initialEn = displayName.firstOrNull()?.uppercase() ?: "S",
+        isVerified = isVerified,
         isOnline = checkOnline,
         consultationFee = "₹499 / 20 min",
-        bio = if (status.isNotBlank()) status else "वैदिक परंपरा अनुसार मार्गदर्शन।"
+        bio = if (status.isNotBlank()) status else "Guidance according to Vedic tradition."
     )
 }
 
@@ -374,185 +388,50 @@ data class AvatarPackage(
 
 data class AvatarOption(
     val id: String,
-    val packageId: String,
+    val packageId: String = "avatars",
     val nameHi: String,
     val nameEn: String,
-    val symbol: String,
-    val bgColor: Color,
+    val drawableRes: Int,
+    val symbol: String = "",
+    val bgColor: Color = Color.Transparent,
     val descriptionHi: String = "",
-    val badgeHi: String = "साधक"
+    val badgeHi: String = "Sadhak"
 )
 
 val AVATAR_PACKAGES = listOf(
     AvatarPackage(
-        id = "sadhaks",
-        titleHi = "साधक व तपस्वी (12+)",
-        titleEn = "Sadhaks & Yogis",
-        description = "ध्यानस्थ, रुद्राक्षधारी, ऋषि, पंडित, योगिनी व तपस्वी अवतार"
-    ),
-    AvatarPackage(
-        id = "symbols",
-        titleHi = "सनातन प्रतीक",
-        titleEn = "Sacred Symbols",
-        description = "ॐ, दीपक, शंख, कमल, सूर्य व मंगल कलश"
-    ),
-    AvatarPackage(
-        id = "deities",
-        titleHi = "देवता कृपा",
-        titleEn = "Divine Deities",
-        description = "शिव, गणेश, हनुमान, दुर्गा व नारायण स्वरूप"
+        id = "avatars",
+        titleHi = "Divine Sadhak Avatars (15)",
+        titleEn = "Spiritual Avatars (15)",
+        description = "Divine avatars for Vedic practice and spiritual identity"
     )
 )
 
 val ALL_AVATAR_OPTIONS = listOf(
-    // -------------------------------------------------------------
-    // पैकेज 1: साधक व तपस्वी (12+ Sadhak Avatars)
-    // -------------------------------------------------------------
-    AvatarOption(
-        id = "sadhak_dhyan",
-        packageId = "sadhaks",
-        nameHi = "ध्यानस्थ साधक",
-        nameEn = "Meditation Yogi",
-        symbol = "🧘",
-        bgColor = Color(0xFF059669),
-        descriptionHi = "गहन ध्यान, समाधि एवं एकाग्रता का प्रतीक",
-        badgeHi = "ध्यान योग"
-    ),
-    AvatarOption(
-        id = "sadhak_rudraksha",
-        packageId = "sadhaks",
-        nameHi = "रुद्राक्षधारी साधक",
-        nameEn = "Rudraksha Sadhak",
-        symbol = "📿",
-        bgColor = Color(0xFF125157),
-        descriptionHi = "भगवान शिव के उपासक एवं रुद्राक्ष माला साधक",
-        badgeHi = "शैव साधक"
-    ),
-    AvatarOption(
-        id = "sadhak_rishi",
-        packageId = "sadhaks",
-        nameHi = "वैदिक महर्षि",
-        nameEn = "Vedic Rishi",
-        symbol = "🌿",
-        bgColor = Color(0xFF15803D),
-        descriptionHi = "वेदों, उपनिषदों एवं सनातन ज्ञान के ज्ञाता",
-        badgeHi = "तत्वदर्शी"
-    ),
-    AvatarOption(
-        id = "sadhak_shakti",
-        packageId = "sadhaks",
-        nameHi = "शक्ति / तंत्र साधक",
-        nameEn = "Shakti Sadhak",
-        symbol = "🔱",
-        bgColor = Color(0xFF7E22CE),
-        descriptionHi = "भगवती आदिशक्ति व भैरव के गूढ़ उपासक",
-        badgeHi = "शक्ति उपासक"
-    ),
-    AvatarOption(
-        id = "sadhak_bhakt",
-        packageId = "sadhaks",
-        nameHi = "अनन्य भक्त (नमन)",
-        nameEn = "Humble Devotee",
-        symbol = "🙏",
-        bgColor = Color(0xFF0D656C),
-        descriptionHi = "ईश्वर के प्रति पूर्ण समर्पण व विनम्रता का भाव",
-        badgeHi = "भक्ति भाव"
-    ),
-    AvatarOption(
-        id = "sadhak_pandit",
-        packageId = "sadhaks",
-        nameHi = "वैदिक आचार्य / पंडित",
-        nameEn = "Vedic Acharya",
-        symbol = "🪔",
-        bgColor = Color(0xFF125157),
-        descriptionHi = "पवित्र मंत्रोच्चार, यज्ञ व कर्मकांड विशेषज्ञ",
-        badgeHi = "कर्मकांडी"
-    ),
-    AvatarOption(
-        id = "sadhak_sanyasi",
-        packageId = "sadhaks",
-        nameHi = "संन्यासी / तपस्वी",
-        nameEn = "Ascetic Hermit",
-        symbol = "🕉️",
-        bgColor = Color(0xFF0D656C),
-        descriptionHi = "वैराग्य, तपस्या एवं आत्म-साक्षात्कार मार्गी",
-        badgeHi = "तपस्वी"
-    ),
-    AvatarOption(
-        id = "sadhak_jyotish",
-        packageId = "sadhaks",
-        nameHi = "दैवज्ञ ज्योतिषी",
-        nameEn = "Astrology Seeker",
-        symbol = "📜",
-        bgColor = Color(0xFF1E40AF),
-        descriptionHi = "नवग्रह, नक्षत्र एवं काल गणना के मर्मज्ञ",
-        badgeHi = "ज्योतिर्विद"
-    ),
-    AvatarOption(
-        id = "sadhak_homa",
-        packageId = "sadhaks",
-        nameHi = "अग्निहोत्री साधक",
-        nameEn = "Yajna Priest",
-        symbol = "🔥",
-        bgColor = Color(0xFFDC2626),
-        descriptionHi = "नित्य अग्निहोत्र व वैदिक यज्ञ आहुति साधक",
-        badgeHi = "अग्निहोत्र"
-    ),
-    AvatarOption(
-        id = "sadhak_yogini",
-        packageId = "sadhaks",
-        nameHi = "साधिका / योगिनी",
-        nameEn = "Yogini Sadhika",
-        symbol = "🧘‍♀️",
-        bgColor = Color(0xFFBE185D),
-        descriptionHi = "कुंडलिनी जागरण व प्राणायाम साधिका",
-        badgeHi = "योग साधिका"
-    ),
-    AvatarOption(
-        id = "sadhak_satsang",
-        packageId = "sadhaks",
-        nameHi = "संकीर्तन साधक",
-        nameEn = "Kirtan Seeker",
-        symbol = "🪕",
-        bgColor = Color(0xFFA21CAF),
-        descriptionHi = "भगवन्नाम संकीर्तन एवं संगीत उपासना",
-        badgeHi = "कीर्तन रस"
-    ),
-    AvatarOption(
-        id = "sadhak_gurukul",
-        packageId = "sadhaks",
-        nameHi = "गुरुकुल ब्रह्मचारी",
-        nameEn = "Brahmachari Disciple",
-        symbol = "📖",
-        bgColor = Color(0xFF4338CA),
-        descriptionHi = "गुरुकुल परंपरा में निरंतर स्वाध्याय व ब्रह्मचर्य",
-        badgeHi = "विद्यार्थी"
-    ),
-
-    // -------------------------------------------------------------
-    // पैकेज 2: सनातन प्रतीक (Sacred Symbols)
-    // -------------------------------------------------------------
-    AvatarOption("om", "symbols", "ॐ (प्रणव नाद)", "Om", "ॐ", Color(0xFF0D656C), "ब्रह्मांड की प्रथम पावन ध्वनि", "सनातन"),
-    AvatarOption("deepak", "symbols", "दीपक (ज्योति)", "Deepak", "🪔", Color(0xFF0D656C), "अंधकार से प्रकाश की ओर ले जाने वाली ज्योति", "पावन ज्योति"),
-    AvatarOption("kamal", "symbols", "कमल पुष्प", "Lotus", "🪷", Color(0xFFDB2777), "पवित्रता, अनासक्ति एवं भगवती लक्ष्मी का आसन", "पवित्र"),
-    AvatarOption("shankh", "symbols", "मंगल शंख", "Shankh", "🐚", Color(0xFF0284C7), "सकारात्मक ऊर्जा व विजय का पावन उद्घोष", "मंगल"),
-    AvatarOption("surya", "symbols", "सूर्य देव", "Surya", "☀️", Color(0xFFD0BF75), "ऊर्जा, तेज एवं नवजीवन के प्रत्यक्ष देवता", "तेजस्वी"),
-    AvatarOption("kalash", "symbols", "मंगल कलश", "Kalash", "🏺", Color(0xFF125157), "समृद्धि, मांगलिकता व वरुण देव का प्रतीक", "मांगलिक"),
-
-    // -------------------------------------------------------------
-    // पैकेज 3: देवता कृपा (Divine Deities)
-    // -------------------------------------------------------------
-    AvatarOption("deva_shiva", "deities", "भगवान शिव", "Lord Shiva", "🔱", Color(0xFF475569), "देवाधिदेव महादेव की असीम अनुकंपा", "महादेव"),
-    AvatarOption("deva_ganesh", "deities", "श्री गणेश", "Lord Ganesha", "🐘", Color(0xFFE11D48), "प्रथम पूज्य विघ्नहर्ता मंगलकर्ता", "विघ्नहर्ता"),
-    AvatarOption("deva_hanuman", "deities", "बजरंगबली हनुमान", "Lord Hanuman", "🚩", Color(0xFF0D656C), "बल, बुद्धि, विद्या व संकटमोचन कृपा", "संकटमोचन"),
-    AvatarOption("deva_durga", "deities", "माँ दुर्गा भवानी", "Maa Durga", "🦁", Color(0xFFB91C1C), "दुष्टनाशिनी, शक्तिदायिनी जगदम्बा", "जगदम्बा"),
-    AvatarOption("deva_vishnu", "deities", "भगवान श्री नारायण", "Lord Vishnu", "🪷", Color(0xFF1D4ED8), "जगत के पालनहार श्री हरि विष्णु", "पालनहार")
+    AvatarOption("avatar_01", "avatars", "Divine Sadhak 1", "Devotee 1", com.example.R.drawable.avatar_01, "", Color.Transparent, "Sacred spiritual form", "Sadhak"),
+    AvatarOption("avatar_02", "avatars", "Divine Sadhak 2", "Devotee 2", com.example.R.drawable.avatar_02, "", Color.Transparent, "Ascetic and meditative form", "Sadhak"),
+    AvatarOption("avatar_03", "avatars", "Divine Sadhak 3", "Devotee 3", com.example.R.drawable.avatar_03, "", Color.Transparent, "Vedic scholar form", "Sadhak"),
+    AvatarOption("avatar_04", "avatars", "Divine Sadhak 4", "Devotee 4", com.example.R.drawable.avatar_04, "", Color.Transparent, "Devotion and practice form", "Sadhak"),
+    AvatarOption("avatar_05", "avatars", "Divine Sadhak 5", "Devotee 5", com.example.R.drawable.avatar_05, "", Color.Transparent, "Calm mind and self-realization", "Sadhak"),
+    AvatarOption("avatar_06", "avatars", "Divine Sadhak 6", "Devotee 6", com.example.R.drawable.avatar_06, "", Color.Transparent, "Pure Vedic Sadhak", "Sadhak"),
+    AvatarOption("avatar_07", "avatars", "Divine Sadhak 7", "Devotee 7", com.example.R.drawable.avatar_07, "", Color.Transparent, "Radiant practice form", "Sadhak"),
+    AvatarOption("avatar_08", "avatars", "Divine Sadhak 8", "Devotee 8", com.example.R.drawable.avatar_08, "", Color.Transparent, "Spiritual traveler", "Sadhak"),
+    AvatarOption("avatar_09", "avatars", "Divine Sadhak 9", "Devotee 9", com.example.R.drawable.avatar_09, "", Color.Transparent, "Sanatani Sadhak", "Sadhak"),
+    AvatarOption("avatar_10", "avatars", "Divine Sadhak 10", "Devotee 10", com.example.R.drawable.avatar_10, "", Color.Transparent, "Practice and renunciation form", "Sadhak"),
+    AvatarOption("avatar_11", "avatars", "Divine Sadhak 11", "Devotee 11", com.example.R.drawable.avatar_11, "", Color.Transparent, "Devotional Sadhak", "Sadhak"),
+    AvatarOption("avatar_12", "avatars", "Divine Sadhak 12", "Devotee 12", com.example.R.drawable.avatar_12, "", Color.Transparent, "Focused mind Sadhak", "Sadhak"),
+    AvatarOption("avatar_13", "avatars", "Divine Sadhak 13", "Devotee 13", com.example.R.drawable.avatar_13, "", Color.Transparent, "Knowledge seeker Sadhak", "Sadhak"),
+    AvatarOption("avatar_14", "avatars", "Divine Sadhak 14", "Devotee 14", com.example.R.drawable.avatar_14, "", Color.Transparent, "Path of truth and righteousness", "Sadhak"),
+    AvatarOption("avatar_15", "avatars", "Divine Sadhak 15", "Devotee 15", com.example.R.drawable.avatar_15, "", Color.Transparent, "Supreme sacred form", "Sadhak")
 )
 
 fun getAvatarById(id: String): AvatarOption {
     return ALL_AVATAR_OPTIONS.find { it.id == id } 
-        ?: ALL_AVATAR_OPTIONS.find { it.id == "sadhak_dhyan" }
         ?: ALL_AVATAR_OPTIONS.first()
+}
+
+fun getAvatarDrawableRes(id: String): Int {
+    return getAvatarById(id).drawableRes
 }
 
 // -------------------------------------------------------------
@@ -588,7 +467,7 @@ data class DreamJournalEntry(
             val date = Date(timestamp)
             SimpleDateFormat("d MMM yyyy · hh:mm a", Locale.getDefault()).format(date)
         } else {
-            datePhase.ifBlank { "आज" }
+            datePhase.ifBlank { "Today" }
         }
     }
 
@@ -597,7 +476,7 @@ data class DreamJournalEntry(
             val date = Date(timestamp)
             SimpleDateFormat("d MMM yyyy (EEEE)", Locale.getDefault()).format(date)
         } else {
-            datePhase.ifBlank { "आज" }
+            datePhase.ifBlank { "Today" }
         }
     }
 

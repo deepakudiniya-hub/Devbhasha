@@ -11,6 +11,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import com.example.ui.screens.ConsentScreen
 import com.example.ui.screens.HomeScreen
 import com.example.ui.screens.LoginScreen
 import com.example.ui.screens.SplashScreen
@@ -18,6 +19,7 @@ import com.example.ui.theme.DevbhashaTheme
 import com.example.utils.RazorpayPaymentManager
 import com.example.utils.UserSession
 import com.google.firebase.FirebaseApp
+import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.auth.FirebaseAuth
 import com.razorpay.PaymentData
 import com.razorpay.PaymentResultWithDataListener
@@ -25,19 +27,24 @@ import com.razorpay.PaymentResultWithDataListener
 enum class AppScreen {
     SPLASH,
     LOGIN,
+    CONSENT,
     USER_HOME
 }
 
 class MainActivity : ComponentActivity(), PaymentResultWithDataListener {
+    private lateinit var firebaseAnalytics: FirebaseAnalytics
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         FirebaseApp.initializeApp(this)
+        firebaseAnalytics = FirebaseAnalytics.getInstance(this)
         enableEdgeToEdge()
         // Preload Razorpay Checkout
         RazorpayPaymentManager.init(this)
 
         setContent {
-            DevbhashaTheme {
+            var isDarkTheme by remember { mutableStateOf(false) }
+            DevbhashaTheme(darkTheme = isDarkTheme) {
                 val context = LocalContext.current
                 val userSession = remember { UserSession(context) }
 
@@ -46,6 +53,13 @@ class MainActivity : ComponentActivity(), PaymentResultWithDataListener {
 
                 // App starts at Splash, then routes to user home if logged in, else LOGIN
                 var currentScreen by remember { mutableStateOf(AppScreen.SPLASH) }
+
+                LaunchedEffect(currentScreen) {
+                    val bundle = android.os.Bundle()
+                    bundle.putString(FirebaseAnalytics.Param.SCREEN_NAME, currentScreen.name)
+                    bundle.putString(FirebaseAnalytics.Param.SCREEN_CLASS, "MainActivity")
+                    firebaseAnalytics.logEvent(FirebaseAnalytics.Event.SCREEN_VIEW, bundle)
+                }
 
                 Crossfade(targetState = currentScreen, label = "screen_transition") { screen ->
                     when (screen) {
@@ -67,12 +81,20 @@ class MainActivity : ComponentActivity(), PaymentResultWithDataListener {
                                         }
                                         currentUserName = userSession.getUserName()
                                         currentUserId = firebaseUser.uid
-                                        currentScreen = AppScreen.USER_HOME
+                                        if (!userSession.hasGivenConsent(currentUserId)) {
+                                            currentScreen = AppScreen.CONSENT
+                                        } else {
+                                            currentScreen = AppScreen.USER_HOME
+                                        }
                                     } else if (loggedIn && uid == "guest_explorer") {
                                         // Guest browse mode (no paid features; server rejects unauthenticated calls)
                                         currentUserName = userSession.getUserName()
                                         currentUserId = uid
-                                        currentScreen = AppScreen.USER_HOME
+                                        if (!userSession.hasGivenConsent(currentUserId)) {
+                                            currentScreen = AppScreen.CONSENT
+                                        } else {
+                                            currentScreen = AppScreen.USER_HOME
+                                        }
                                     } else {
                                         if (loggedIn) userSession.clearSession()
                                         currentScreen = AppScreen.LOGIN
@@ -82,35 +104,51 @@ class MainActivity : ComponentActivity(), PaymentResultWithDataListener {
                         }
 
                         AppScreen.LOGIN -> {
-                            Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                                LoginScreen(
-                                    onLoginSuccess = { uid, name, phone, role ->
-                                        userSession.saveUserSession(
-                                            userName = name,
-                                            isLoggedIn = true,
-                                            userId = uid,
-                                            phoneNumber = phone
-                                        )
-                                        currentUserName = name
-                                        currentUserId = uid
+                            LoginScreen(
+                                onLoginSuccess = { uid, name, phone, role ->
+                                    userSession.saveUserSession(
+                                        userName = name,
+                                        isLoggedIn = true,
+                                        userId = uid,
+                                        phoneNumber = phone
+                                    )
+                                    currentUserName = name
+                                    currentUserId = uid
+                                    if (!userSession.hasGivenConsent(uid)) {
+                                        currentScreen = AppScreen.CONSENT
+                                    } else {
                                         currentScreen = AppScreen.USER_HOME
-                                    },
-                                    onSkip = { role ->
-                                        val defaultName = "दीपक जी"
-                                        val defaultUid = "guest_explorer"
-                                        userSession.saveUserSession(
-                                            userName = defaultName,
-                                            isLoggedIn = true,
-                                            userId = defaultUid,
-                                            phoneNumber = ""
-                                        )
-                                        currentUserName = defaultName
-                                        currentUserId = defaultUid
+                                    }
+                                },
+                                onSkip = { role ->
+                                    val defaultName = "Devotee"
+                                    val defaultUid = "guest_explorer"
+                                    userSession.saveUserSession(
+                                        userName = defaultName,
+                                        isLoggedIn = true,
+                                        userId = defaultUid,
+                                        phoneNumber = ""
+                                    )
+                                    currentUserName = defaultName
+                                    currentUserId = defaultUid
+                                    if (!userSession.hasGivenConsent(defaultUid)) {
+                                        currentScreen = AppScreen.CONSENT
+                                    } else {
                                         currentScreen = AppScreen.USER_HOME
-                                    },
-                                    modifier = Modifier.padding(innerPadding)
-                                )
-                            }
+                                    }
+                                },
+                                modifier = Modifier.fillMaxSize()
+                            )
+                        }
+
+                        AppScreen.CONSENT -> {
+                            ConsentScreen(
+                                userId = currentUserId,
+                                userSession = userSession,
+                                onConsentAccepted = {
+                                    currentScreen = AppScreen.USER_HOME
+                                }
+                            )
                         }
 
                         AppScreen.USER_HOME -> {
@@ -121,9 +159,11 @@ class MainActivity : ComponentActivity(), PaymentResultWithDataListener {
                                     FirebaseAuth.getInstance().signOut()
                                     userSession.clearSession()
                                     currentUserId = ""
-                                    currentUserName = "साधक"
+                                    currentUserName = "Sadhak"
                                     currentScreen = AppScreen.LOGIN
-                                }
+                                },
+                                isDarkTheme = isDarkTheme,
+                                onThemeToggle = { isDarkTheme = it }
                             )
                         }
                     }

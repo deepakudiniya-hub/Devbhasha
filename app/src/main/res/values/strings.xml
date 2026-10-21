@@ -1,3 +1,72 @@
 <resources>
     <string name="app_name">Devbhasha</string>
+    <string name="app_name_hindi">Devbhasha</string>
+    <string name="app_tagline">वैदिक ज्ञान, उपनिषद एवं आध्यात्मिक मार्गदर्शन</string>
+
+    <!-- Navigation Tabs -->
+    <string name="tab_home">होम</string>
+    <string name="tab_sadhak">साधक</string>
+    <string name="tab_svapna">स्वप्न</string>
+    <string name="tab_upay">ज्ञान</string>
+
+    <!-- Authentication -->
+    <string name="login_title">देवभाषा में साइन इन करें</string>
+    <string name="login_subtitle">संस्कृति, ज्ञान और आध्यात्मिकता से जुड़ें</string>
+    <string name="enter_mobile_label">अपना मोबाइल नंबर दर्ज करें</string>
+    <string name="mobile_number_hint">मोबाइल नंबर</string>
+    <string name="btn_get_otp">ओटीपी प्राप्त करें</string>
+    <string name="terms_and_privacy">जारी रखकर, आप हमारे नियमों और गोपनीयता नीति से सहमत होते हैं</string>
+    <string name="or_continue_with">या इसके साथ जारी रखें</string>
+    <string name="login_with_google">गूगल (Google)</string>
+    <string name="login_with_facebook">फेसबुक (Facebook)</string>
+    <string name="skip_text">छोड़ें और देखें →</string>
+    <string name="tagline_wisdom">|| ज्ञानम परमम बलम् ||</string>
+    <string name="tagline_wisdom_en">ज्ञान ही सर्वोच्च शक्ति है</string>
+    <string name="otp_verification_title">सत्यापन कोड दर्ज करें</string>
+    <string name="otp_sent_to">आपके मोबाइल नंबर पर ओटीपी भेज दिया गया है</string>
+    <string name="btn_verify_otp">ओटीपी सत्यापित करें</string>
+    <string name="resend_otp_code">कोड पुनः भेजें</string>
+
+    <!-- Home Screen -->
+    <string name="home_hero_title">वैदिक साधक से चैट करें</string>
+    <string name="home_hero_subtitle">वैदिक साहित्य, उपनिषद दर्शन और स्वप्न रहस्य</string>
+    <string name="home_hero_button">अभी प्रश्न पूछें</string>
+    <string name="search_hint">श्लोक, उपनिषद या स्वप्न खोजें...</string>
+
+    <!-- Sadhak Screen & Empty States -->
+    <string name="sadhak_screen_title">अनुभवी साधक एवं विद्वान</string>
+    <string name="sadhak_filter_all">सभी साधक</string>
+    <string name="sadhak_filter_online">ऑनलाइन विद्वान</string>
+    <string name="sadhak_filter_top">शीर्ष साधक</string>
+    <string name="sadhak_empty_title">वर्तमान में कोई साधक ऑनलाइन नहीं है</string>
+    <string name="sadhak_notify_btn">उपलब्ध होने पर सूचित करें</string>
+    <string name="sadhak_notify_toast">साधक उपलब्ध होते ही आपको सूचित कर दिया जाएगा ✓</string>
+
+    <!-- Svapna (Dream) Screen -->
+    <string name="svapna_screen_title">स्वप्न जर्नल</string>
+    <string name="svapna_screen_subtitle">स्वप्नों के आध्यात्मिक और दार्शनिक अर्थ खोजें</string>
+    <string name="svapna_input_hint">यहाँ अपना सपना लिखें या बोलें...</string>
+    <string name="svapna_submit_button">स्वप्न सुरक्षित करें</string>
+    <string name="svapna_history_title">पिछले स्वप्न</string>
+    <string name="svapna_empty_title">कोई पिछला स्वप्न दर्ज नहीं है</string>
+    <string name="svapna_empty_desc">रात में देखा गया कोई भी सपना दर्ज करें और उसका आध्यात्मिक रहस्य जानें।</string>
+
+    <!-- Upay Screen -->
+    <string name="upay_screen_title">दर्शन एवं ज्ञान</string>
+    <string name="upay_chip_all">सभी</string>
+    <string name="upay_chip_aarogya">आरोग्य</string>
+    <string name="upay_chip_shanti">शान्ति</string>
+    <string name="upay_chip_samriddhi">समृद्धि</string>
+    <string name="upay_daily_heading">आज का विशेष श्लोक और विचार</string>
+    <string name="upay_samagri_heading">अध्ययन सामग्री</string>
+    <string name="upay_sadhak_heading">साधक के विचार</string>
+
+    <!-- Wallet & Common -->
+    <string name="wallet_title">सहायता एवं योगदान</string>
+    <string name="wallet_add_cash">राशि जोड़ें</string>
+
+    <!-- Profile & Avatar Picker -->
+    <string name="avatar_picker_title">अपना अवतार चुनें</string>
+    <string name="avatar_picker_subtitle">अपनी आध्यात्मिक पहचान के लिए एक पवित्र अवतार चुनें</string>
+    <string name="avatar_picker_save_button">सहेजें</string>
 </resources>

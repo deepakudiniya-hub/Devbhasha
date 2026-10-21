@@ -93,4 +93,99 @@ object UserManager {
                 onComplete?.invoke(false)
             }
     }
+
+    fun recordConsent(
+        uid: String,
+        consentVersion: String = Constants.CONSENT_VERSION,
+        onComplete: ((Boolean) -> Unit)? = null
+    ) {
+        val currentAuthUser = FirebaseAuth.getInstance().currentUser
+        if (currentAuthUser == null || currentAuthUser.uid != uid) {
+            Log.d(TAG, "Local/guest session (uid=$uid), skipping Firestore consent record")
+            onComplete?.invoke(true)
+            return
+        }
+
+        val consentData = mapOf(
+            "consentVersion" to consentVersion,
+            "consentAt" to com.google.firebase.Timestamp.now()
+        )
+
+        db.collection("users").document(uid)
+            .set(consentData, SetOptions.merge())
+            .addOnSuccessListener {
+                Log.d(TAG, "Consent recorded in Firestore for uid=$uid")
+                onComplete?.invoke(true)
+            }
+            .addOnFailureListener { e ->
+                Log.w(TAG, "Failed to record consent in Firestore: ${e.message}")
+                onComplete?.invoke(false)
+            }
+    }
+
+    fun withdrawConsent(uid: String, onComplete: ((Boolean) -> Unit)? = null) {
+        val currentAuthUser = FirebaseAuth.getInstance().currentUser
+        if (currentAuthUser == null || currentAuthUser.uid != uid) {
+            Log.d(TAG, "Local/guest session, skipping Firestore consent withdrawal")
+            onComplete?.invoke(true)
+            return
+        }
+
+        val withdrawData = mapOf(
+            "consentWithdrawnAt" to com.google.firebase.Timestamp.now()
+        )
+
+        db.collection("users").document(uid)
+            .set(withdrawData, SetOptions.merge())
+            .addOnSuccessListener {
+                Log.d(TAG, "Consent withdrawal recorded in Firestore")
+                onComplete?.invoke(true)
+            }
+            .addOnFailureListener { e ->
+                Log.w(TAG, "Failed to record consent withdrawal: ${e.message}")
+                onComplete?.invoke(false)
+            }
+    }
+
+    fun deleteAccountAndData(uid: String, onResult: (Boolean, String?, Boolean) -> Unit) {
+        // onResult(success, errorMessage, requiresReauth)
+        val currentAuthUser = FirebaseAuth.getInstance().currentUser
+        if (currentAuthUser == null || currentAuthUser.uid != uid) {
+            Log.d(TAG, "Guest or local account deletion")
+            onResult(true, null, false)
+            return
+        }
+
+        // 1. Delete Firestore user document
+        db.collection("users").document(uid)
+            .delete()
+            .addOnCompleteListener { firestoreTask ->
+                if (!firestoreTask.isSuccessful) {
+                    Log.w(TAG, "Firestore user doc deletion warning: ${firestoreTask.exception?.message}")
+                }
+
+                // 2. Try deleting Storage files if present
+                try {
+                    com.google.firebase.storage.FirebaseStorage.getInstance()
+                        .reference.child("users/$uid")
+                        .delete()
+                } catch (e: Exception) {
+                    Log.w(TAG, "Storage files deletion ignored/skipped: ${e.message}")
+                }
+
+                // 3. Delete Firebase Auth user account
+                currentAuthUser.delete()
+                    .addOnSuccessListener {
+                        Log.d(TAG, "Firebase Auth account deleted successfully")
+                        onResult(true, null, false)
+                    }
+                    .addOnFailureListener { e ->
+                        Log.e(TAG, "Failed to delete Auth user: ${e.message}")
+                        val isReauthNeeded = e is com.google.firebase.auth.FirebaseAuthRecentLoginRequiredException ||
+                                e.message?.contains("CREDENTIAL_TOO_OLD", ignoreCase = true) == true ||
+                                e.message?.contains("recent login", ignoreCase = true) == true
+                        onResult(false, e.message ?: "Account deletion failed", isReauthNeeded)
+                    }
+            }
+    }
 }

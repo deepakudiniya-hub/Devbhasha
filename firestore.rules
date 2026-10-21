@@ -40,7 +40,7 @@ service cloud.firestore {
               'earnings', 'totalEarnings', 'balance', 'walletBalance',
               'payout', 'payouts', 'payoutBalance', 'pendingPayout', 'payoutStatus',
               'totalPayout', 'totalPaidOut', 'lastPayoutAt', 'payoutAmount',
-              'role', 'admin', 'isAdmin', 'roles', 'blocked', 'disabled', 'approved'];
+              'role', 'admin', 'isAdmin', 'roles', 'blocked', 'disabled', 'approved', 'status', 'isVerified'];
     }
 
     // Admins may read everything (writes are granted per collection below;
@@ -58,6 +58,16 @@ service cloud.firestore {
       allow update: if isSelf(uid)
                     && !changedKeys().hasAny(userProtectedKeys());
       allow delete: if false;
+      match /consents/{consentId} {
+        allow read: if isSelf(uid);
+        allow create, update: if isSelf(uid)
+          && request.resource.data.uid == uid
+          && request.resource.data.type == 'data_processing'
+          && request.resource.data.version is int
+          && request.resource.data.approved is bool
+          && request.resource.data.keys().hasOnly(['uid', 'type', 'version', 'approved', 'approvedAt', 'appVersion', 'platform']);
+        allow delete: if false;
+      }
     }
 
     // ------------------------------------------------ money (functions only)
@@ -160,15 +170,18 @@ service cloud.firestore {
         resource.data.callerId == request.auth.uid ||
         resource.data.providerId == request.auth.uid
       );
-      allow create: if isSignedIn()
-                    && request.resource.data.callerId == request.auth.uid
-                    && request.resource.data.status == 'ringing'
-                    && !request.resource.data.keys().hasAny(
-                         ['earnedAmount', 'settled', 'settledAt', 'agoraToken']);
+      allow create: if false;
       allow update: if isSignedIn() && (
-        resource.data.callerId == request.auth.uid ||
-        resource.data.providerId == request.auth.uid
-      ) && changedKeys().hasOnly(['status', 'durationSeconds']);
+        resource.data.callerId == request.auth.uid || resource.data.providerId == request.auth.uid
+      ) && changedKeys().hasOnly(['status', 'durationSeconds', 'connectedAt'])
+        && resource.data.status in ['Ringing', 'Connected', 'CALLING', 'CONNECTED']
+        && (
+          (resource.data.providerId == request.auth.uid
+            && request.resource.data.status == 'Connected'
+            && request.resource.data.connectedAt is int)
+          || (!changedKeys().hasAny(['connectedAt'])
+            && request.resource.data.status in ['ENDED', 'CONNECTED'])
+        );
       allow delete: if false;
     }
 
@@ -184,10 +197,12 @@ service cloud.firestore {
 
     // ------------------------------------------------- provider profiles
     match /providers/{providerId} {
-      allow read: if isSignedIn();
+      allow read: if isSelf(providerId);
       allow create: if isAdmin() || (
         isSelf(providerId)
-        && !request.resource.data.keys().hasAny(providerProtectedKeys())
+        && !request.resource.data.keys().hasAny(providerProtectedKeys().removeAll(['status', 'isVerified']))
+        && request.resource.data.get('isVerified', false) == false
+        && request.resource.data.get('status', 'Pending') in ['Pending', 'PENDING', 'pending']
       );
       allow update: if isAdmin() || (
         isSelf(providerId)
@@ -206,12 +221,7 @@ service cloud.firestore {
       // Provider may file a request; only admin/functions change its status.
       match /payout_requests/{requestId} {
         allow read: if isSelf(providerId);
-        allow create: if isSelf(providerId)
-                      && request.resource.data.status == 'pending'
-                      && request.resource.data.amountPaise is int
-                      && request.resource.data.amountPaise > 0
-                      && !request.resource.data.keys().hasAny(
-                           ['processedAt', 'processedBy', 'paidAt', 'utr', 'approvedBy']);
+        allow create: if false;
         allow update: if isAdmin();
         allow delete: if false;
       }
@@ -247,6 +257,36 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
+    // ---------------------------------------------------- consultation_requests
+    match /consultation_requests/{requestId} {
+      allow read: if isSignedIn() && (
+        resource.data.userId == request.auth.uid ||
+        resource.data.providerId == request.auth.uid ||
+        isAdmin()
+      );
+      // Consultation request lifecycle is owned by trusted Cloud Functions.
+      // Clients must not forge provider assignment or acceptance/completion.
+      allow create, update: if false;
+      allow delete: if isAdmin();
+    }
+
+    // ---------------------------------------------------- consultation_history
+    match /consultation_history/{historyId} {
+      allow read: if isSignedIn() && (
+        resource.data.userId == request.auth.uid ||
+        resource.data.providerId == request.auth.uid ||
+        isAdmin()
+      );
+      allow create: if isAdmin() || (
+        isSignedIn() && request.resource.data.userId == request.auth.uid
+      );
+      allow update, delete: if isAdmin();
+    }
+
+    match /payout_requests/{id} {
+      allow read: if isSignedIn() && resource.data.providerId == request.auth.uid;
+      allow write: if false;
+    }
     // Everything else: denied by default (no matching allow).
   }
 }

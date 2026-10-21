@@ -22,6 +22,10 @@ import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.automirrored.filled.Backspace
+import com.example.R
+import androidx.compose.ui.res.painterResource
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -36,6 +40,9 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -76,14 +83,14 @@ fun LoginScreen(
 
     var phoneNumber by remember { mutableStateOf("") }
     var otpCode by remember { mutableStateOf("") }
-    var enteredUserName by remember { mutableStateOf("दीपक जी") }
+    var enteredUserName by remember { mutableStateOf("Devotee") }
     var walkthroughStep by remember { mutableIntStateOf(0) }
-    var selectedLanguage by remember { mutableStateOf("hi") }
+    var selectedLanguage by remember { mutableStateOf("en") }
     var selectedZodiac by remember { mutableStateOf("aries") }
     var userGender by remember { mutableStateOf("male") }
     var userDob by remember { mutableStateOf("15/08/1998") }
     var userTob by remember { mutableStateOf("08:30 AM") }
-    var userPob by remember { mutableStateOf("वाराणसी, उत्तर प्रदेश") }
+    var userPob by remember { mutableStateOf("Varanasi, Uttar Pradesh") }
     var viewState by remember { mutableStateOf(LoginViewState.PHONE_INPUT) }
     var isLoading by remember { mutableStateOf(false) }
     var otpTimer by remember { mutableIntStateOf(30) }
@@ -129,10 +136,10 @@ fun LoginScreen(
     }
 
     fun authErrorMessage(e: Exception?): String = when (e) {
-        is com.google.firebase.auth.FirebaseAuthInvalidCredentialsException -> "गलत OTP या नंबर। कृपया दोबारा जाँचें।"
-        is com.google.firebase.FirebaseTooManyRequestsException -> "बहुत अधिक प्रयास। कृपया कुछ देर बाद कोशिश करें।"
-        is com.google.firebase.FirebaseNetworkException -> "नेटवर्क त्रुटि। इंटरनेट कनेक्शन जाँचें।"
-        else -> "सत्यापन विफल: " + (e?.localizedMessage ?: "अज्ञात त्रुटि")
+        is com.google.firebase.auth.FirebaseAuthInvalidCredentialsException -> "Invalid OTP or number. Please check again."
+        is com.google.firebase.FirebaseTooManyRequestsException -> "Too many requests. Please try again later."
+        is com.google.firebase.FirebaseNetworkException -> "Network error. Check internet connection."
+        else -> "Verification failed: " + (e?.localizedMessage ?: "Unknown error")
     }
 
     fun signInWithPhoneCredential(credential: com.google.firebase.auth.PhoneAuthCredential) {
@@ -220,7 +227,7 @@ fun LoginScreen(
             showToast("लॉगिन विफल। कृपया दोबारा कोशिश करें।")
             return
         }
-        val finalName = name.ifBlank { user.displayName ?: "साधक" }
+        val finalName = name.ifBlank { user.displayName ?: "Sadhak" }
         UserManager.initializeOrSyncUser(
             uid = user.uid,
             userName = finalName,
@@ -286,8 +293,7 @@ fun LoginScreen(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(PaperBg)
-            .statusBarsPadding()
+            .background(Color.White)
             .navigationBarsPadding()
     ) {
         Crossfade(
@@ -298,7 +304,7 @@ fun LoginScreen(
             when (state) {
                 LoginViewState.WALKTHROUGH,
                 LoginViewState.PHONE_INPUT -> {
-                    AstrotalkLoginScreen(
+                    DevbhashaLoginScreen(
                         phoneNumber = phoneNumber,
                         onPhoneNumberChange = {
                             phoneNumber = it
@@ -308,13 +314,12 @@ fun LoginScreen(
                             triggerSendOtp()
                         },
                         onGoogleLoginClick = { triggerGoogleSignIn() },
-                        onAppleLoginClick = { showToast("Apple लॉगिन जल्द आ रहा है") },
                         onFacebookLoginClick = { showToast("Facebook लॉगिन जल्द आ रहा है") },
                         onSkip = {
                             if (onSkip != null) {
                                 onSkip("user")
                             } else {
-                                onLoginSuccess("guest_explorer", "साधक", "", "user")
+                                onLoginSuccess("guest_explorer", "Sadhak", "", "user")
                             }
                         },
                         isLoading = isLoading
@@ -322,7 +327,7 @@ fun LoginScreen(
                 }
 
                 LoginViewState.OTP_VERIFY -> {
-                    AstrotalkOtpScreen(
+                    DevbhashaOtpScreen(
                         phoneNumber = phoneNumber,
                         otpCode = otpCode,
                         onOtpChange = {
@@ -391,7 +396,7 @@ fun LoginScreen(
                                 return@AstrotalkAllSetScreen
                             }
                             val uid = firebaseUser.uid
-                            val finalName = enteredUserName.trim().ifBlank { "दीपक जी" }
+                            val finalName = enteredUserName.trim().ifBlank { "Devotee" }
                             UserManager.initializeOrSyncUser(
                                 uid = uid,
                                 userName = finalName,
@@ -449,27 +454,46 @@ private fun BentoPhoneInputView(
             .padding(horizontal = 28.dp, vertical = 20.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Masthead: 72x72 dp Dev Logo, center aligned
-        Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(top = 20.dp, bottom = 20.dp)) {
+        // Masthead: 72.dp circular container with deep teal spiritual lotus icon, Hindi title and subtitle
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.padding(top = 20.dp, bottom = 20.dp)
+        ) {
             DevLogoIcon(
                 size = 72.dp,
-                elevation = 6.dp,
+                elevation = 4.dp,
                 showGlow = false
             )
-            Spacer(modifier = Modifier.height(14.dp))
-            Text("देव भाषा", style = MaterialTheme.typography.titleLarge, letterSpacing = 1.sp, color = Ink, fontWeight = FontWeight.Bold)
+            Text(
+                text = "देवभाषा",
+                fontFamily = TiroDevanagariHindi,
+                fontSize = 28.sp,
+                fontWeight = FontWeight.Bold,
+                color = Ink,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(top = 12.dp)
+            )
+            Text(
+                text = "Devbhasha",
+                fontFamily = NotoSansDevanagari,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Medium,
+                color = Color(0xFF083A35),
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(top = 2.dp)
+            )
         }
         
         // Greeting
         Text(
-            text = "नमस्ते, साधक",
+            text = "नमस्ते, Sadhak",
             style = MaterialTheme.typography.headlineSmall,
             color = Ink,
             fontWeight = FontWeight.Bold
         )
         Spacer(modifier = Modifier.height(4.dp))
         Text(
-            text = "वैदिक साधक, स्वप्न विचार एवं सीधा सात्विक समाधान।",
+            text = "वैदिक Sadhak, स्वप्न विचार एवं सीधा सात्विक समाधान।",
             style = MaterialTheme.typography.bodyMedium,
             color = InkSoft,
             textAlign = TextAlign.Center
@@ -499,21 +523,16 @@ private fun BentoPhoneInputView(
         
         Spacer(modifier = Modifier.height(20.dp))
         
-        // Send OTP Button (Premium Gradient)
-        val buttonGradient = Brush.horizontalGradient(listOf(SaffronGradientStart, SaffronGradientEnd))
-        val backgroundModifier = if (phoneNumber.length == 10) {
-            Modifier.background(buttonGradient)
-        } else {
-            Modifier.background(InkFaint)
-        }
+        // Send OTP Button (Solid Teal)
+        val isButtonActive = phoneNumber.length == 10
         Box(
             contentAlignment = Alignment.Center,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(52.dp)
-                .clip(RoundedCornerShape(999.dp))
-                .then(backgroundModifier)
-                .clickable(enabled = phoneNumber.length == 10) { onSendCode() }
+                .height(50.dp)
+                .clip(RoundedCornerShape(12.dp))
+                .background(if (isButtonActive) MaterialTheme.colorScheme.primary else InkFaint)
+                .clickable(enabled = isButtonActive) { onSendCode() }
         ) {
             Text(
                 text = if (isLoading) "Sending..." else "OTP प्राप्त करें (Send Code) →",
@@ -551,11 +570,11 @@ private fun BentoPhoneInputView(
                 horizontalArrangement = Arrangement.Center,
                 modifier = Modifier.padding(horizontal = 12.dp)
             ) {
-                Text(
-                    text = "G",
-                    color = Ink,
-                    fontWeight = FontWeight.ExtraBold,
-                    fontSize = 18.sp
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_google_logo),
+                    contentDescription = "Google Logo",
+                    tint = Color.Unspecified,
+                    modifier = Modifier.size(20.dp)
                 )
                 Spacer(modifier = Modifier.width(10.dp))
                 Text(
@@ -576,12 +595,12 @@ private fun BentoPhoneInputView(
                 .fillMaxWidth()
                 .height(48.dp),
             shape = RoundedCornerShape(999.dp),
-            border = BorderStroke(1.dp, Saffron.copy(alpha = 0.5f))
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f))
         ) {
             Icon(
                 imageVector = Icons.Filled.AutoAwesome,
                 contentDescription = null,
-                tint = Saffron,
+                tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(16.dp)
             )
             Spacer(modifier = Modifier.width(8.dp))
@@ -747,14 +766,14 @@ private fun BentoOtpVerifyView(
 
         Surface(
             shape = RoundedCornerShape(8.dp),
-            color = Color(0xFFFAF6EA),
-            border = BorderStroke(1.dp, Color(0xFFE9DB97))
+            color = LightTeal,
+            border = BorderStroke(1.dp, PrimaryTeal)
         ) {
             Text(
                 text = "💡 SMS न पहुँचे तो 30 सेकंड बाद दोबारा भेजें",
                 fontSize = 11.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF125157),
+                color = PrimaryPeacock,
                 modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
             )
         }
@@ -888,7 +907,7 @@ private fun BentoOtpVerifyView(
 }
 
 /**
- * 3. Bento Editorial Verified Success Screen (Big Sage Stamp + Barcode + Enter देव)
+// English comment placeholder
  */
 @Composable
 private fun BentoVerifiedSuccessView(
@@ -969,7 +988,7 @@ private fun BentoVerifiedSuccessView(
             textAlign = TextAlign.Center
         )
         Text(
-            text = if (userName.isNotBlank() && userName != "साधक") "$userName." else "Sadhak.",
+            text = if (userName.isNotBlank() && userName != "Sadhak") "$userName." else "Sadhak.",
             fontFamily = FontFamily.Serif,
             fontStyle = FontStyle.Italic,
             fontWeight = FontWeight.Normal,
@@ -982,7 +1001,7 @@ private fun BentoVerifiedSuccessView(
 
         // Optional Name Input Field
         OutlinedTextField(
-            value = if (userName == "साधक") "" else userName,
+            value = if (userName == "Sadhak") "" else userName,
             onValueChange = { onNameChange(it) },
             placeholder = { Text("Enter your name (उदा. राहुल / प्रिया)", fontSize = 13.sp, color = InkFaint) },
             label = { Text("Your Name (वैकल्पिक)", fontSize = 11.5.sp) },
@@ -1040,7 +1059,7 @@ private fun BentoVerifiedSuccessView(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Enter देव Button
+// English comment placeholder
         Surface(
             shape = RoundedCornerShape(999.dp),
             color = Ink,
@@ -1138,3 +1157,673 @@ private fun SocialLoginButton(
         )
     }
 }
+
+@Composable
+fun DevbhashaLoginScreen(
+    phoneNumber: String,
+    onPhoneNumberChange: (String) -> Unit,
+    onGetOtpClick: () -> Unit,
+    onGoogleLoginClick: () -> Unit,
+    onFacebookLoginClick: () -> Unit,
+    onSkip: () -> Unit,
+    isLoading: Boolean,
+    modifier: Modifier = Modifier
+) {
+    var termsAccepted by remember { mutableStateOf(false) }
+
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .background(Color(0xFFFBF8F2))
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+        ) {
+            // Header: Dark green top background with perfectly centered logo group and reduced height / bottom curve
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(
+                        brush = Brush.verticalGradient(
+                            colors = listOf(
+                                Color(0xFF083A35),
+                                Color(0xFF0A443E),
+                                Color(0xFF0F5C5C)
+                            )
+                        ),
+                        shape = RoundedCornerShape(bottomStart = 36.dp, bottomEnd = 36.dp)
+                    )
+                    .statusBarsPadding()
+                    .padding(top = 10.dp, bottom = 22.dp, start = 20.dp, end = 20.dp)
+            ) {
+                TextButton(
+                    onClick = onSkip,
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .defaultMinSize(minWidth = 48.dp, minHeight = 48.dp)
+                ) {
+                    Text(
+                        text = "आगे बढ़ें →",
+                        style = MaterialTheme.typography.labelLarge.copy(
+                            color = Color.White.copy(alpha = 0.95f),
+                            fontWeight = FontWeight.Bold
+                        )
+                    )
+                }
+
+                // Logo & Brand Lockup: Perfectly centered vertical Column
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.Center)
+                        .padding(top = 4.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    DevLogoIcon(
+                        size = 64.dp,
+                        elevation = 4.dp,
+                        showGlow = false
+                    )
+
+                    Text(
+                        text = "देवभाषा",
+                        fontFamily = TiroDevanagariHindi,
+                        color = Color.White,
+                        fontSize = 26.sp,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(top = 8.dp)
+                    )
+
+                    Text(
+                        text = "Devbhasha",
+                        fontFamily = NotoSansDevanagari,
+                        color = Color(0xFFB4D8D3),
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Medium,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(top = 2.dp)
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            // Login Section
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = DevSpacing.space20),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "देवभाषा में प्रवेश करें",
+                    fontFamily = TiroDevanagariHindi,
+                    fontSize = 26.sp,
+                    lineHeight = 34.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black,
+                    textAlign = TextAlign.Center
+                )
+                Spacer(modifier = Modifier.height(6.dp))
+                Text(
+                    text = "संस्कृति, ज्ञान और अध्यात्म से जुड़ें",
+                    fontFamily = NotoSansDevanagari,
+                    fontSize = 14.sp,
+                    color = Color.DarkGray,
+                    textAlign = TextAlign.Center
+                )
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // Mobile Number Input Section (14dp rounded, subtle outline)
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    Text(
+                        text = "अपना मोबाइल नंबर दर्ज करें",
+                        fontFamily = NotoSansDevanagari,
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Black,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+
+                    Surface(
+                        shape = DevbhashaTextFieldShape,
+                        color = Color.White,
+                        border = BorderStroke(1.dp, Color(0xFFE2E8F0)),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(56.dp)
+                                .padding(horizontal = 16.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Start
+                        ) {
+                            Text(
+                                text = "🇮🇳",
+                                fontSize = 20.sp,
+                                modifier = Modifier.align(Alignment.CenterVertically)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "+91",
+                                fontFamily = NotoSansDevanagari,
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.Black,
+                                modifier = Modifier.align(Alignment.CenterVertically)
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Icon(
+                                imageVector = Icons.Default.ArrowDropDown,
+                                contentDescription = null,
+                                tint = Color.DarkGray,
+                                modifier = Modifier
+                                    .size(20.dp)
+                                    .align(Alignment.CenterVertically)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+
+                            Box(
+                                modifier = Modifier
+                                    .width(1.dp)
+                                    .height(24.dp)
+                                    .background(Color.LightGray)
+                                    .align(Alignment.CenterVertically)
+                            )
+                            Spacer(modifier = Modifier.width(12.dp))
+
+                            OutlinedTextField(
+                                value = phoneNumber,
+                                onValueChange = { if (it.length <= 10 && it.all { c -> c.isDigit() }) onPhoneNumberChange(it) },
+                                singleLine = true,
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                                textStyle = TextStyle(
+                                    fontFamily = NotoSansDevanagari,
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.Black
+                                ),
+                                placeholder = {
+                                    Text(
+                                        text = "मोबाइल नंबर",
+                                        fontFamily = NotoSansDevanagari,
+                                        fontSize = 15.sp,
+                                        color = Color.Gray
+                                    )
+                                },
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    focusedBorderColor = Color.Transparent,
+                                    unfocusedBorderColor = Color.Transparent,
+                                    focusedContainerColor = Color.Transparent,
+                                    unfocusedContainerColor = Color.Transparent
+                                ),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .align(Alignment.CenterVertically)
+                            )
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(18.dp))
+
+                // Terms and Privacy Policy Checkbox Row (Disables login button if unchecked)
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(8.dp))
+                        .clickable { termsAccepted = !termsAccepted }
+                        .padding(vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Checkbox(
+                        checked = termsAccepted,
+                        onCheckedChange = { termsAccepted = it },
+                        colors = CheckboxDefaults.colors(
+                            checkedColor = Color(0xFF0F5C5C),
+                            uncheckedColor = Color.Gray
+                        )
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    val consentAnnotatedString = buildAnnotatedString {
+                        append("मैं ")
+                        withStyle(
+                            style = SpanStyle(
+                                color = Color(0xFF0D9488),
+                                textDecoration = TextDecoration.Underline,
+                                fontWeight = FontWeight.Bold
+                            )
+                        ) {
+                            append("नियम व शर्तें")
+                        }
+                        append(" और ")
+                        withStyle(
+                            style = SpanStyle(
+                                color = Color(0xFF0D9488),
+                                textDecoration = TextDecoration.Underline,
+                                fontWeight = FontWeight.Bold
+                            )
+                        ) {
+                            append("गोपनीयता नीति")
+                        }
+                        append(" से सहमत हूँ")
+                    }
+                    Text(
+                        text = consentAnnotatedString,
+                        fontFamily = NotoSansDevanagari,
+                        fontSize = 12.5.sp,
+                        lineHeight = 18.sp,
+                        color = Color.DarkGray
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                // Primary CTA: Solid vibrant green button (Disabled if terms not accepted or loading or phone < 10)
+                val isButtonEnabled = !isLoading && phoneNumber.length == 10 && termsAccepted
+                Button(
+                    onClick = onGetOtpClick,
+                    enabled = isButtonEnabled,
+                    shape = RoundedCornerShape(14.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF10B981),
+                        contentColor = Color.White,
+                        disabledContainerColor = Color(0xFF10B981).copy(alpha = 0.4f),
+                        disabledContentColor = Color.White.copy(alpha = 0.7f)
+                    ),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(52.dp)
+                ) {
+                    if (isLoading) {
+                        CircularProgressIndicator(
+                            color = Color.White,
+                            strokeWidth = 2.dp,
+                            modifier = Modifier.size(22.dp)
+                        )
+                    } else {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            Text(
+                                text = "ओटीपी प्राप्त करें",
+                                fontFamily = NotoSansDevanagari,
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "→",
+                                color = Color.White,
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // Social Login Divider
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    HorizontalDivider(modifier = Modifier.weight(1f), color = Color.LightGray)
+                    Text(
+                        text = "अथवा इसके साथ जारी रखें",
+                        fontFamily = NotoSansDevanagari,
+                        fontSize = 13.sp,
+                        color = Color.DarkGray,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(horizontal = 12.dp)
+                    )
+                    HorizontalDivider(modifier = Modifier.weight(1f), color = Color.LightGray)
+                }
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                // Social Login: Exactly TWO equal-sized Outlined Buttons (Google, Facebook - rounded borders & modern icons)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(14.dp)
+                ) {
+                    // Google Button (Outlined Button with rounded border & modern icon)
+                    OutlinedButton(
+                        onClick = onGoogleLoginClick,
+                        shape = RoundedCornerShape(999.dp),
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            containerColor = Color.White,
+                            contentColor = Color.Black
+                        ),
+                        border = BorderStroke(1.dp, Color(0xFFCBD5E1)),
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(48.dp)
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_google_logo),
+                                contentDescription = "Google Logo",
+                                tint = Color.Unspecified,
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "Google",
+                                fontFamily = NotoSansDevanagari,
+                                fontSize = 13.5.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.Black
+                            )
+                        }
+                    }
+
+                    // Facebook Button (Outlined Button with rounded border & modern icon)
+                    OutlinedButton(
+                        onClick = onFacebookLoginClick,
+                        shape = RoundedCornerShape(999.dp),
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            containerColor = Color.White,
+                            contentColor = Color.Black
+                        ),
+                        border = BorderStroke(1.dp, Color(0xFFCBD5E1)),
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(48.dp)
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_facebook_logo),
+                                contentDescription = "Facebook Logo",
+                                tint = Color.Unspecified,
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "Facebook",
+                                fontFamily = NotoSansDevanagari,
+                                fontSize = 13.5.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.Black
+                            )
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(32.dp))
+
+                // Footer Decoration
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(text = "🪷", fontSize = 30.sp)
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "॥ ज्ञानम् परमं बलम् ॥",
+                        fontFamily = TiroDevanagariHindi,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.DarkGray,
+                        letterSpacing = 1.sp
+                    )
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = "ज्ञान ही सबसे बड़ा बल है",
+                        fontFamily = NotoSansDevanagari,
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun DevbhashaOtpScreen(
+    phoneNumber: String,
+    otpCode: String,
+    onOtpChange: (String) -> Unit,
+    onVerifyClick: () -> Unit,
+    onResendClick: () -> Unit,
+    onBackClick: () -> Unit,
+    otpTimer: Int,
+    isLoading: Boolean,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .statusBarsPadding()
+            .navigationBarsPadding()
+            .padding(horizontal = 24.dp)
+    ) {
+        // Back Button
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 10.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconButton(onClick = onBackClick) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "Back",
+                    tint = MaterialTheme.colorScheme.onBackground
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        Text(
+            text = "सत्यापन कोड दर्ज करें",
+            fontFamily = TiroDevanagariHindi,
+            fontSize = 24.sp,
+            lineHeight = 32.sp,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onBackground
+        )
+
+        Spacer(modifier = Modifier.height(6.dp))
+
+        Text(
+            text = "आपके मोबाइल नंबर +91 ${phoneNumber.take(2)}•••• ••${phoneNumber.takeLast(2)} पर 6 अंकों का ओटीपी भेजा गया है",
+            fontFamily = NotoSansDevanagari,
+            fontSize = 13.sp,
+            lineHeight = 20.sp,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+
+        Spacer(modifier = Modifier.height(28.dp))
+
+        // 6 Separate Digit Boxes
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally)
+        ) {
+            for (i in 0 until 6) {
+                val digit = if (i < otpCode.length) otpCode[i].toString() else ""
+                val isCurrent = i == otpCode.length
+
+                Surface(
+                    shape = DevbhashaButtonShape,
+                    color = MaterialTheme.colorScheme.background,
+                    border = BorderStroke(
+                        width = if (isCurrent) 2.dp else 1.dp,
+                        color = if (isCurrent) MaterialTheme.colorScheme.primary else if (digit.isNotBlank()) MaterialTheme.colorScheme.primary.copy(alpha = 0.6f) else MaterialTheme.colorScheme.outline
+                    ),
+                    modifier = Modifier.size(46.dp)
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Text(
+                            text = digit,
+                            fontFamily = NotoSansDevanagari,
+                            fontSize = 22.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(18.dp))
+
+        // Resend Timer Row
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "कोड प्राप्त नहीं हुआ? ",
+                fontFamily = NotoSansDevanagari,
+                fontSize = 13.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            if (otpTimer > 0) {
+                Text(
+                    text = "${otpTimer}s में पुनः भेजें",
+                    fontFamily = NotoSansDevanagari,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            } else {
+                Text(
+                    text = "पुनः भेजें",
+                    fontFamily = NotoSansDevanagari,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.clickable { onResendClick() }
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.weight(1f))
+
+        // Numeric Keypad
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 14.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            val keypadRows = listOf(
+                listOf("1", "2", "3"),
+                listOf("4", "5", "6"),
+                listOf("7", "8", "9"),
+                listOf("", "0", "DEL")
+            )
+
+            keypadRows.forEach { row ->
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    row.forEach { key ->
+                        if (key.isEmpty()) {
+                            Spacer(modifier = Modifier.weight(1f))
+                        } else {
+                            Surface(
+                                shape = DevbhashaButtonShape,
+                                color = MaterialTheme.colorScheme.background,
+                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .height(52.dp)
+                                    .clip(DevbhashaButtonShape)
+                                    .clickable {
+                                        when (key) {
+                                            "DEL" -> if (otpCode.isNotEmpty()) onOtpChange(otpCode.dropLast(1))
+                                            else -> if (otpCode.length < 6) onOtpChange(otpCode + key)
+                                        }
+                                    }
+                            ) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    if (key == "DEL") {
+                                        Icon(
+                                            imageVector = Icons.AutoMirrored.Filled.Backspace,
+                                            contentDescription = "Delete",
+                                            tint = MaterialTheme.colorScheme.onSurface,
+                                            modifier = Modifier.size(20.dp)
+                                        )
+                                    } else {
+                                        Text(
+                                            text = key,
+                                            fontFamily = NotoSansDevanagari,
+                                            fontSize = 20.sp,
+                                            fontWeight = FontWeight.SemiBold,
+                                            color = MaterialTheme.colorScheme.onSurface
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Verify Button: Teal filled 52dp
+        Button(
+            onClick = onVerifyClick,
+            enabled = !isLoading && otpCode.length == 6,
+            shape = DevbhashaButtonShape,
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
+                disabledContainerColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
+                disabledContentColor = MaterialTheme.colorScheme.onSurfaceVariant
+            ),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(DevSpacing.buttonHeight)
+        ) {
+            if (isLoading) {
+                CircularProgressIndicator(
+                    color = MaterialTheme.colorScheme.onPrimary,
+                    strokeWidth = 2.dp,
+                    modifier = Modifier.size(22.dp)
+                )
+            } else {
+                Text(
+                    text = "ओटीपी सत्यापित करें",
+                    fontFamily = NotoSansDevanagari,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(18.dp))
+    }
+}
+
+@Composable fun AstrotalkLanguageSelectionScreen(selectedLanguage: String, onLanguageSelected: (String) -> Unit, onContinue: () -> Unit, onSkip: () -> Unit) {}
+@Composable fun AstrotalkZodiacSelectionScreen(selectedZodiac: String, onZodiacSelected: (String) -> Unit, onContinue: () -> Unit, onSkip: () -> Unit) {}
+@Composable fun AstrotalkPersonalDetailsScreen(initialName: String, onSaveDetails: (String, String, String, String, String) -> Unit, onBackClick: () -> Unit) {}
+@Composable fun AstrotalkAllSetScreen(onLetsGo: () -> Unit) { LaunchedEffect(Unit) { onLetsGo() } }
