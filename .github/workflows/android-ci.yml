@@ -60,8 +60,8 @@ jobs:
           RAZORPAY_KEY: ${{ secrets.RAZORPAY_KEY }}
         run: |
           {
-            echo "AGORA_APP_ID=${AGORA_APP_ID}"
-            echo "RAZORPAY_KEY=${RAZORPAY_KEY}"
+            echo "AGORA_APP_ID=${AGORA_APP_ID:-YOUR_AGORA_APP_ID}"
+            echo "RAZORPAY_KEY=${RAZORPAY_KEY:-YOUR_RAZORPAY_KEY}"
           } > .env
 
       - name: Assemble (debug)
