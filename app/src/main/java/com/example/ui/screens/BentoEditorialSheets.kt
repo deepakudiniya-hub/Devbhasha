@@ -1,10 +1,12 @@
 package com.example.ui.screens
 
 import com.example.utils.PriceLabels
+import com.example.utils.Pricing
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -27,7 +29,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -44,6 +48,7 @@ import com.example.ui.models.SadhakItem
 import com.example.ui.models.getAvatarById
 import com.example.utils.HapticFeedbackHelper
 import com.example.utils.UserSession
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.ui.theme.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -54,7 +59,8 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BentoEditorialRechargeSheet(
-    currentBalance: Double,
+    currentBalance: Double?,
+    language: String = "en",
     onDismiss: () -> Unit,
     onConfirmRecharge: (Int) -> Unit
 ) {
@@ -95,14 +101,14 @@ fun BentoEditorialRechargeSheet(
                 )
                 Surface(
                     shape = RoundedCornerShape(999.dp),
-                    color = Color(0xFFFAF6EA),
+                    color = Color(0xFFF1F5F9),
                     border = BorderStroke(1.dp, Color(0xFFE9DB97))
                 ) {
                     Text(
-                        text = "🔒 Secure Razorpay",
+                        text = "Secure Razorpay",
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF125157),
+                        color = SaffronDeep,
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
                     )
                 }
@@ -117,7 +123,7 @@ fun BentoEditorialRechargeSheet(
                     color = InkSoft
                 )
                 Text(
-                    text = "₹${currentBalance.toInt()}",
+                    text = currentBalance?.let { "₹${it.toInt()}" } ?: "₹0",
                     fontFamily = AppFontFamily,
                     fontSize = 15.sp,
                     fontWeight = FontWeight.Bold,
@@ -130,21 +136,21 @@ fun BentoEditorialRechargeSheet(
             // Price list (display labels only — amounts are decided by the server)
             Surface(
                 shape = RoundedCornerShape(14.dp),
-                color = Color(0xFFFAF6EA),
+                color = Color(0xFFF1F5F9),
                 border = BorderStroke(1.2.dp, Color(0xFFD0BF75)),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column(modifier = Modifier.padding(12.dp)) {
                     Text(
-                        text = "परामर्श सत्र ${PriceLabels.SESSION} · समय बढ़ाएँ ${PriceLabels.EXTEND}",
+                        text = "परामर्श सत्र: चैट / कॉल प्रति मिनट",
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF125157)
+                        color = SaffronDeep
                     )
                     Text(
                         text = "स्वप्न अर्थ चैट ${PriceLabels.DREAM_CHAT} · स्वप्न कॉल ${PriceLabels.DREAM_CALL}",
                         fontSize = 11.sp,
-                        color = Color(0xFF125157)
+                        color = SaffronDeep
                     )
                 }
             }
@@ -197,7 +203,7 @@ fun BentoEditorialRechargeSheet(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Text(text = "Recharge Amount:", fontSize = 12.sp, color = Color(0xFF64748B))
+                        Text(text = if (language == "hi") "टॉप-अप राशि:" else "Recharge Amount:", fontSize = 12.sp, color = Color(0xFF64748B))
                         Text(text = "₹$selectedAmount", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1E293B))
                     }
                     HorizontalDivider(modifier = Modifier.padding(vertical = 6.dp), color = Color(0xFFE2E8F0))
@@ -205,7 +211,7 @@ fun BentoEditorialRechargeSheet(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Text(text = "Total Credited in Wallet:", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1E293B))
+                        Text(text = if (language == "hi") "कुल वॉलेट क्रेडिट:" else "Total Credited in Wallet:", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1E293B))
                         Text(text = "₹$selectedAmount", fontSize = 14.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF16A34A))
                     }
                 }
@@ -223,7 +229,7 @@ fun BentoEditorialRechargeSheet(
                     .clickable { onConfirmRecharge(selectedAmount * 2) }
             ) {
                 Text(
-                    text = "Pay ₹$selectedAmount & Get ₹${selectedAmount * 2}",
+                    text = if (language == "hi") "भुगतान करें ₹$selectedAmount और पाएं ₹${selectedAmount * 2}" else "Pay ₹$selectedAmount & Get ₹${selectedAmount * 2}",
                     fontSize = 13.5.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.White,
@@ -243,7 +249,7 @@ fun BentoEditorialRechargeSheet(
 fun BentoEditorialProfileSheet(
     userName: String,
     userEmail: String,
-    balanceAmount: Double,
+    balanceAmount: Double?,
     freeMins: Int,
     language: String = "en",
     onDismiss: () -> Unit,
@@ -303,18 +309,16 @@ fun BentoEditorialProfileSheet(
                 ) {
                     Surface(
                         shape = CircleShape,
-                        color = avatar.bgColor,
-                        border = BorderStroke(2.5.dp, Color(0xFFD0BF75)),
+                        border = BorderStroke(2.5.dp, MaterialTheme.colorScheme.secondary),
                         shadowElevation = 3.dp,
                         modifier = Modifier.size(58.dp)
                     ) {
-                        Box(contentAlignment = Alignment.Center) {
-                            Text(
-                                text = avatar.symbol,
-                                fontSize = 28.sp,
-                                color = Color.White
-                            )
-                        }
+                        Image(
+                            painter = painterResource(id = avatar.drawableRes),
+                            contentDescription = avatar.nameHi,
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier.fillMaxSize()
+                        )
                     }
                     // Small edit icon badge at the corner
                     Surface(
@@ -342,7 +346,7 @@ fun BentoEditorialProfileSheet(
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
-                            text = userName.ifBlank { "साधक" },
+                            text = userName.ifBlank { "Sadhak" },
                             fontFamily = AppFontFamily,
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Bold,
@@ -375,7 +379,7 @@ fun BentoEditorialProfileSheet(
             // Quick 1-Tap Sadhak Avatar Strip
             Surface(
                 shape = RoundedCornerShape(14.dp),
-                color = Color(0xFFFAF6EA),
+                color = Color(0xFFF1F5F9),
                 border = BorderStroke(1.dp, Color(0xFFE9DB97)),
                 modifier = Modifier
                     .fillMaxWidth()
@@ -389,15 +393,15 @@ fun BentoEditorialProfileSheet(
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(
-                                text = "✨ साधक अवतार चुनें",
+                                text = "Sadhak अवतार चुनें",
                                 fontSize = 12.5.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = Color(0xFF125157)
+                                color = SaffronPrimary
                             )
                             Spacer(modifier = Modifier.width(6.dp))
                             Surface(
                                 shape = RoundedCornerShape(999.dp),
-                                color = Color(0xFFD0BF75)
+                                color = SaffronPrimary
                             ) {
                                 Text(
                                     text = "12+ उपलब्ध",
@@ -412,7 +416,7 @@ fun BentoEditorialProfileSheet(
                             text = "सभी देखें ›",
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Bold,
-                            color = Color(0xFF125157),
+                            color = SaffronPrimary,
                             modifier = Modifier.clickable {
                                 HapticFeedbackHelper.playClick(haptic)
                                 showAvatarModalDialog = true
@@ -431,10 +435,10 @@ fun BentoEditorialProfileSheet(
                             val isSelected = (opt.id == currentAvatarId)
                             Surface(
                                 shape = RoundedCornerShape(12.dp),
-                                color = if (isSelected) Color.White else Color(0xFFFAF6EA),
+                                color = if (isSelected) Color.White else Color(0xFFF1F5F9),
                                 border = BorderStroke(
                                     if (isSelected) 2.dp else 1.dp,
-                                    if (isSelected) Color(0xFFD0BF75) else Color(0xFFE9DB97)
+                                    if (isSelected) SaffronPrimary else Color(0xFFE2E8F0)
                                 ),
                                 shadowElevation = if (isSelected) 2.dp else 0.dp,
                                 modifier = Modifier
@@ -443,7 +447,7 @@ fun BentoEditorialProfileSheet(
                                         HapticFeedbackHelper.playClick(haptic)
                                         currentAvatarId = opt.id
                                         userSession.setAvatarId(opt.id)
-                                        Toast.makeText(context, "अवतार चुना गया: ${opt.nameHi} ✨", Toast.LENGTH_SHORT).show()
+                                        Toast.makeText(context, "अवतार चुना गया: ${opt.nameHi}", Toast.LENGTH_SHORT).show()
                                     }
                             ) {
                                 Row(
@@ -464,7 +468,7 @@ fun BentoEditorialProfileSheet(
                                         text = opt.nameHi,
                                         fontSize = 11.sp,
                                         fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                                        color = if (isSelected) Color(0xFF125157) else Color(0xFF125157)
+                                        color = if (isSelected) SaffronPrimary else Ink
                                     )
                                 }
                             }
@@ -478,7 +482,7 @@ fun BentoEditorialProfileSheet(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                ProfileStatBox(label = if (isHi) "बैलेंस" else "BALANCE", value = "₹${balanceAmount.toInt()}", modifier = Modifier.weight(1f))
+                ProfileStatBox(label = if (isHi) "बैलेंस" else "BALANCE", value = balanceAmount?.let { "₹${it.toInt()}" } ?: "—", modifier = Modifier.weight(1f))
                 ProfileStatBox(label = if (isHi) "फ्री मिनट" else "FREE MINS", value = "$freeMins", modifier = Modifier.weight(1f))
                 ProfileStatBox(label = if (isHi) "खाता स्थिति" else "MEMBERSHIP", value = if (isHi) "सक्रिय" else "Active", modifier = Modifier.weight(1f))
             }
@@ -495,7 +499,7 @@ fun BentoEditorialProfileSheet(
                 Column {
                     ProfileMenuRow(
                         icon = Icons.Filled.AutoAwesome,
-                        title = if (isHi) "साधक अवतार बदलें (12+ विकल्प)" else "Change Sadhak Avatar",
+                        title = if (isHi) "Sadhak अवतार बदलें (12+ विकल्प)" else "Change Sadhak Avatar",
                         onClick = {
                             HapticFeedbackHelper.playClick(haptic)
                             showAvatarModalDialog = true
@@ -565,7 +569,7 @@ fun BentoEditorialProfileSheet(
                                     modifier = Modifier.weight(1f),
                                     shape = RoundedCornerShape(8.dp),
                                     colors = ButtonDefaults.outlinedButtonColors(
-                                        containerColor = if (isSelected) Terra.copy(alpha = 0.1f) else Color.Transparent,
+                                        containerColor = if (isSelected) SaffronSoftBg else Color.Transparent,
                                         contentColor = if (isSelected) Terra else Ink
                                     ),
                                     border = BorderStroke(1.dp, if (isSelected) Terra else EditorialLine),
@@ -575,6 +579,61 @@ fun BentoEditorialProfileSheet(
                                 }
                             }
                         }
+                    }
+                    HorizontalDivider(color = EditorialLine)
+                    // Dark Mode Toggle Row using DataStore
+                    val scope = rememberCoroutineScope()
+                    val themePrefs = remember { com.example.utils.ThemePreferencesManager.getInstance(context) }
+                    val isDarkTheme by themePrefs.darkModeFlow.collectAsStateWithLifecycle(initialValue = false)
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(56.dp)
+                            .clickable {
+                                HapticFeedbackHelper.playClick(haptic)
+                                scope.launch {
+                                    themePrefs.setDarkMode(!isDarkTheme)
+                                }
+                            }
+                            .padding(horizontal = 14.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Surface(
+                            shape = CircleShape,
+                            color = Color(0xFFF3F4F6),
+                            modifier = Modifier.size(30.dp)
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Icon(
+                                    imageVector = if (isDarkTheme) Icons.Filled.DarkMode else Icons.Outlined.DarkMode,
+                                    contentDescription = null,
+                                    tint = Color(0xFF1F2937),
+                                    modifier = Modifier.size(15.dp)
+                                )
+                            }
+                        }
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Text(
+                            text = if (isHi) "डार्क मोड (Dark Mode)" else "Dark Mode",
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = Color(0xFF1F2937),
+                            modifier = Modifier.weight(1f)
+                        )
+                        Switch(
+                            checked = isDarkTheme,
+                            onCheckedChange = { checked ->
+                                HapticFeedbackHelper.playClick(haptic)
+                                scope.launch {
+                                    themePrefs.setDarkMode(checked)
+                                }
+                            },
+                            colors = SwitchDefaults.colors(
+                                checkedThumbColor = Color.White,
+                                checkedTrackColor = SaffronPrimary
+                            )
+                        )
                     }
                     HorizontalDivider(color = EditorialLine)
                     ProfileMenuRow(icon = Icons.AutoMirrored.Outlined.HelpOutline, title = if (isHi) "सहायता एवं समर्थन" else "Help & support", onClick = onHelpClick)
@@ -613,261 +672,15 @@ fun BentoEditorialProfileSheet(
         // Full Sadhak Avatar Picker Dialog (12+ Spiritual & Devotional Avatars)
         // =========================================================================
         if (showAvatarModalDialog) {
-            var selectedPackageId by remember { mutableStateOf("sadhaks") }
-            var avatarSearchQuery by remember { mutableStateOf("") }
-            var tempSelectedAvatarId by remember { mutableStateOf(currentAvatarId) }
-            val tempAvatar = remember(tempSelectedAvatarId) { getAvatarById(tempSelectedAvatarId) }
-
-            val filteredAvatars = remember(selectedPackageId, avatarSearchQuery) {
-                ALL_AVATAR_OPTIONS.filter { opt ->
-                    val matchesPkg = (opt.packageId == selectedPackageId)
-                    val matchesQuery = if (avatarSearchQuery.isBlank()) true else {
-                        opt.nameHi.contains(avatarSearchQuery, ignoreCase = true) ||
-                        opt.nameEn.contains(avatarSearchQuery, ignoreCase = true) ||
-                        opt.descriptionHi.contains(avatarSearchQuery, ignoreCase = true) ||
-                        opt.badgeHi.contains(avatarSearchQuery, ignoreCase = true)
-                    }
-                    matchesPkg && matchesQuery
+            DevbhashaAvatarPickerSheet(
+                currentAvatarId = currentAvatarId,
+                onDismiss = { showAvatarModalDialog = false },
+                onAvatarSelected = { newAvatarId ->
+                    currentAvatarId = newAvatarId
+                    userSession.setAvatarId(newAvatarId)
+                    showAvatarModalDialog = false
+                    Toast.makeText(context, "अवतार सफलतापूर्वक सहेजा गया", Toast.LENGTH_SHORT).show()
                 }
-            }
-
-            AlertDialog(
-                onDismissRequest = { showAvatarModalDialog = false },
-                title = {
-                    Column {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = "✨ साधक अवतार चुनें",
-                                fontFamily = AppFontFamily,
-                                fontSize = 18.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = Color(0xFF1E293B)
-                            )
-                            IconButton(
-                                onClick = { showAvatarModalDialog = false },
-                                modifier = Modifier.size(28.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Filled.Close,
-                                    contentDescription = "Close",
-                                    tint = Color(0xFF64748B),
-                                    modifier = Modifier.size(20.dp)
-                                )
-                            }
-                        }
-                        Text(
-                            text = "अपनी साधना एवं भक्ति अनुसार दिव्य अवतार चुनें",
-                            fontSize = 11.5.sp,
-                            color = Color(0xFF64748B)
-                        )
-                    }
-                },
-                text = {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .heightIn(max = 480.dp)
-                    ) {
-                        // Live Preview Header Card
-                        Surface(
-                            shape = RoundedCornerShape(16.dp),
-                            color = tempAvatar.bgColor.copy(alpha = 0.12f),
-                            border = BorderStroke(1.5.dp, tempAvatar.bgColor),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(bottom = 12.dp)
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(12.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(12.dp)
-                            ) {
-                                Surface(
-                                    shape = CircleShape,
-                                    color = tempAvatar.bgColor,
-                                    border = BorderStroke(2.dp, Color.White),
-                                    shadowElevation = 3.dp,
-                                    modifier = Modifier.size(54.dp)
-                                ) {
-                                    Box(contentAlignment = Alignment.Center) {
-                                        Text(text = tempAvatar.symbol, fontSize = 26.sp)
-                                    }
-                                }
-
-                                Column(modifier = Modifier.weight(1f)) {
-                                    Row(verticalAlignment = Alignment.CenterVertically) {
-                                        Text(
-                                            text = tempAvatar.nameHi,
-                                            fontSize = 15.sp,
-                                            fontWeight = FontWeight.Bold,
-                                            color = Color(0xFF1E293B)
-                                        )
-                                        Spacer(modifier = Modifier.width(6.dp))
-                                        Surface(
-                                            shape = RoundedCornerShape(999.dp),
-                                            color = tempAvatar.bgColor
-                                        ) {
-                                            Text(
-                                                text = tempAvatar.badgeHi,
-                                                fontSize = 9.5.sp,
-                                                fontWeight = FontWeight.Bold,
-                                                color = Color.White,
-                                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-                                            )
-                                        }
-                                    }
-                                    Text(
-                                        text = tempAvatar.descriptionHi.ifBlank { "सात्विक साधना अवतार" },
-                                        fontSize = 11.sp,
-                                        color = Color(0xFF475569),
-                                        lineHeight = 15.sp
-                                    )
-                                }
-                            }
-                        }
-
-                        // Category Tabs (Sadhaks, Symbols, Deities)
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(bottom = 10.dp),
-                            horizontalArrangement = Arrangement.spacedBy(6.dp)
-                        ) {
-                            AVATAR_PACKAGES.forEach { pkg ->
-                                val isSelected = (pkg.id == selectedPackageId)
-                                Surface(
-                                    shape = RoundedCornerShape(10.dp),
-                                    color = if (isSelected) Color(0xFF125157) else Color(0xFFF1F5F9),
-                                    modifier = Modifier
-                                        .weight(1f)
-                                        .clickable {
-                                            HapticFeedbackHelper.playClick(haptic)
-                                            selectedPackageId = pkg.id
-                                        }
-                                ) {
-                                    Text(
-                                        text = pkg.titleHi,
-                                        fontSize = 11.sp,
-                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                                        color = if (isSelected) Color.White else Color(0xFF475569),
-                                        textAlign = TextAlign.Center,
-                                        maxLines = 1,
-                                        modifier = Modifier.padding(vertical = 7.dp, horizontal = 2.dp)
-                                    )
-                                }
-                            }
-                        }
-
-                        // Grid List of Avatars
-                        LazyColumn(
-                            verticalArrangement = Arrangement.spacedBy(8.dp),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .weight(1f)
-                        ) {
-                            items(filteredAvatars) { opt ->
-                                val isSelected = (opt.id == tempSelectedAvatarId)
-                                Surface(
-                                    shape = RoundedCornerShape(14.dp),
-                                    color = if (isSelected) Color(0xFFFAF6EA) else Color.White,
-                                    border = BorderStroke(
-                                        if (isSelected) 2.dp else 1.dp,
-                                        if (isSelected) Color(0xFFD0BF75) else Color(0xFFE2E8F0)
-                                    ),
-                                    shadowElevation = if (isSelected) 2.dp else 0.5.dp,
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .clickable {
-                                            HapticFeedbackHelper.playClick(haptic)
-                                            tempSelectedAvatarId = opt.id
-                                        }
-                                ) {
-                                    Row(
-                                        modifier = Modifier.padding(10.dp),
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(10.dp)
-                                    ) {
-                                        Surface(
-                                            shape = CircleShape,
-                                            color = opt.bgColor,
-                                            modifier = Modifier.size(38.dp)
-                                        ) {
-                                            Box(contentAlignment = Alignment.Center) {
-                                                Text(text = opt.symbol, fontSize = 20.sp)
-                                            }
-                                        }
-
-                                        Column(modifier = Modifier.weight(1f)) {
-                                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                                Text(
-                                                    text = opt.nameHi,
-                                                    fontSize = 13.sp,
-                                                    fontWeight = FontWeight.Bold,
-                                                    color = Color(0xFF1E293B)
-                                                )
-                                                Spacer(modifier = Modifier.width(6.dp))
-                                                Surface(
-                                                    shape = RoundedCornerShape(999.dp),
-                                                    color = opt.bgColor.copy(alpha = 0.15f)
-                                                ) {
-                                                    Text(
-                                                        text = opt.badgeHi,
-                                                        fontSize = 9.sp,
-                                                        fontWeight = FontWeight.Bold,
-                                                        color = opt.bgColor,
-                                                        modifier = Modifier.padding(horizontal = 5.dp, vertical = 1.dp)
-                                                    )
-                                                }
-                                            }
-                                            Text(
-                                                text = opt.descriptionHi,
-                                                fontSize = 10.5.sp,
-                                                color = Color(0xFF64748B),
-                                                maxLines = 1,
-                                                overflow = TextOverflow.Ellipsis
-                                            )
-                                        }
-
-                                        if (isSelected) {
-                                            Icon(
-                                                imageVector = Icons.Filled.Check,
-                                                contentDescription = "Selected",
-                                                tint = Color(0xFF125157),
-                                                modifier = Modifier.size(20.dp)
-                                            )
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                },
-                confirmButton = {
-                    Button(
-                        onClick = {
-                            HapticFeedbackHelper.playClick(haptic)
-                            currentAvatarId = tempSelectedAvatarId
-                            userSession.setAvatarId(tempSelectedAvatarId)
-                            showAvatarModalDialog = false
-                            Toast.makeText(context, "साधक अवतार लागू हुआ: ${tempAvatar.nameHi} ✨", Toast.LENGTH_SHORT).show()
-                        },
-                        shape = RoundedCornerShape(12.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF125157)),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text(
-                            text = "यह अवतार सेट करें (Apply Avatar)",
-                            fontSize = 13.5.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.White
-                        )
-                    }
-                },
-                dismissButton = null
             )
         }
     }
@@ -897,7 +710,7 @@ private fun ProfileStatBox(
                 ) {
                     Text(
                         text = value,
-                        fontFamily = FontFamily.SansSerif,
+                        fontFamily = com.example.ui.theme.ManropeHindFontFamily,
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color(0xFF16A34A), // Green text
@@ -907,7 +720,7 @@ private fun ProfileStatBox(
             } else {
                 Text(
                     text = value,
-                    fontFamily = FontFamily.SansSerif,
+                    fontFamily = com.example.ui.theme.ManropeHindFontFamily,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color(0xFF1F2937)
@@ -1082,12 +895,15 @@ fun BentoEditorialBookingSheet(
                                     )
                                 }
 
-                                Text(
-                                    text = PriceLabels.SESSION,
-                                    fontSize = 11.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = Ink
-                                )
+                                val rateStr = if (sadhak.chatPricePerMin > 0) "₹${sadhak.chatPricePerMin}/m" else if (sadhak.callPricePerMin > 0) "₹${sadhak.callPricePerMin}/m" else ""
+                                if (rateStr.isNotEmpty()) {
+                                    Text(
+                                        text = rateStr,
+                                        fontSize = 11.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = Ink
+                                    )
+                                }
 
                                 // Tick
                                 Surface(
@@ -1154,21 +970,17 @@ fun PoochhoProblemConsultSheet(
     language: String = if (isHindi) "hi" else "en"
 ) {
     var problemText by remember { mutableStateOf("") }
-    var selectedCategory by remember { mutableStateOf(initialCategory ?: "💼 करियर / व्यापार") }
+    var selectedCategory by remember { mutableStateOf(initialCategory ?: "करियर / व्यापार") }
     var selectedSadhak by remember { mutableStateOf<SadhakItem?>(sadhaks.firstOrNull()) }
     var isListening by remember { mutableStateOf(false) }
 
     val quickProblems = listOf(
-        "💼 करियर / व्यापार",
-        "❤️ विवाह / संबंध",
-        "🩺 स्वास्थ्य / शांति",
-        "🔮 कुंडली / ग्रह दोष",
-        "🏡 पारिवारिक क्लेश",
-        "🕉️ साधना / मंत्र"
-    )
-
-    val saffronGradient = Brush.horizontalGradient(
-        listOf(SaffronGradientStart, SaffronGradientEnd)
+        "करियर / व्यापार",
+        "विवाह / संबंध",
+        "स्वास्थ्य / शांति",
+        "कुंडली / ग्रह दोष",
+        "पारिवारिक क्लेश",
+        "साधना / मंत्र"
     )
 
     ModalBottomSheet(
@@ -1221,7 +1033,7 @@ fun PoochhoProblemConsultSheet(
                         }
                     }
                     Text(
-                        text = "अपनी किसी भी समस्या का समाधान पाएं — साधक से चैट अथवा वॉइस कॉल द्वारा",
+                        text = "अपनी किसी भी समस्या का समाधान पाएं — Sadhak से चैट अथवा वॉइस कॉल द्वारा",
                         fontSize = 12.sp,
                         color = Color(0xFF737373)
                     )
@@ -1362,7 +1174,7 @@ fun PoochhoProblemConsultSheet(
 
             // Sadhak Selection Row
             Text(
-                text = "परामर्श हेतु साधक चुनें:",
+                text = "परामर्श हेतु Sadhak चुनें:",
                 fontSize = 12.5.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color(0xFF000000)
@@ -1424,8 +1236,9 @@ fun PoochhoProblemConsultSheet(
                                     fontWeight = FontWeight.SemiBold,
                                     color = Color(0xFF000000)
                                 )
+                                val sadhakRate = if (sadhak.chatPricePerMin > 0) "₹${sadhak.chatPricePerMin}/min" else if (sadhak.callPricePerMin > 0) "₹${sadhak.callPricePerMin}/min" else ""
                                 Text(
-                                    text = "${PriceLabels.SESSION} · ⭐ ${sadhak.rating}",
+                                    text = if (sadhakRate.isNotEmpty()) "$sadhakRate · ⭐ ${sadhak.rating}" else "⭐ ${sadhak.rating}",
                                     fontSize = 10.5.sp,
                                     color = Color(0xFF737373)
                                 )
@@ -1442,16 +1255,15 @@ fun PoochhoProblemConsultSheet(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                // Primary: Chat (Saffron Gradient)
+                // Primary: Chat (Solid Saffron)
                 Surface(
-                    shape = RoundedCornerShape(999.dp),
-                    color = Color.Transparent,
-                    shadowElevation = 3.dp,
+                    shape = RoundedCornerShape(12.dp),
+                    color = Saffron,
+                    shadowElevation = 0.dp,
                     modifier = Modifier
                         .weight(1f)
-                        .height(50.dp)
-                        .clip(RoundedCornerShape(999.dp))
-                        .background(saffronGradient)
+                        .height(48.dp)
+                        .clip(RoundedCornerShape(12.dp))
                         .clickable {
                             val active = selectedSadhak ?: sadhaks.firstOrNull()
                             if (active != null) {
@@ -1473,7 +1285,7 @@ fun PoochhoProblemConsultSheet(
                         )
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
-                            text = "चैट करें (Chat)",
+                            text = "चैट (₹${Pricing.TEXT_QUESTION_PRICE_RUPEES})",
                             fontSize = 13.5.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color.White
@@ -1510,8 +1322,11 @@ fun PoochhoProblemConsultSheet(
                             modifier = Modifier.size(18.dp)
                         )
                         Spacer(modifier = Modifier.width(6.dp))
+                        val active = selectedSadhak ?: sadhaks.firstOrNull()
+                        val callPrice = active?.callPricePerMin ?: 0
+                        val callLabel = if (callPrice > 0) "कॉल (₹$callPrice/मि)" else "कॉल"
                         Text(
-                            text = "कॉल करें (Call)",
+                            text = callLabel,
                             fontSize = 13.5.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color(0xFF000000)
@@ -1543,7 +1358,7 @@ fun DreamQuickRecorderSheet(
 ) {
     var mode by remember { mutableStateOf("write") } // "write" or "voice"
     var dreamText by remember { mutableStateOf("") }
-    var selectedTag by remember { mutableStateOf("🌿 शुभ (Shubh)") }
+    var selectedTag by remember { mutableStateOf("शुभ (Shubh)") }
     var isRecording by remember { mutableStateOf(false) }
     var recordingSeconds by remember { mutableIntStateOf(0) }
     var isSaving by remember { mutableStateOf(false) }
@@ -1561,16 +1376,12 @@ fun DreamQuickRecorderSheet(
         }
     }
 
-    val saffronGradient = Brush.horizontalGradient(
-        listOf(SaffronGradientStart, SaffronGradientEnd)
-    )
-
     val moodTags = listOf(
-        "🌿 शुभ (Shubh)",
-        "⚡ चेतावनी (Warning)",
-        "🕊️ मुक्ति (Peace)",
-        "✨ रहस्यमय (Mystic)",
-        "🌊 नदी / प्रकृति"
+        "शुभ (Shubh)",
+        "चेतावनी (Warning)",
+        "मुक्ति (Peace)",
+        "रहस्यमय (Mystic)",
+        "नदी / प्रकृति"
     )
 
     ModalBottomSheet(
@@ -1623,7 +1434,7 @@ fun DreamQuickRecorderSheet(
                         }
                     }
                     Text(
-                        text = "सपना दर्ज करें और साधक से उसका आध्यात्मिक अर्थ व फल जानें 🌙✨",
+                        text = "सपना दर्ज करें और Sadhak से उसका आध्यात्मिक अर्थ व फल जानें",
                         fontSize = 12.sp,
                         color = Color(0xFF737373)
                     )
@@ -1663,7 +1474,7 @@ fun DreamQuickRecorderSheet(
                         .clickable { mode = "write" }
                 ) {
                     Text(
-                        text = "✍️ लिखना (Write Dream)",
+                        text = "लिखना (Write Dream)",
                         fontSize = 12.sp,
                         fontWeight = if (mode == "write") FontWeight.Bold else FontWeight.Medium,
                         color = if (mode == "write") Color.White else Color(0xFF737373),
@@ -1682,7 +1493,7 @@ fun DreamQuickRecorderSheet(
                         .clickable { mode = "voice" }
                 ) {
                     Text(
-                        text = "🎙️ वॉइस रिकॉर्डर (Voice Record)",
+                        text = "वॉइस रिकॉर्डर (Voice Record)",
                         fontSize = 12.sp,
                         fontWeight = if (mode == "voice") FontWeight.Bold else FontWeight.Medium,
                         color = if (mode == "voice") Color.White else Color(0xFF737373),
@@ -1775,7 +1586,7 @@ fun DreamQuickRecorderSheet(
                                         if (dreamText.isBlank()) {
                                             dreamText = "सपने में पावन गंगा तट और आरती के दर्शन हुए, मन में अपार शांति की अनुभूति हुई..."
                                         }
-                                        toastNote = "ऑडियो रिकॉर्ड हो गया ✨"
+                                        toastNote = "ऑडियो रिकॉर्ड हो गया"
                                     }
                                 }
                         ) {
@@ -1873,7 +1684,7 @@ fun DreamQuickRecorderSheet(
                 ) {
                     Box(contentAlignment = Alignment.Center) {
                         Text(
-                            text = "💾 सपना सहेजें",
+                            text = "सपना सहेजें",
                             fontSize = 13.5.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color(0xFF000000)
@@ -1881,25 +1692,35 @@ fun DreamQuickRecorderSheet(
                     }
                 }
 
-                // Primary: Ask Sadhak (Saffron Gradient)
+                // Primary: Ask Sadhak (Solid Saffron)
                 Surface(
-                    shape = RoundedCornerShape(999.dp),
-                    color = Color.Transparent,
-                    shadowElevation = 3.dp,
+                    shape = RoundedCornerShape(12.dp),
+                    color = Saffron,
+                    shadowElevation = 0.dp,
                     modifier = Modifier
                         .weight(1f)
-                        .height(50.dp)
-                        .clip(RoundedCornerShape(999.dp))
-                        .background(saffronGradient)
+                        .height(48.dp)
+                        .clip(RoundedCornerShape(12.dp))
                         .clickable {
                             val textToAsk = dreamText.trim().ifBlank { "सपने का अर्थ व समाधान बताएं" }
                             onAskSadhak(textToAsk)
                             onDismiss()
                         }
                 ) {
-                    Box(contentAlignment = Alignment.Center) {
+                    Row(
+                        modifier = Modifier.fillMaxSize(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Outlined.Chat,
+                            contentDescription = null,
+                            tint = Color.White,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
                         Text(
-                            text = "🔮 साधक से अर्थ पूछें",
+                            text = "Sadhak से अर्थ पूछें",
                             fontSize = 13.5.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color.White
@@ -1910,7 +1731,7 @@ fun DreamQuickRecorderSheet(
 
             Spacer(modifier = Modifier.height(10.dp))
 
-            // Open Full Journal Shortcut
+            // Open Community Dreams Shortcut
             TextButton(
                 onClick = {
                     onOpenJournal()
@@ -1919,7 +1740,7 @@ fun DreamQuickRecorderSheet(
                 modifier = Modifier.align(Alignment.CenterHorizontally)
             ) {
                 Text(
-                    text = "📖 पूरी स्वप्न डायरी देखें (Open Journal) →",
+                    text = "सामुदायिक स्वप्न देखें (Community Dreams) →",
                     fontSize = 12.sp,
                     fontWeight = FontWeight.SemiBold,
                     color = Color(0xFF000000)

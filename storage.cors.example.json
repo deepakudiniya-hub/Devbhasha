@@ -1,0 +1,16 @@
+[
+  {
+    "origin": [
+      "https://YOUR_ADMIN_DOMAIN"
+    ],
+    "method": [
+      "GET",
+      "HEAD"
+    ],
+    "responseHeader": [
+      "Content-Type",
+      "Authorization"
+    ],
+    "maxAgeSeconds": 3600
+  }
+]

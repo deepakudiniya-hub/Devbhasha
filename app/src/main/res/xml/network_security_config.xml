@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <!-- 1. Enforce HTTPS everywhere and block all cleartext HTTP traffic -->
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <!-- Only trust pre-installed system CAs, blocking user-installed MitM proxy certs -->
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+
+    <!-- 2. Certificate Pinning and Domain Isolation for Backend & Auth Services -->
+    <domain-config cleartextTrafficPermitted="false">
+        <domain includeSubdomains="true">googleapis.com</domain>
+        <domain includeSubdomains="true">cloudfunctions.net</domain>
+        <domain includeSubdomains="true">firebaseio.com</domain>
+        <domain includeSubdomains="true">razorpay.com</domain>
+        <domain includeSubdomains="true">devbhasha.com</domain>
+
+        <pin-set expiration="2027-12-31">
+            <!-- Google Trust Services Roots & Intermediates (GTS Root R1, GTS Root R2, GTS 1C3) -->
+            <pin digest="SHA-256">hxqRlPTuQEKatdogHEZmVqCz3Upph10L015Jo/pFoxY=</pin>
+            <pin digest="SHA-256">Vfd95BwDeSQooUBguRmnjfSvkIpETtuUbzbukBlDLZs=</pin>
+            <pin digest="SHA-256">zCTIpAaqZfUMKWbWgqy+KTRFcGee608DbZh6nkRhKHY=</pin>
+            <!-- DigiCert Global Root CA & Global Root G2 backup pins -->
+            <pin digest="SHA-256">r/mIkG3eEpVdm+u/ko/cwxzOMo1bk4TyHIlByibiA5E=</pin>
+            <pin digest="SHA-256">i7WTqTvh0OioIruIfFR4kRqhLmZ24reWURQ8fZkeHEs=</pin>
+            <!-- Razorpay DigiCert / Cloudflare Pins -->
+            <pin digest="SHA-256">kIdp6NNEd8wsugYyyIYFsi1ylmcED3hZbSRMa9gqkgU=</pin>
+            <pin digest="SHA-256">WoiWRyIOVNa9ihaBciRSC7XHjliYS9VwUGOIud4PB18=</pin>
+        </pin-set>
+    </domain-config>
+
+    <!-- 3. Development / Debugging Overrides for Debug Builds Only -->
+    <debug-overrides>
+        <trust-anchors>
+            <certificates src="system" />
+            <certificates src="user" />
+        </trust-anchors>
+    </debug-overrides>
+</network-security-config>

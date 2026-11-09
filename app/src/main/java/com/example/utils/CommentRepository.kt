@@ -1,5 +1,6 @@
 package com.example.utils
 
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 
@@ -8,6 +9,7 @@ data class CardComment(
     val cardId: String = "",
     val userName: String = "",
     val commentText: String = "",
+    val rating: Int = 5,
     val timestamp: Long = System.currentTimeMillis()
 )
 
@@ -25,7 +27,8 @@ object CommentRepository {
                     cardId = doc.getString("cardId") ?: cardId,
                     userName = doc.getString("userName") ?: "साधक",
                     commentText = doc.getString("commentText") ?: "",
-                    timestamp = doc.getLong("timestamp") ?: System.currentTimeMillis()
+                    rating = doc.getLong("rating")?.toInt() ?: 5,
+                    timestamp = (doc.get("timestamp") as? Number)?.toLong() ?: (doc.get("timestamp") as? com.google.firebase.Timestamp)?.toDate()?.time ?: 0L
                 )
             }.sortedByDescending { it.timestamp }
         } catch (e: Exception) {
@@ -33,16 +36,10 @@ object CommentRepository {
         }
     }
 
-    suspend fun postComment(cardId: String, userName: String, commentText: String): Boolean {
+    suspend fun postComment(cardId: String, userName: String, commentText: String, rating: Int = 5): Boolean {
         return try {
-            val db = FirestoreProvider.get()
-            val data = mapOf(
-                "cardId" to cardId,
-                "userName" to userName,
-                "commentText" to commentText,
-                "timestamp" to System.currentTimeMillis()
-            )
-            db.collection("card_comments").add(data).await()
+            com.google.firebase.functions.FirebaseFunctions.getInstance().getHttpsCallable("postComment")
+                .call(mapOf("cardId" to cardId, "userName" to userName, "commentText" to commentText, "rating" to rating)).await()
             true
         } catch (e: Exception) {
             false

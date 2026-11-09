@@ -28,3 +28,10 @@ firebase-debug.log
 # Never commit built APKs (they embed keys)
 public/*.apk
 *.apk
+
+#Signing & Keystores
+*.jks
+*.keystore
+*.pem
+release-upload-keystore.jks.base64
+.signing/

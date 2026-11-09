@@ -8,7 +8,7 @@ service firebase.storage {
   match /b/{bucket}/o {
 
     function isSignedIn() {
-      return request.auth != null;
+      return request.auth != null && request.auth.token.firebase.sign_in_provider != 'anonymous';
     }
     function isOwner(uid) {
       return isSignedIn() && request.auth.uid == uid;
@@ -48,14 +48,24 @@ service firebase.storage {
     // Sadhak private documents (KYC, certificates): owner + admin only.
     match /providers/{uid}/private/{allPaths=**} {
       allow read: if isOwner(uid);
-      allow create, update: if isOwner(uid) && isImageOrPdf(10);
-      allow delete: if isOwner(uid);
+      allow create: if isOwner(uid) && isImageOrPdf(10);
+      allow update, delete: if false;
     }
 
     // Public app content (card art etc.): anyone reads, admin writes.
     match /public/{allPaths=**} {
       allow read: if true;
       allow write: if isAdmin() && isImage(10);
+    }
+
+    match /public/banners/{file} {
+      allow read: if true;
+      allow write: if isAdmin() && isImage(2);
+    }
+
+    // Payout slips: read and write false for clients
+    match /payout_slips/{allPaths=**} {
+      allow read, write: if false;
     }
   }
 }

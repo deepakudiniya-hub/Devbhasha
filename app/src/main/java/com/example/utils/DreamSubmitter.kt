@@ -2,6 +2,7 @@ package com.example.utils
 
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.SetOptions
 import kotlinx.coroutines.tasks.await
 
 sealed class DreamSubmitResult {
@@ -31,32 +32,52 @@ data class VerifiedSadhakInfo(
 /**
  * Submits a dream for interpretation.
  *
- * Billing is server-authoritative: the app calls `startSession` with only the
- * session type and provider. The server decides price, duration, whether this is
- * the one-time free dream chat (once per phone number), and debits the wallet.
- * The client never sends an amount.
+ * A dream question is a separate session kind with status = "pending" and also includes providerId.
+ * Creates session doc fields: userId, providerId, type = "dream", status = "pending".
  */
 object DreamSubmitter {
 
-    private suspend fun pickVerifiedSadhak(): VerifiedSadhakInfo? {
-        val snap = FirestoreProvider.get()
-            .collection("sadhaks")
-            .whereEqualTo("verified", true)
-            .limit(25)
+    private suspend fun pickVerifiedSadhak(targetProviderId: String? = null): VerifiedSadhakInfo? {
+        val db = FirestoreProvider.get()
+        if (!targetProviderId.isNullOrBlank()) {
+            val direct = runCatching { db.collection("sadhaks").document(targetProviderId).get().await() }.getOrNull()
+            if (direct != null && direct.exists()) {
+                val name = direct.getString("name")
+                    ?: direct.getString("displayName")
+                    ?: direct.getString("nameHi")
+                    ?: "साधक"
+                return VerifiedSadhakInfo(id = direct.id, name = name)
+            }
+        }
+        var snap = db.collection("sadhaks")
+            .whereEqualTo("status", "APPROVED")
+            .whereEqualTo("isVerified", true)
+            .limit(20)
             .get()
             .await()
+        if (snap.isEmpty) {
+            snap = db.collection("providers")
+                .whereEqualTo("status", "APPROVED")
+                .whereEqualTo("isVerified", true)
+                .limit(20)
+                .get()
+                .await()
+        }
         val available = snap.documents.filter { it.getBoolean("availability") != false }
         val doc = (available.ifEmpty { snap.documents }).randomOrNull() ?: return null
         return VerifiedSadhakInfo(
-            id = doc.getString("sadhakId")?.takeIf { it.isNotBlank() } ?: doc.id,
-            name = doc.getString("name") ?: "साधक"
+            id = doc.getString("sadhakId")?.takeIf { it.isNotBlank() }
+                ?: doc.getString("providerId")?.takeIf { it.isNotBlank() }
+                ?: doc.id,
+            name = doc.getString("name") ?: doc.getString("displayName") ?: doc.getString("nameHi") ?: "साधक"
         )
     }
 
     suspend fun submitDream(
         userName: String,
         dreamText: String,
-        type: SessionType = SessionType.DREAM_CHAT
+        type: SessionType = SessionType.DREAM_CHAT,
+        targetProviderId: String? = null
     ): DreamSubmitResult {
         val cleanText = dreamText.trim()
         if (cleanText.isBlank()) return DreamSubmitResult.Error("सपना खाली नहीं हो सकता।")
@@ -64,35 +85,22 @@ object DreamSubmitter {
             ?: return DreamSubmitResult.Error("कृपया पहले लॉगिन करें।")
 
         return try {
-            val sadhak = pickVerifiedSadhak() ?: return DreamSubmitResult.NoVerifiedSadhak()
+            val sadhak = pickVerifiedSadhak(targetProviderId) ?: return DreamSubmitResult.NoVerifiedSadhak()
+            val db = FirestoreProvider.get()
 
-            val started = SessionBilling.startSession(type, sadhak.id).getOrElse { e ->
-                val be = e as? SessionBillingException
-                return if (be?.isInsufficientBalance == true) DreamSubmitResult.InsufficientBalance()
-                else DreamSubmitResult.Error(e.localizedMessage ?: "सत्र शुरू नहीं हो सका")
+            val started = SessionBilling.startSession(type, sadhak.id, questionText = cleanText).getOrElse { e ->
+                if ((e as? SessionBillingException)?.isInsufficientBalance == true) return DreamSubmitResult.InsufficientBalance()
+                return DreamSubmitResult.Error(e.localizedMessage ?: "Unable to start consultation. Please retry.")
             }
-
-            // Record the question (no money fields — earningAmount is server-only).
-            val questionRef = FirestoreProvider.get().collection("questions").document()
-            questionRef.set(
-                mapOf(
-                    "questionText" to cleanText,
-                    "userId" to uid,
-                    "userName" to userName,
-                    "category" to "Dream",
-                    "providerId" to sadhak.id,
-                    "sadhakName" to sadhak.name,
-                    "status" to "assigned",
-                    "sessionId" to started.sessionId,
-                    "createdAt" to FieldValue.serverTimestamp()
-                )
-            ).await()
+            val sessionId = started.sessionId
+            val isFreeTrial = started.isFreeTrial
+            val amountPaise = started.amountPaise
 
             DreamSubmitResult.Success(
                 sadhakName = sadhak.name,
-                questionId = questionRef.id,
-                isFreeTrial = started.isFreeTrial,
-                amountPaise = started.amountPaise
+                questionId = sessionId,
+                isFreeTrial = isFreeTrial,
+                amountPaise = amountPaise
             )
         } catch (e: kotlinx.coroutines.CancellationException) {
             throw e

@@ -1,14 +1,18 @@
 package com.example.ui.screens
 
 import com.example.utils.AgoraVoiceManager
+import com.example.utils.AnalyticsHelper
 import com.example.utils.SessionBilling
 import com.example.utils.SessionType
 import com.example.utils.PriceLabels
+import com.example.utils.Pricing
 import com.example.ui.components.rememberSessionController
+import com.example.ui.components.PostConsultationReviewDialog
 import com.example.ui.components.SessionStatusBar
 import com.example.ui.components.sessionErrorText
 import android.widget.Toast
 import androidx.compose.animation.*
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -42,6 +46,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.ui.models.SadhakItem
 import com.example.ui.theme.*
+import com.example.utils.FirestoreProvider
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.SetOptions
 import kotlinx.coroutines.delay
 import java.util.Locale
 
@@ -57,8 +71,48 @@ fun CallConsultationScreen(
     modifier: Modifier = Modifier
 ) {
     var activeCallingSadhak by remember { mutableStateOf<SadhakItem?>(null) }
+    var activeCallingCallId by remember { mutableStateOf<String?>(null) }
+    var pendingSadhakForCall by remember { mutableStateOf<SadhakItem?>(null) }
     var searchQuery by remember { mutableStateOf("") }
     var selectedFilter by remember { mutableStateOf("all") }
+    val context = LocalContext.current
+    val db = remember { FirestoreProvider.get(context) }
+
+    val initiateCallAction: (SadhakItem) -> Unit = { sadhak ->
+        activeCallingCallId = null
+        activeCallingSadhak = sadhak
+    }
+
+    val micPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            pendingSadhakForCall?.let { sadhak ->
+                initiateCallAction(sadhak)
+            }
+        } else {
+            Toast.makeText(
+                context,
+                if (isHindi) "वॉइस कॉल के लिए माइक्रोफ़ोन अनुमति आवश्यक है" else "Microphone permission is required for voice calls",
+                Toast.LENGTH_LONG
+            ).show()
+        }
+        pendingSadhakForCall = null
+    }
+
+    val requestCallWithPermission: (SadhakItem) -> Unit = { sadhak: SadhakItem ->
+        val hasMicPermission = ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.RECORD_AUDIO
+        ) == PackageManager.PERMISSION_GRANTED
+
+        if (hasMicPermission) {
+            initiateCallAction(sadhak)
+        } else {
+            pendingSadhakForCall = sadhak
+            micPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+        }
+    }
 
     if (activeCallingSadhak != null) {
         LiveAudioCallScreen(
@@ -67,7 +121,12 @@ fun CallConsultationScreen(
             userId = userId,
             userName = userName,
             walletBalance = walletBalance,
-            onEndCall = { activeCallingSadhak = null }
+            onEndCall = {
+                AnalyticsHelper.logSessionEnd()
+                activeCallingSadhak = null
+                activeCallingCallId = null
+            },
+            callDocId = activeCallingCallId
         )
     } else {
         CallAstrologerListScreen(
@@ -78,10 +137,7 @@ fun CallConsultationScreen(
             selectedFilter = selectedFilter,
             onFilterSelected = { selectedFilter = it },
             walletBalance = walletBalance,
-            onStartCall = { sadhak ->
-                // Balance & price are checked by the server in startSession.
-                activeCallingSadhak = sadhak
-            },
+            onStartCall = requestCallWithPermission,
             onStartChat = onStartChat,
             modifier = modifier
         )
@@ -103,11 +159,41 @@ private fun CallAstrologerListScreen(
 ) {
     val filters = listOf(
         "all" to (if (isHindi) "सभी विशेषज्ञ" else "All Astrologers"),
-        "online" to (if (isHindi) "🟢 तुरंत कॉल उपलब्ध" else "🟢 Ready to Call"),
-        "top" to (if (isHindi) "⭐ शीर्ष रेटिंग (4.9+)" else "⭐ Top Rated"),
+        "online" to (if (isHindi) "उपलब्ध Sadhak" else "Available Now"),
+        "top" to (if (isHindi) "शीर्ष Sadhak" else "Top Rated"),
         "vedic" to (if (isHindi) "वैदिक ज्योतिषी" else "Vedic Experts"),
-        "tarot" to (if (isHindi) "टैरो व हस्तरेखा" else "Tarot & Palmistry")
+        "tarot" to (if (isHindi) "टैरो व हस्तरेखा" else "Tarot & Palmistry"),
+        "history" to (if (isHindi) "कॉल इतिहास" else "Call History")
     )
+
+    var callHistoryItems by remember { mutableStateOf<List<Map<String, Any>>>(emptyList()) }
+    var isLoadingHistory by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    val db = remember { FirestoreProvider.get(context) }
+
+    LaunchedEffect(selectedFilter) {
+        if (selectedFilter == "history") {
+            isLoadingHistory = true
+            db.collection("active_calls")
+                .get()
+                .addOnSuccessListener { result ->
+                    val list = result.documents.mapNotNull { doc ->
+                        val data = doc.data ?: return@mapNotNull null
+                        data.toMutableMap().apply {
+                            put("id", doc.id)
+                        }
+                    }.sortedByDescending { docMap ->
+                        val ts = docMap["createdAt"] as? com.google.firebase.Timestamp
+                        ts?.toDate()?.time ?: 0L
+                    }
+                    callHistoryItems = list
+                    isLoadingHistory = false
+                }
+                .addOnFailureListener {
+                    isLoadingHistory = false
+                }
+        }
+    }
 
     val filteredList = remember(sadhaks, searchQuery, selectedFilter) {
         sadhaks.filter { sadhak ->
@@ -121,6 +207,7 @@ private fun CallAstrologerListScreen(
                 "top" -> (sadhak.rating.toDoubleOrNull() ?: 0.0) >= 4.8
                 "vedic" -> sadhak.titleHi.contains("वैदिक", true) || sadhak.titleHi.contains("ज्योतिष", true)
                 "tarot" -> sadhak.titleHi.contains("टैरो", true) || sadhak.titleHi.contains("हस्तरेखा", true) || sadhak.bio.contains("हस्तरेखा", true)
+                "history" -> false
                 else -> true
             }
 
@@ -150,21 +237,23 @@ private fun CallAstrologerListScreen(
                 ) {
                     Column {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(
-                                text = "📞",
-                                fontSize = 18.sp
+                            Icon(
+                                imageVector = Icons.Outlined.Phone,
+                                contentDescription = null,
+                                tint = Saffron,
+                                modifier = Modifier.size(20.dp)
                             )
-                            Spacer(modifier = Modifier.width(6.dp))
+                            Spacer(modifier = Modifier.width(8.dp))
                             Text(
-                                text = if (isHindi) "साधक वॉइस कॉल परामर्श" else "Call Astrologers",
+                                text = if (isHindi) "Sadhak वॉइस कॉल परामर्श" else "Call Astrologers",
                                 fontSize = 17.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = Color(0xFF1E293B)
                             )
                         }
                         Text(
-                            text = if (isHindi) "सीधे फ़ोन पर बात करें • ${PriceLabels.SESSION}"
-                            else "Direct phone consultation • ${PriceLabels.SESSION}",
+                            text = if (isHindi) "सीधे फ़ोन पर बात करें • प्रति मिनट शुल्क"
+                            else "Direct phone consultation • Per minute pricing",
                             fontSize = 11.5.sp,
                             color = Color(0xFF64748B)
                         )
@@ -279,21 +368,131 @@ private fun CallAstrologerListScreen(
             }
         }
 
-        // Astrologer Call Cards List
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 16.dp),
-            contentPadding = PaddingValues(top = 12.dp, bottom = 32.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            items(filteredList, key = { it.id }) { sadhak ->
-                CallAstrologerCard(
-                    sadhak = sadhak,
-                    isHindi = isHindi,
-                    onStartCall = { onStartCall(sadhak) },
-                    onStartChat = { onStartChat(sadhak) }
-                )
+        // Astrologer Call Cards List or History
+        if (selectedFilter == "history") {
+            if (isLoadingHistory) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator(color = Saffron)
+                }
+            } else if (callHistoryItems.isEmpty()) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Icon(
+                            imageVector = Icons.Default.Description,
+                            contentDescription = null,
+                            tint = SaffronPrimary,
+                            modifier = Modifier.size(40.dp)
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = if (isHindi) "कोई कॉल इतिहास उपलब्ध नहीं है" else "No call history found",
+                            fontSize = 14.sp,
+                            color = Color(0xFF64748B),
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+                }
+            } else {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 16.dp),
+                    contentPadding = PaddingValues(top = 12.dp, bottom = 32.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    items(callHistoryItems, key = { it["id"].toString() }) { callMap ->
+                        val providerId = callMap["providerId"]?.toString() ?: ""
+                        val status = callMap["status"]?.toString() ?: "ENDED"
+                        val sadhak = sadhaks.find { it.id == providerId }
+                        val sadhakName = if (isHindi) (sadhak?.nameHi ?: providerId) else (sadhak?.nameEn ?: providerId)
+                        val timestamp = callMap["createdAt"] as? com.google.firebase.Timestamp
+                        val dateStr = timestamp?.toDate()?.let {
+                            android.text.format.DateFormat.format("dd MMM yyyy, hh:mm a", it).toString()
+                        } ?: "Recent"
+
+                        Surface(
+                            shape = RoundedCornerShape(16.dp),
+                            color = Color.White,
+                            shadowElevation = 1.dp,
+                            border = BorderStroke(1.dp, Color(0xFFE2E8F0)),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(14.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(44.dp)
+                                        .clip(CircleShape)
+                                        .background(Color(0xFFF1F5F9)),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Outlined.Phone,
+                                        contentDescription = "Phone",
+                                        tint = SaffronPrimary,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                }
+                                Spacer(modifier = Modifier.width(12.dp))
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        text = sadhakName,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 14.sp,
+                                        color = Color(0xFF1E293B)
+                                    )
+                                    Spacer(modifier = Modifier.height(2.dp))
+                                    Text(
+                                        text = dateStr,
+                                        fontSize = 12.sp,
+                                        color = Color(0xFF64748B)
+                                    )
+                                }
+                                Surface(
+                                    shape = RoundedCornerShape(8.dp),
+                                    color = when (status.uppercase()) {
+                                        "CONNECTED", "ENDED" -> Color(0xFFDCFCE7)
+                                        "REJECTED" -> Color(0xFFFEE2E2)
+                                        else -> Color(0xFFFEF3C7)
+                                    }
+                                ) {
+                                    Text(
+                                        text = status,
+                                        fontSize = 11.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = when (status.uppercase()) {
+                                            "CONNECTED", "ENDED" -> Color(0xFF15803D)
+                                            "REJECTED" -> Color(0xFFB91C1C)
+                                            else -> Color(0xFFB45309)
+                                        },
+                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        } else {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 16.dp),
+                contentPadding = PaddingValues(top = 12.dp, bottom = 32.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                items(filteredList, key = { it.id }) { sadhak ->
+                    CallAstrologerCard(
+                        sadhak = sadhak,
+                        isHindi = isHindi,
+                        onStartCall = { onStartCall(sadhak) },
+                        onStartChat = { onStartChat(sadhak) }
+                    )
+                }
             }
         }
     }
@@ -325,17 +524,14 @@ fun CallAstrologerCard(
                         modifier = Modifier
                             .size(54.dp)
                             .clip(CircleShape)
-                            .background(
-                                Brush.linearGradient(
-                                    listOf(Color(0xFF16A34A), Color(0xFF0D9488))
-                                )
-                            ),
+                            .background(Color(0xFFFAFAFA))
+                            .border(1.5.dp, if (sadhak.isOnline) Saffron else BorderLight, CircleShape),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
                             text = if (isHindi) sadhak.initialHi else sadhak.initialEn,
-                            color = Color.White,
-                            fontSize = 22.sp,
+                            color = Color(0xFF000000),
+                            fontSize = 20.sp,
                             fontWeight = FontWeight.Bold
                         )
                     }
@@ -378,13 +574,24 @@ fun CallAstrologerCard(
                             border = BorderStroke(1.dp, BorderLight),
                             shape = RoundedCornerShape(6.dp)
                         ) {
-                            Text(
-                                text = "⭐ ${sadhak.rating}",
-                                color = Saffron,
-                                fontSize = 11.5.sp,
-                                fontWeight = FontWeight.Bold,
-                                modifier = Modifier.padding(horizontal = 5.dp, vertical = 2.dp)
-                            )
+                            Row(
+                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(2.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Filled.Star,
+                                    contentDescription = null,
+                                    tint = Saffron,
+                                    modifier = Modifier.size(11.dp)
+                                )
+                                Text(
+                                    text = sadhak.rating,
+                                    color = Color(0xFF000000),
+                                    fontSize = 11.5.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
                         }
                     }
 
@@ -402,13 +609,13 @@ fun CallAstrologerCard(
                         modifier = Modifier.padding(top = 2.dp)
                     ) {
                         Text(
-                            text = "💼 ${if (isHindi) sadhak.experienceHi else sadhak.experienceEn}",
+                            text = if (isHindi) sadhak.experienceHi else sadhak.experienceEn,
                             fontSize = 11.5.sp,
                             color = Color(0xFF64748B)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "• ⏱️ ${if (isHindi) "प्रतीक्षा 0 मिनट" else "0 min wait"}",
+                            text = "• ${if (isHindi) "प्रतीक्षा 0 मिनट" else "0 min wait"}",
                             fontSize = 11.5.sp,
                             color = Color(0xFF16A34A),
                             fontWeight = FontWeight.Medium
@@ -428,21 +635,24 @@ fun CallAstrologerCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            text = "₹499",
-                            fontWeight = FontWeight.Black,
-                            fontSize = 16.sp,
-                            color = Color(0xFF15803D)
-                        )
-                        Text(
-                            text = if (isHindi) " / 20 मिनट" else " / 20 min",
-                            fontSize = 11.sp,
-                            color = Color(0xFF64748B)
-                        )
+                    val rate = sadhak.callPricePerMin
+                    if (rate > 0) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = "₹$rate",
+                                fontWeight = FontWeight.Black,
+                                fontSize = 16.sp,
+                                color = Color(0xFF15803D)
+                            )
+                            Text(
+                                text = if (isHindi) " / मिनट" else " / min",
+                                fontSize = 11.sp,
+                                color = Color(0xFF64748B)
+                            )
+                        }
                     }
                     Text(
-                        text = if (isHindi) "📞 सीधी वॉइस कॉल" else "📞 Direct Audio Call",
+                        text = if (isHindi) "सीधी कॉल" else "Direct Call",
                         fontSize = 10.5.sp,
                         fontWeight = FontWeight.SemiBold,
                         color = Color(0xFF15803D)
@@ -482,7 +692,11 @@ fun CallAstrologerCard(
                         )
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
-                            text = if (isHindi) "कॉल लगाएं" else "Call Now",
+                            text = if (sadhak.callPricePerMin > 0) {
+                                if (isHindi) "कॉल लगाएं (₹${sadhak.callPricePerMin}/मि)" else "Call (₹${sadhak.callPricePerMin}/min)"
+                            } else {
+                                if (isHindi) "कॉल लगाएं" else "Call Now"
+                            },
                             fontWeight = FontWeight.Bold,
                             fontSize = 13.sp
                         )
@@ -502,11 +716,19 @@ fun LiveAudioCallScreen(
     isHindi: Boolean,
     userId: String,
     userName: String,
-    walletBalance: Double,
+    walletBalance: Double?,
     onEndCall: () -> Unit,
-    sessionType: SessionType = SessionType.SESSION
+    sessionType: SessionType = SessionType.CALL_PER_MIN,
+    callDocId: String? = null
 ) {
     val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+    val db = remember { FirestoreProvider.get(context) }
+    val authUid = FirebaseAuth.getInstance().currentUser?.uid
+    val effectiveUserId = authUid ?: userId.ifBlank { "user_${System.currentTimeMillis()}" }
+
+    var currentCallDocId by remember(sadhak.id, callDocId) { mutableStateOf<String?>(callDocId) }
+    var callStatus by remember { mutableStateOf("CALLING") }
 
     var isCallConnected by remember { mutableStateOf(false) }
     var callDurationSeconds by remember { mutableIntStateOf(0) }
@@ -515,12 +737,64 @@ fun LiveAudioCallScreen(
     var showReviewDialog by remember { mutableStateOf(false) }
     var callError by remember { mutableStateOf<String?>(null) }
 
+    // Intercept back button to cleanly hang up and release Agora voice resources
+    BackHandler {
+        AgoraVoiceManager.leave()
+        currentCallDocId?.let { cid ->
+            db.collection("active_calls").document(cid).update("status", "ENDED")
+        }
+        onEndCall()
+    }
+
+    // Attach real-time snapshot listener on active_calls doc and react to status transitions:
+    // status == "CALLING"  — show outgoing/ringing call state
+    // status == "CONNECTED" — transition to active/connected call state
+    // status == "ENDED" — end call screen (tear down call UI)
+    // status == "REJECTED" — show rejected state and end call screen
+    DisposableEffect(currentCallDocId) {
+        val cid = currentCallDocId
+        if (cid == null) return@DisposableEffect onDispose { }
+        val docRef = db.collection("active_calls").document(cid)
+        val registration = docRef.addSnapshotListener { snapshot, e ->
+            if (e != null) return@addSnapshotListener
+            if (snapshot != null && snapshot.exists()) {
+                val status = snapshot.getString("status")?.uppercase(Locale.getDefault()) ?: "CALLING"
+                callStatus = status
+                when (status) {
+                    "CALLING", "RINGING" -> {
+                        isCallConnected = false
+                    }
+                    "CONNECTED" -> {
+                        isCallConnected = true
+                    }
+                    "ENDED" -> {
+                        AgoraVoiceManager.leave()
+                        onEndCall()
+                    }
+                    "REJECTED" -> {
+                        AgoraVoiceManager.leave()
+                        Toast.makeText(
+                            context,
+                            if (isHindi) "Sadhak व्यस्त हैं / कॉल अस्वीकार हुई" else "Call rejected by astrologer",
+                            Toast.LENGTH_LONG
+                        ).show()
+                        onEndCall()
+                    }
+                }
+            }
+        }
+        onDispose { registration.remove() }
+    }
+
     // Server-billed session: price, duration and debit are decided by Cloud Functions.
     val sessionController = rememberSessionController(
         type = sessionType,
         providerId = sadhak.id,
         onExpired = {
             AgoraVoiceManager.leave()
+            currentCallDocId?.let { cid ->
+                db.collection("active_calls").document(cid).update("status", "ENDED")
+            }
             showReviewDialog = true
         }
     )
@@ -529,6 +803,7 @@ fun LiveAudioCallScreen(
     LaunchedEffect(sessionController.sessionId) {
         val sessionId = sessionController.sessionId
         if (sessionId.isBlank()) return@LaunchedEffect
+        currentCallDocId = sessionId
         SessionBilling.getAgoraToken(sessionId)
             .onSuccess { info ->
                 val ready = AgoraVoiceManager.initEngine(context, info.appId)
@@ -547,7 +822,19 @@ fun LiveAudioCallScreen(
         val err = sessionController.error
         if (err != null && sessionController.session == null) {
             Toast.makeText(context, sessionErrorText(err, isHindi), Toast.LENGTH_LONG).show()
+            currentCallDocId?.let { cid ->
+                db.collection("active_calls").document(cid).update("status", "ENDED")
+            }
             onEndCall()
+        }
+    }
+
+    LaunchedEffect(sessionController.sessionId, sessionController.isEnded) {
+        val sid = sessionController.sessionId
+        if (sid.isBlank() || sessionController.isEnded) return@LaunchedEffect
+        while (!sessionController.isEnded) {
+            delay(60_000L)
+            SessionBilling.getAgoraToken(sid).onSuccess { AgoraVoiceManager.renewToken(it.token) }
         }
     }
 
@@ -556,8 +843,19 @@ fun LiveAudioCallScreen(
     }
 
     LaunchedEffect(Unit) {
-        AgoraVoiceManager.onRemoteJoined = { isCallConnected = true }
-        AgoraVoiceManager.onRemoteLeft = { showReviewDialog = true }
+        AgoraVoiceManager.onRemoteJoined = {
+            coroutineScope.launch { SessionBilling.confirmConnection(sessionController.sessionId) }
+            isCallConnected = true
+            currentCallDocId?.let { cid ->
+                db.collection("active_calls").document(cid).update("status", "CONNECTED")
+            }
+        }
+        AgoraVoiceManager.onRemoteLeft = {
+            currentCallDocId?.let { cid ->
+                db.collection("active_calls").document(cid).update("status", "ENDED")
+            }
+            showReviewDialog = true
+        }
     }
 
     DisposableEffect(Unit) {
@@ -585,52 +883,27 @@ fun LiveAudioCallScreen(
     }
 
     if (showReviewDialog) {
-        AlertDialog(
-            onDismissRequest = {
+        PostConsultationReviewDialog(
+            sadhak = sadhak,
+            consultationId = currentCallDocId ?: "",
+            sessionType = "call",
+            durationSeconds = callDurationSeconds,
+            isHindi = isHindi,
+            userId = effectiveUserId,
+            userName = userName,
+            onDismiss = {
                 showReviewDialog = false
+                currentCallDocId?.let { cid ->
+                    db.collection("active_calls").document(cid).update("status", "ENDED")
+                }
                 onEndCall()
             },
-            title = {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(text = "🕉️", fontSize = 20.sp)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = if (isHindi) "परामर्श संपन्न हुआ" else "Consultation Completed",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp
-                    )
+            onSubmitSuccess = {
+                showReviewDialog = false
+                currentCallDocId?.let { cid ->
+                    db.collection("active_calls").document(cid).update("status", "ENDED")
                 }
-            },
-            text = {
-                Column {
-                    Text(
-                        text = if (isHindi)
-                            "साधक ${sadhak.nameHi} के साथ आपकी $formattedDuration की वार्ता सफल रही।"
-                        else
-                            "Your consultation of $formattedDuration with ${sadhak.nameEn} completed.",
-                        fontSize = 13.5.sp,
-                        color = Color(0xFF334155),
-                        lineHeight = 19.sp
-                    )
-                    Spacer(modifier = Modifier.height(14.dp))
-                    Text(
-                        text = if (isHindi) "रेटिंग दें: ⭐⭐⭐⭐⭐" else "Rating: ⭐⭐⭐⭐⭐",
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = SaffronDeep
-                    )
-                }
-            },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        showReviewDialog = false
-                        onEndCall()
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = SaffronPrimary)
-                ) {
-                    Text(if (isHindi) "धन्यवाद व संपन्न" else "Done")
-                }
+                onEndCall()
             }
         )
     }
@@ -660,18 +933,32 @@ fun LiveAudioCallScreen(
                         modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
+                        val infiniteTransition = rememberInfiniteTransition(label = "pulse")
+                        val pulseAlpha by infiniteTransition.animateFloat(
+                            initialValue = 0.3f,
+                            targetValue = 1f,
+                            animationSpec = infiniteRepeatable(
+                                animation = tween(800, easing = LinearEasing),
+                                repeatMode = RepeatMode.Reverse
+                            ),
+                            label = "pulseAlpha"
+                        )
+                        val dotColor = if (isCallConnected) Color(0xFF10B981) else Saffron
+
                         Box(
                             modifier = Modifier
-                                .size(8.dp)
+                                .size(10.dp)
                                 .clip(CircleShape)
-                                .background(if (isCallConnected) Color(0xFF10B981) else Saffron)
+                                .background(if (!isCallConnected) dotColor.copy(alpha = pulseAlpha) else dotColor)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             text = if (isCallConnected) {
                                 if (isHindi) "सक्रिय ऑडियो परामर्श • $formattedDuration" else "Active Call • $formattedDuration"
+                            } else if (callStatus == "REJECTED") {
+                                if (isHindi) "कॉल अस्वीकार हुई" else "Call Rejected"
                             } else {
-                                if (isHindi) "पंडित जी से संपर्क हो रहा है..." else "Connecting call..."
+                                if (isHindi) "Sadhak को कॉल हो रही है (Ringing)..." else "Calling Astrologer (Ringing)..."
                             },
                             color = Color.White,
                             fontSize = 13.sp,
@@ -683,7 +970,7 @@ fun LiveAudioCallScreen(
                 Spacer(modifier = Modifier.height(12.dp))
 
                 Text(
-                    text = "🔒 100% End-to-End Encrypted Vedic Audio",
+                    text = "100% End-to-End Encrypted Vedic Audio",
                     fontSize = 11.sp,
                     color = Color(0xFF94A3B8)
                 )
@@ -693,49 +980,28 @@ fun LiveAudioCallScreen(
                 SessionStatusBar(
                     controller = sessionController,
                     isHindi = isHindi,
-                    darkBackground = true,
-                    onExtendFailed = { e ->
-                        Toast.makeText(context, sessionErrorText(e, isHindi), Toast.LENGTH_LONG).show()
-                    }
+                    darkBackground = true
                 )
             }
 
-            // Center Astrologer Avatar & Aura
+            // Center Astrologer Avatar
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Outer Glowing Ring
                 Box(
                     modifier = Modifier
-                        .size(150.dp)
+                        .size(118.dp)
                         .clip(CircleShape)
-                        .background(
-                            Brush.radialGradient(
-                                listOf(
-                                    Saffron.copy(alpha = 0.35f),
-                                    Saffron.copy(alpha = 0.15f),
-                                    Color.Transparent
-                                )
-                            )
-                        ),
+                        .background(Color(0xFF1E293B))
+                        .border(3.dp, Saffron, CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
-                    // Middle Ring
-                    Box(
-                        modifier = Modifier
-                            .size(118.dp)
-                            .clip(CircleShape)
-                            .background(Color(0xFF1E293B))
-                            .border(3.dp, Saffron, CircleShape),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = if (isHindi) sadhak.initialHi else sadhak.initialEn,
-                            color = Color.White,
-                            fontSize = 44.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
+                    Text(
+                        text = if (isHindi) sadhak.initialHi else sadhak.initialEn,
+                        color = Color.White,
+                        fontSize = 44.sp,
+                        fontWeight = FontWeight.Bold
+                    )
                 }
 
                 Spacer(modifier = Modifier.height(18.dp))
@@ -763,7 +1029,13 @@ fun LiveAudioCallScreen(
                     shape = RoundedCornerShape(12.dp)
                 ) {
                     Text(
-                        text = if (isHindi) "🎙️ सात्विक वैदिक परामर्श चालू है" else "🎙️ Sacred Vedic Session Live",
+                        text = if (isCallConnected) {
+                            if (isHindi) "सात्विक वैदिक परामर्श चालू है" else "Sacred Vedic Session Live"
+                        } else if (callStatus == "REJECTED") {
+                            if (isHindi) "Sadhak इस समय व्यस्त हैं" else "Astrologer is currently busy"
+                        } else {
+                            if (isHindi) "रिंग हो रहा है • कृपया प्रतीक्षा करें" else "Ringing • Please wait for answer"
+                        },
                         color = Color(0xFFE2E8F0),
                         fontSize = 12.sp,
                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 5.dp)
@@ -813,6 +1085,9 @@ fun LiveAudioCallScreen(
                         IconButton(
                             onClick = {
                                 AgoraVoiceManager.leave()
+                                currentCallDocId?.let { cid ->
+                                    db.collection("active_calls").document(cid).update("status", "ENDED")
+                                }
                                 sessionController.end()
                                 showReviewDialog = true
                             },

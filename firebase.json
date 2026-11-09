@@ -8,8 +8,9 @@
   ],
   "firestore": [
     {
-      "database": "default",
-      "rules": "firestore.rules"
+      "database": "ai-studio-android-devbhash-c2b59e88-80f5-4209-81ce-859c3cb917d9",
+      "rules": "firestore.rules",
+      "indexes": "firestore.indexes.json"
     }
   ],
   "storage": {

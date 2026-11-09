@@ -19,7 +19,9 @@ import kotlinx.coroutines.tasks.await
  *  - endSession({sessionId})
  */
 enum class SessionType(val wire: String) {
-    SESSION("SESSION"),
+    CHAT_PER_MIN("CHAT_PER_MIN"),
+    CALL_PER_MIN("CALL_PER_MIN"),
+    SESSION_30("SESSION_30"),
     DREAM_CHAT("DREAM_CHAT"),
     DREAM_CALL("DREAM_CALL")
 }
@@ -29,12 +31,9 @@ data class StartedSession(
     /** Epoch millis when the server will end the session. */
     val endsAtMillis: Long,
     val amountPaise: Long,
-    val isFreeTrial: Boolean
-)
-
-data class ExtendedSession(
-    val endsAtMillis: Long,
-    val amountPaise: Long
+    val pricePerMinPaise: Long = 0L,
+    val isFreeTrial: Boolean = false,
+    val type: SessionType = SessionType.CHAT_PER_MIN
 )
 
 data class AgoraJoinInfo(
@@ -49,18 +48,15 @@ data class AgoraJoinInfo(
  * money; the authoritative amount always comes back from the server.
  */
 object PriceLabels {
-    const val SESSION = "₹499 / 20 min"
-    const val EXTEND = "+5 min ₹99"
-    const val DREAM_CHAT = "₹99 / 7 min"
-    const val DREAM_CALL = "₹199 / 10 min"
+    const val DREAM_CHAT = "₹199"
+    const val DREAM_CALL = "₹299"
     const val FREE_TRIAL_BADGE = "पहली स्वप्न चैट 5 मिनट मुफ़्त"
     const val FREE_TRIAL_BADGE_EN = "First dream chat free · 5 min"
 
-    /** Seconds left at which the "extend" warning is shown. */
-    const val EXTEND_WARNING_SECONDS = 120L
-
     fun forType(type: SessionType): String = when (type) {
-        SessionType.SESSION -> SESSION
+        SessionType.CHAT_PER_MIN -> "Chat"
+        SessionType.CALL_PER_MIN -> "Call"
+        SessionType.SESSION_30 -> "30-min Session"
         SessionType.DREAM_CHAT -> DREAM_CHAT
         SessionType.DREAM_CALL -> DREAM_CALL
     }
@@ -90,22 +86,28 @@ class SessionBillingException(
 object SessionBilling {
     private val functions: FirebaseFunctions by lazy { FirebaseFunctions.getInstance() }
 
-    suspend fun startSession(type: SessionType, providerId: String): Result<StartedSession> = runCall {
-        val data = call("startSession", mapOf("type" to type.wire, "providerId" to providerId))
-        StartedSession(
+    suspend fun startSession(type: SessionType, providerId: String, idempotencyKey: String = java.util.UUID.randomUUID().toString(), questionText: String = ""): Result<StartedSession> = runCall {
+        val data = call("startSession", mapOf("type" to type.wire, "providerId" to providerId, "idempotencyKey" to idempotencyKey, "questionText" to questionText))
+        val started = StartedSession(
             sessionId = data.str("sessionId") ?: throw malformed("startSession"),
             endsAtMillis = parseEpochMillis(data["endsAt"]) ?: throw malformed("startSession"),
             amountPaise = (data["amountPaise"] as? Number)?.toLong() ?: 0L,
-            isFreeTrial = data["isFreeTrial"] as? Boolean ?: false
+            pricePerMinPaise = (data["pricePerMinPaise"] as? Number)?.toLong() ?: 0L,
+            isFreeTrial = data["isFreeTrial"] as? Boolean ?: false,
+            type = type
         )
-    }
-
-    suspend fun extendSession(sessionId: String): Result<ExtendedSession> = runCall {
-        val data = call("extendSession", mapOf("sessionId" to sessionId))
-        ExtendedSession(
-            endsAtMillis = parseEpochMillis(data["endsAt"]) ?: throw malformed("extendSession"),
-            amountPaise = (data["amountPaise"] as? Number)?.toLong() ?: 0L
-        )
+        val analyticsType = when (type) {
+            SessionType.CHAT_PER_MIN -> "chat_per_min"
+            SessionType.CALL_PER_MIN -> "call_per_min"
+            SessionType.SESSION_30 -> "session_30"
+            SessionType.DREAM_CHAT -> "dream_chat"
+            SessionType.DREAM_CALL -> "dream_call"
+        }
+        AnalyticsHelper.logSessionStart(analyticsType)
+        if (started.isFreeTrial) {
+            AnalyticsHelper.logFreeDreamChatUsed()
+        }
+        started
     }
 
     suspend fun getAgoraToken(sessionId: String): Result<AgoraJoinInfo> = runCall {
@@ -118,14 +120,21 @@ object SessionBilling {
         )
     }
 
+    suspend fun confirmConnection(sessionId: String): Result<Unit> = runCall {
+        call("confirmSessionConnection", mapOf("sessionId" to sessionId))
+        Unit
+    }
+
     suspend fun endSession(sessionId: String): Result<Unit> = runCall {
         call("endSession", mapOf("sessionId" to sessionId))
+        AnalyticsHelper.logSessionEnd()
         Unit
     }
 
     /** Fire-and-forget end, for use from dispose / non-suspending contexts. */
     fun endSessionAsync(sessionId: String) {
         if (sessionId.isBlank()) return
+        AnalyticsHelper.logSessionEnd()
         functions.getHttpsCallable("endSession").call(mapOf("sessionId" to sessionId))
     }
 

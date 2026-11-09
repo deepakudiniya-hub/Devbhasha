@@ -67,6 +67,10 @@ object AgoraVoiceManager {
         return engine.joinChannel(token, channelName.trim(), "", uid) == 0
     }
 
+    fun renewToken(token: String) {
+        if (token.isNotBlank()) rtcEngine?.renewToken(token)
+    }
+
     fun leave() {
         try { rtcEngine?.leaveChannel() } catch (e: Exception) { }
     }

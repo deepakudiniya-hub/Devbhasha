@@ -1,35 +1,11 @@
 package com.example.utils
 
 import android.content.Context
-import com.example.R
 import com.google.firebase.FirebaseApp
 import com.google.firebase.firestore.FirebaseFirestore
 
 object FirestoreProvider {
-    @Volatile
-    private var instance: FirebaseFirestore? = null
-
-    fun get(context: Context? = null): FirebaseFirestore {
-        return instance ?: synchronized(this) {
-            instance ?: run {
-                val dbId = try {
-                    context?.getString(R.string.firestore_database_id)
-                } catch (e: Exception) {
-                    null
-                }
-                val app = FirebaseApp.getInstance()
-                val firestore = if (!dbId.isNullOrBlank()) {
-                    try {
-                        FirebaseFirestore.getInstance(app, dbId)
-                    } catch (e: Exception) {
-                        FirebaseFirestore.getInstance(app)
-                    }
-                } else {
-                    FirebaseFirestore.getInstance(app)
-                }
-                instance = firestore
-                firestore
-            }
-        }
-    }
+    const val DATABASE_ID = "ai-studio-android-devbhash-c2b59e88-80f5-4209-81ce-859c3cb917d9"
+    private val instance: FirebaseFirestore by lazy { FirebaseFirestore.getInstance(FirebaseApp.getInstance(), DATABASE_ID) }
+    fun get(context: Context? = null): FirebaseFirestore = instance
 }

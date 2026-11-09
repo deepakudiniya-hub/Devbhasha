@@ -58,13 +58,13 @@ import java.util.*
  * Filter Presets for Journal Search
  */
 enum class JournalFilterType(val titleHi: String, val titleEn: String, val titleHgl: String, val icon: String) {
-    ALL("सभी", "All", "Sabhi", "✨"),
-    TODAY("आज", "Today", "Aaj", "📅"),
-    YESTERDAY("कल", "Yesterday", "Kal", "📅"),
-    THIS_WEEK("इस सप्ताह", "This Week", "Iss Hafte", "🗓️"),
-    SHUBH("शुभ स्वप्न", "Auspicious", "Shubh Sapne", "🌿"),
-    ALERT("चेतावनी", "Warnings", "Chetavni", "⚡"),
-    ANSWERED("साधक उत्तर", "Answered", "Sadhak Answer", "👤")
+    ALL("सभी", "All", "Sabhi", ""),
+    TODAY("आज", "Today", "Aaj", ""),
+    YESTERDAY("कल", "Yesterday", "Kal", ""),
+    THIS_WEEK("इस सप्ताह", "This Week", "Iss Hafte", ""),
+    SHUBH("शुभ स्वप्न", "Auspicious", "Shubh Sapne", ""),
+    ALERT("चेतावनी", "Warnings", "Chetavni", ""),
+    ANSWERED("Sadhak उत्तर", "Answered", "Sadhak Answer", "")
 }
 
 /**
@@ -169,8 +169,6 @@ fun HomeJournalSearchBar(
     onQueryChange: (String) -> Unit,
     activeFilter: JournalFilterType,
     onFilterSelect: (JournalFilterType) -> Unit,
-    customDateMillis: Long?,
-    onCustomDateSelect: (Long?) -> Unit,
     onSearchSubmit: (String) -> Unit,
     onOpenJournalClick: () -> Unit,
     isHindi: Boolean,
@@ -178,7 +176,6 @@ fun HomeJournalSearchBar(
     modifier: Modifier = Modifier
 ) {
     var showFilters by remember { mutableStateOf(false) }
-    val context = LocalContext.current
     val focusManager = LocalFocusManager.current
     val currentLangCode = when {
         language.lowercase() in listOf("hgl", "hinglish") -> "hgl"
@@ -192,35 +189,6 @@ fun HomeJournalSearchBar(
         else -> "Search…"
     }
 
-    // Function to launch Android DatePickerDialog
-    fun openDatePicker() {
-        val calendar = Calendar.getInstance()
-        if (customDateMillis != null) {
-            calendar.timeInMillis = customDateMillis
-        }
-        val dialog = DatePickerDialog(
-            context,
-            { _, year, month, dayOfMonth ->
-                val selectedCal = Calendar.getInstance().apply {
-                    set(Calendar.YEAR, year)
-                    set(Calendar.MONTH, month)
-                    set(Calendar.DAY_OF_MONTH, dayOfMonth)
-                    set(Calendar.HOUR_OF_DAY, 0)
-                    set(Calendar.MINUTE, 0)
-                    set(Calendar.SECOND, 0)
-                    set(Calendar.MILLISECOND, 0)
-                }
-                onCustomDateSelect(selectedCal.timeInMillis)
-                val dateStr = SimpleDateFormat("d MMM yyyy", Locale.getDefault()).format(selectedCal.time)
-                Toast.makeText(context, "तारीख फ़िल्टर: $dateStr", Toast.LENGTH_SHORT).show()
-            },
-            calendar.get(Calendar.YEAR),
-            calendar.get(Calendar.MONTH),
-            calendar.get(Calendar.DAY_OF_MONTH)
-        )
-        dialog.show()
-    }
-
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -229,7 +197,8 @@ fun HomeJournalSearchBar(
         // Main Search Bar Pill
         Surface(
             shape = RoundedCornerShape(10.dp),
-            color = Color(0xFFF2F2F7), // Light grey background
+            color = Color(0xFFFFFFFF), // Pure white search box
+            border = BorderStroke(1.dp, Color(0xFFEADFD3)), // Thin beige border
             shadowElevation = 0.dp,
             modifier = Modifier
                 .fillMaxWidth()
@@ -246,7 +215,7 @@ fun HomeJournalSearchBar(
                 Icon(
                     imageVector = Icons.Outlined.Search,
                     contentDescription = "Search",
-                    tint = Color(0xFF8E8E93),
+                    tint = Color(0xFF6B5B53),
                     modifier = Modifier.size(20.dp)
                 )
 
@@ -257,10 +226,10 @@ fun HomeJournalSearchBar(
                         .padding(horizontal = 2.dp),
                     contentAlignment = Alignment.CenterStart
                 ) {
-                    if (query.isEmpty() && customDateMillis == null) {
+                    if (query.isEmpty()) {
                         Text(
                             text = placeholderText,
-                            color = Color(0xFF8E8E93),
+                            color = Color(0xFF6B5B53),
                             fontSize = 15.sp,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
@@ -276,7 +245,7 @@ fun HomeJournalSearchBar(
                             fontSize = 14.5.sp,
                             fontWeight = FontWeight.Medium
                         ),
-                        cursorBrush = SolidColor(Color(0xFF125157)),
+                        cursorBrush = SolidColor(SaffronPrimary),
                         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
                         keyboardActions = KeyboardActions(onSearch = {
                             focusManager.clearFocus()
@@ -284,35 +253,6 @@ fun HomeJournalSearchBar(
                         }),
                         modifier = Modifier.fillMaxWidth()
                     )
-                }
-
-                // Active Custom Date Badge (if any)
-                if (customDateMillis != null) {
-                    val dateLabel = SimpleDateFormat("d MMM", Locale.getDefault()).format(Date(customDateMillis))
-                    Surface(
-                        shape = RoundedCornerShape(8.dp),
-                        color = Color(0xFF125157),
-                        modifier = Modifier.clickable { onCustomDateSelect(null) }
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                        ) {
-                            Text(
-                                text = dateLabel,
-                                color = Color.White,
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Icon(
-                                imageVector = Icons.Filled.Close,
-                                contentDescription = "Clear Date",
-                                tint = Color.White,
-                                modifier = Modifier.size(12.dp)
-                            )
-                        }
-                    }
                 }
 
                 // Clear Query Button ('✕')
@@ -327,26 +267,10 @@ fun HomeJournalSearchBar(
                         Icon(
                             imageVector = Icons.Filled.Clear,
                             contentDescription = "Clear",
-                            tint = InkSoft,
+                            tint = Color(0xFF6B5B53),
                             modifier = Modifier.size(16.dp)
                         )
                     }
-                }
-
-                // Single Date Picker Calendar Button
-                IconButton(
-                    onClick = { openDatePicker() },
-                    modifier = Modifier
-                        .size(34.dp)
-                        .clip(CircleShape)
-                        .background(if (customDateMillis != null) Color(0xFF125157).copy(alpha = 0.12f) else Color(0xFFF1F5F9))
-                ) {
-                    Icon(
-                        imageVector = Icons.Outlined.CalendarMonth,
-                        contentDescription = "Pick Date",
-                        tint = if (customDateMillis != null) Color(0xFF125157) else Color(0xFF475569),
-                        modifier = Modifier.size(18.dp)
-                    )
                 }
             }
         }
@@ -363,7 +287,7 @@ fun HomeJournalSearchBar(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     JournalFilterType.values().forEach { filter ->
-                        val isSelected = (activeFilter == filter && customDateMillis == null)
+                        val isSelected = (activeFilter == filter)
                         val label = when (currentLangCode) {
                             "hi" -> filter.titleHi
                             "hgl" -> filter.titleHgl
@@ -386,9 +310,20 @@ fun HomeJournalSearchBar(
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(4.dp)
                             ) {
-                                Text(
-                                    text = filter.icon,
-                                    fontSize = 11.sp
+                                val filterIcon = when (filter) {
+                                    JournalFilterType.ALL -> Icons.Default.AutoAwesome
+                                    JournalFilterType.TODAY -> Icons.Default.Today
+                                    JournalFilterType.YESTERDAY -> Icons.Default.CalendarToday
+                                    JournalFilterType.THIS_WEEK -> Icons.Default.DateRange
+                                    JournalFilterType.SHUBH -> Icons.Default.SelfImprovement
+                                    JournalFilterType.ALERT -> Icons.Default.Warning
+                                    JournalFilterType.ANSWERED -> Icons.Default.QuestionAnswer
+                                }
+                                Icon(
+                                    imageVector = filterIcon,
+                                    contentDescription = null,
+                                    tint = if (isSelected) Color.White else Color(0xFF737373),
+                                    modifier = Modifier.size(13.dp)
                                 )
                                 Text(
                                     text = label,
@@ -456,9 +391,11 @@ fun HomeJournalSearchResultsSection(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
-                    Text(
-                        text = "📖",
-                        fontSize = 15.sp
+                    Icon(
+                        imageVector = Icons.Default.MenuBook,
+                        contentDescription = null,
+                        tint = Terra,
+                        modifier = Modifier.size(18.dp)
                     )
                     Column {
                         val countText = when (currentLangCode) {
@@ -492,9 +429,9 @@ fun HomeJournalSearchResultsSection(
                 ) {
                     Text(
                         text = when (currentLangCode) {
-                            "hi" -> "फ़िल्टर हटाएं ✕"
-                            "hgl" -> "Clear karein ✕"
-                            else -> "Clear ✕"
+                            "hi" -> "फ़िल्टर हटाएं"
+                            "hgl" -> "Clear karein"
+                            else -> "Clear"
                         },
                         color = Terra,
                         fontWeight = FontWeight.Bold,
@@ -521,7 +458,12 @@ fun HomeJournalSearchResultsSection(
                         .padding(24.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Text(text = "🔍", fontSize = 32.sp)
+                    Icon(
+                        imageVector = Icons.Default.Search,
+                        contentDescription = null,
+                        tint = InkSoft,
+                        modifier = Modifier.size(36.dp)
+                    )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         text = when (currentLangCode) {
@@ -560,9 +502,9 @@ fun HomeJournalSearchResultsSection(
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
                             text = when (currentLangCode) {
-                                "hi" -> "नया सपना दर्ज करें ✍️"
-                                "hgl" -> "Naya Sapna Add Karein ✍️"
-                                else -> "Log New Entry ✍️"
+                                "hi" -> "नया सपना दर्ज करें"
+                                "hgl" -> "Naya Sapna Add Karein"
+                                else -> "Log New Entry"
                             },
                             fontWeight = FontWeight.Bold,
                             fontSize = 12.5.sp
@@ -674,14 +616,14 @@ fun JournalSearchResultCard(
                                 shape = RoundedCornerShape(6.dp),
                                 color = when {
                                     isAlert -> Color(0xFFFFF1F0)
-                                    isLucidOrSpecial -> Color(0xFFF3E8FF)
+                                    isLucidOrSpecial -> MaterialTheme.colorScheme.primaryContainer
                                     else -> Color(0xFFF2F7EC)
                                 },
                                 border = BorderStroke(
                                     1.dp,
                                     when {
                                         isAlert -> Color(0xFFFFCCC7)
-                                        isLucidOrSpecial -> Color(0xFFDDD6FE)
+                                        isLucidOrSpecial -> MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
                                         else -> Color(0xFFD6E4C4)
                                     }
                                 )
@@ -690,7 +632,7 @@ fun JournalSearchResultCard(
                                     text = t,
                                     color = when {
                                         isAlert -> Color(0xFFCF1322)
-                                        isLucidOrSpecial -> Color(0xFF7C3AED)
+                                        isLucidOrSpecial -> MaterialTheme.colorScheme.primary
                                         else -> Color(0xFF389E0D)
                                     },
                                     fontSize = 10.sp,
@@ -758,10 +700,15 @@ fun JournalSearchResultCard(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
-                        Text(text = "✨", fontSize = 12.sp)
+                        Icon(
+                            imageVector = Icons.Default.AutoAwesome,
+                            contentDescription = null,
+                            tint = Color(0xFF2B5B2E),
+                            modifier = Modifier.size(13.dp)
+                        )
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = "साधक परामर्श / वैदिक फल:",
+                                text = "Sadhak परामर्श / वैदिक फल:",
                                 color = Color(0xFF2B5B2E),
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 10.5.sp
@@ -799,7 +746,7 @@ fun JournalSearchResultCard(
                             .clickable {
                                 val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                                 clipboard.setPrimaryClip(ClipData.newPlainText("Dream", "${entry.title}\n${entry.description}"))
-                                Toast.makeText(context, "सपना कॉपी किया गया ✓", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, "सपना कॉपी किया गया", Toast.LENGTH_SHORT).show()
                             }
                             .padding(horizontal = 6.dp, vertical = 4.dp),
                         verticalAlignment = Alignment.CenterVertically,
@@ -871,7 +818,7 @@ fun JournalSearchResultCard(
                             )
                             Text(
                                 text = when (currentLangCode) {
-                                    "hi" -> "साधक से फल जानें"
+                                    "hi" -> "Sadhak से फल जानें"
                                     "hgl" -> "Sadhak se poochein"
                                     else -> "Ask Sadhak"
                                 },
@@ -914,23 +861,23 @@ fun shareDreamEntry(context: Context, entry: DreamJournalEntry) {
     }
 
     val shareBody = buildString {
-        appendLine("🌙 देवभाषा स्वप्न डायरी · Dream Journal Entry")
+        appendLine("देवभाषा स्वप्न डायरी · Dream Journal Entry")
         val allTags = entry.getAllTags()
         val tagsStr = if (allTags.isNotEmpty()) allTags.joinToString(" ") else entry.tag
-        appendLine("📅 $dateText | $tagsStr")
+        appendLine("$dateText | $tagsStr")
         appendLine()
-        appendLine("✨ ${entry.title}")
+        appendLine(entry.title)
         appendLine(entry.description)
         if (!entry.meaning.isNullOrBlank()) {
             appendLine()
-            appendLine("📜 वैदिक फल / परामर्श: ${entry.meaning}")
+            appendLine("वैदिक फल / परामर्श: ${entry.meaning}")
         }
         if (!entry.answeredBy.isNullOrBlank()) {
             appendLine("— मार्गदर्शन: ${entry.answeredBy}")
         }
         if (entry.tags.isNotEmpty()) {
             appendLine()
-            appendLine("🏷️ टैग्स: ${entry.tags.joinToString(" ")}")
+            appendLine("टैग्स: ${entry.tags.joinToString(" ")}")
         }
         appendLine()
         append("— देवभाषा (Devbhasha) ऐप से साझा किया गया")
@@ -969,7 +916,7 @@ fun highlightSearchQuery(text: String, query: String): androidx.compose.ui.text.
             withStyle(
                 SpanStyle(
                     background = Color(0xFFFFE58F),
-                    color = Color(0xFF125157),
+                    color = SaffronDeep,
                     fontWeight = FontWeight.Bold
                 )
             ) {
@@ -1024,9 +971,9 @@ fun DreamEntryDetailDialog(
                 Spacer(modifier = Modifier.width(6.dp))
                 Text(
                     text = when (currentLangCode) {
-                        "hi" -> "साधक से फल जानें (₹99)"
-                        "hgl" -> "Sadhak se poochein (₹99)"
-                        else -> "Ask Sadhak (₹99)"
+                        "hi" -> "Sadhak से फल जानें (₹199)"
+                        "hgl" -> "Sadhak se poochein (₹199)"
+                        else -> "Ask Sadhak (₹199)"
                     },
                     fontWeight = FontWeight.Bold
                 )
@@ -1057,7 +1004,12 @@ fun DreamEntryDetailDialog(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Text(text = "🌙", fontSize = 20.sp)
+                Icon(
+                    imageVector = Icons.Default.AutoAwesome,
+                    contentDescription = null,
+                    modifier = Modifier.size(20.dp),
+                    tint = SaffronPrimary
+                )
                 Text(
                     text = entry.title,
                     fontWeight = FontWeight.Bold,
@@ -1080,7 +1032,7 @@ fun DreamEntryDetailDialog(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "📅 $formattedDate",
+                        text = formattedDate,
                         color = InkSoft,
                         fontSize = 11.5.sp,
                         fontWeight = FontWeight.Medium
@@ -1127,7 +1079,7 @@ fun DreamEntryDetailDialog(
                     ) {
                         Column(modifier = Modifier.padding(12.dp)) {
                             Text(
-                                text = "✨ वैदिक विश्लेषण व फल:",
+                                text = "वैदिक विश्लेषण व फल:",
                                 color = Color(0xFF235527),
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 12.sp

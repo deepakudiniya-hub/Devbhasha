@@ -1,3 +1,72 @@
 <resources>
     <string name="app_name">Devbhasha</string>
+    <string name="app_name_hindi">Devbhasha</string>
+    <string name="app_tagline">Vedic Wisdom, Upanishadic Philosophy &amp; Spiritual Guidance</string>
+
+    <!-- Navigation Tabs -->
+    <string name="tab_home">Home</string>
+    <string name="tab_sadhak">Sadhak</string>
+    <string name="tab_svapna">Dreams</string>
+    <string name="tab_upay">Remedy</string>
+
+    <!-- Authentication -->
+    <string name="login_title">Sign In to Devbhasha</string>
+    <string name="login_subtitle">Connect with Vedic wisdom, culture and spirituality</string>
+    <string name="enter_mobile_label">Enter your mobile number</string>
+    <string name="mobile_number_hint">Mobile Number</string>
+    <string name="btn_get_otp">Get OTP</string>
+    <string name="terms_and_privacy">By continuing, you agree to our Terms and Privacy Policy</string>
+    <string name="or_continue_with">Or continue with</string>
+    <string name="login_with_google">Google</string>
+    <string name="login_with_facebook">Facebook</string>
+    <string name="skip_text">Skip &amp; Explore →</string>
+    <string name="tagline_wisdom">|| Jnanam Paramam Balam ||</string>
+    <string name="tagline_wisdom_en">Wisdom is the ultimate strength</string>
+    <string name="otp_verification_title">Enter Verification Code</string>
+    <string name="otp_sent_to">An OTP has been sent to your mobile number</string>
+    <string name="btn_verify_otp">Verify OTP</string>
+    <string name="resend_otp_code">Resend Code</string>
+
+    <!-- Home Screen -->
+    <string name="home_hero_title">Chat with a Vedic Sadhak</string>
+    <string name="home_hero_subtitle">Vedic literature, Upanishad philosophy and dream symbolism</string>
+    <string name="home_hero_button">Ask Question Now</string>
+    <string name="search_hint">Search sadhaks or topics...</string>
+
+    <!-- Sadhak Screen &amp; Empty States -->
+    <string name="sadhak_screen_title">Spiritual Guides &amp; Scholars</string>
+    <string name="sadhak_filter_all">All Experts</string>
+    <string name="sadhak_filter_online">Online</string>
+    <string name="sadhak_filter_top">Top Rated</string>
+    <string name="sadhak_empty_title">No experts currently online</string>
+    <string name="sadhak_notify_btn">Notify when available</string>
+    <string name="sadhak_notify_toast">You will be notified once an expert is online ✓</string>
+
+    <!-- Svapna (Dream) Screen -->
+    <string name="svapna_screen_title">Community Dreams</string>
+    <string name="svapna_screen_subtitle">Explore spiritual and philosophical meanings of dreams</string>
+    <string name="svapna_input_hint">Describe your dream here...</string>
+    <string name="svapna_submit_button">Share Dream</string>
+    <string name="svapna_history_title">Recent Dreams</string>
+    <string name="svapna_empty_title">No dreams posted yet</string>
+    <string name="svapna_empty_desc">Record any dream you experienced and explore its spiritual symbolism.</string>
+
+    <!-- Upay Screen -->
+    <string name="upay_screen_title">Remedy &amp; Wisdom</string>
+    <string name="upay_chip_all">All</string>
+    <string name="upay_chip_aarogya">Wellness</string>
+    <string name="upay_chip_shanti">Peace</string>
+    <string name="upay_chip_samriddhi">Prosperity</string>
+    <string name="upay_daily_heading">Today\'s Special Remedy &amp; Contemplation</string>
+    <string name="upay_samagri_heading">Spiritual Items &amp; Sacred Offerings</string>
+    <string name="upay_sadhak_heading">Sadhak Remedies</string>
+
+    <!-- Wallet &amp; Common -->
+    <string name="wallet_title">Spiritual Wallet &amp; Dakshina</string>
+    <string name="wallet_add_cash">Add Funds</string>
+
+    <!-- Profile &amp; Avatar Picker -->
+    <string name="avatar_picker_title">Choose Your Avatar</string>
+    <string name="avatar_picker_subtitle">Select a sacred avatar for your spiritual journey</string>
+    <string name="avatar_picker_save_button">Save Avatar</string>
 </resources>

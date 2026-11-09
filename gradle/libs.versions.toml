@@ -41,12 +41,17 @@ agoraVoice = "4.5.0"
 firebaseBom = "34.17.0"
 secretsGradlePlugin = "2.0.1"
 googleServices = "4.5.0"
+crashlytics = "3.0.3"
 credentials = "1.5.0"
 googleid = "1.1.1"
 razorpay = "1.6.38"
 kotlinxSerializationJson = "1.8.0"
+facebookLogin = "18.3.0"
+
+playIntegrity = "1.4.0"
 
 [libraries]
+play-integrity = { group = "com.google.android.play", name = "integrity", version.ref = "playIntegrity" }
 razorpay-checkout = { group = "com.razorpay", name = "checkout", version.ref = "razorpay" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -104,8 +109,13 @@ agora-voice = { group = "io.agora.rtc", name = "full-rtc-basic", version.ref = "
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
 firebase-auth = { group = "com.google.firebase", name = "firebase-auth" }
 firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore" }
+firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging" }
 firebase-ai = { group = "com.google.firebase", name = "firebase-ai" }
 firebase-functions = { group = "com.google.firebase", name = "firebase-functions" }
+firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics" }
+firebase-crashlytics = { group = "com.google.firebase", name = "firebase-crashlytics" }
+firebase-storage = { group = "com.google.firebase", name = "firebase-storage" }
+facebook-login = { group = "com.facebook.android", name = "facebook-login", version.ref = "facebookLogin" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
@@ -114,3 +124,4 @@ google-devtools-ksp = { id = "com.google.devtools.ksp", version.ref = "googleDev
 roborazzi = { id = "io.github.takahirom.roborazzi", version.ref = "roborazzi" }
 secrets = { id = "com.google.android.libraries.mapsplatform.secrets-gradle-plugin", version.ref = "secretsGradlePlugin" }
 google-services = { id = "com.google.gms.google-services", version.ref = "googleServices" }
+firebase-crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "crashlytics" }
