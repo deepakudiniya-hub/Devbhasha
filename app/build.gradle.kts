@@ -1,5 +1,7 @@
+import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
+import java.util.Base64
 import java.util.Properties
 
 plugins {
@@ -10,6 +12,7 @@ plugins {
   alias(libs.plugins.roborazzi)
   alias(libs.plugins.secrets)
   alias(libs.plugins.google.services)
+  alias(libs.plugins.firebase.crashlytics)
 }
 
 // Automated Version Management via version.properties
@@ -26,56 +29,73 @@ val versionMinor = (versionProps.getProperty("versionMinor")?.toIntOrNull() ?: 0
 val versionPatch = (versionProps.getProperty("versionPatch")?.toIntOrNull() ?: 0)
 val currentVersionName = if (versionPatch > 0) "$versionMajor.$versionMinor.$versionPatch" else "$versionMajor.$versionMinor"
 
+val localPropsFile = rootProject.file("local.properties")
+val localProps = Properties().apply {
+    if (localPropsFile.exists()) {
+        FileInputStream(localPropsFile).use { load(it) }
+    }
+}
+
+fun getSigningProp(key: String): String? {
+    return System.getenv(key) ?: localProps.getProperty(key)
+}
+
+val ksPath = getSigningProp("DEVBHASHA_KEYSTORE_PATH")
+val ksPassword = getSigningProp("DEVBHASHA_KEYSTORE_PASSWORD")
+val kAlias = getSigningProp("DEVBHASHA_KEY_ALIAS")
+val kPassword = getSigningProp("DEVBHASHA_KEY_PASSWORD")
+
+val hasReleaseSigning = !ksPath.isNullOrBlank() && !ksPassword.isNullOrBlank() && !kAlias.isNullOrBlank() && !kPassword.isNullOrBlank()
+
 android {
   namespace = "com.example"
-  compileSdk { version = release(36) { minorApiLevel = 1 } }
+  compileSdk = 36
 
   defaultConfig {
     applicationId = "com.aistudio.devbhasha.kxmpzq"
     minSdk = 24
     targetSdk = 36
-    versionCode = 24
-  
-    versionName = "24.0"
+    versionCode = currentVersionCode
+    versionName = currentVersionName
     
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
   }
 
   signingConfigs {
     create("release") {
-      val customKeystore = System.getenv("KEYSTORE_PATH") ?: "${rootDir}/my-upload-key.jks"
-      if (file(customKeystore).exists()) {
-        storeFile = file(customKeystore)
-        storePassword = System.getenv("STORE_PASSWORD")
-        keyAlias = "upload"
-        keyPassword = System.getenv("KEY_PASSWORD")
-      } else {
-        storeFile = file("${rootDir}/debug.keystore")
-        storePassword = "android"
-        keyAlias = "androiddebugkey"
-        keyPassword = "android"
+      if (hasReleaseSigning) {
+        storeFile = file(ksPath!!)
+        storePassword = ksPassword
+        keyAlias = kAlias
+        keyPassword = kPassword
       }
     }
-    create("debugConfig") {
-      storeFile = file("${rootDir}/debug.keystore")
-      storePassword = "android"
-      keyAlias = "androiddebugkey"
-      keyPassword = "android"
-    }
+
   }
 
   buildTypes {
     release {
       isMinifyEnabled = true
       isShrinkResources = true
-      isCrunchPngs = true
+      isCrunchPngs = false
       proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-      signingConfig = signingConfigs.getByName("release")
+      if (hasReleaseSigning) {
+        signingConfig = signingConfigs.getByName("release")
+      }
       
       // Additional R8 configuration for better stability
-      setMatchingFallbacks(listOf("release"))
+      matchingFallbacks += listOf("release")
+
+      configure<com.google.firebase.crashlytics.buildtools.gradle.CrashlyticsExtension> {
+        mappingFileUploadEnabled = true
+      }
     }
-    debug { signingConfig = signingConfigs.getByName("debugConfig") }
+    debug {
+      signingConfig = signingConfigs.getByName("debug")
+      configure<com.google.firebase.crashlytics.buildtools.gradle.CrashlyticsExtension> {
+        mappingFileUploadEnabled = false
+      }
+    }
   }
   compileOptions {
     sourceCompatibility = JavaVersion.VERSION_11
@@ -120,14 +140,14 @@ dependencies {
   implementation(libs.androidx.compose.ui.graphics)
   implementation(libs.androidx.compose.ui.tooling.preview)
   implementation(libs.androidx.core.ktx)
-  // implementation(libs.androidx.datastore.preferences)
+  implementation(libs.androidx.datastore.preferences)
   implementation(libs.androidx.lifecycle.runtime.compose)
   implementation(libs.androidx.lifecycle.runtime.ktx)
   implementation(libs.androidx.lifecycle.viewmodel.compose)
   implementation(libs.androidx.navigation.compose)
   // implementation(libs.androidx.room.ktx)
   // implementation(libs.androidx.room.runtime)
-  // implementation(libs.coil.compose)
+  implementation(libs.coil.compose)
   // Retrofit / OkHttp now resolved from the version catalog only (single source of truth)
   implementation(libs.converter.kotlinx.serialization)
   implementation(libs.kotlinx.serialization.json)
@@ -137,7 +157,8 @@ dependencies {
   // Razorpay Checkout SDK
   implementation(libs.razorpay.checkout)
 
-  // Credentials
+  // Credentials & Play Integrity
+  implementation(libs.play.integrity)
   implementation(libs.androidx.credentials)
   implementation(libs.androidx.credentials.play.services)
   implementation(libs.googleid)
@@ -154,10 +175,17 @@ dependencies {
   implementation(libs.retrofit)
 
   implementation(platform(libs.firebase.bom))
+  implementation("com.google.firebase:firebase-appcheck-playintegrity")
+  debugImplementation("com.google.firebase:firebase-appcheck-debug")
   implementation(libs.firebase.auth)
   implementation(libs.firebase.firestore)
+  implementation(libs.firebase.messaging)
   implementation(libs.firebase.ai)
   implementation(libs.firebase.functions)
+  implementation(libs.firebase.analytics)
+  implementation(libs.firebase.crashlytics)
+  implementation(libs.firebase.storage)
+  implementation(libs.facebook.login)
   testImplementation(libs.androidx.compose.ui.test.junit4)
   testImplementation(libs.androidx.core)
   testImplementation(libs.androidx.junit)

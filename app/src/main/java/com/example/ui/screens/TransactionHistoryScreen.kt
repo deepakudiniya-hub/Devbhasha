@@ -10,6 +10,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Remove
+import androidx.compose.material.icons.outlined.ReceiptLong
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -51,7 +52,7 @@ fun TransactionHistoryScreen(
             }
             Text(
                 text = "Transaction History",
-                fontFamily = FontFamily.Serif,
+                fontFamily = com.example.ui.theme.ManropeHindFontFamily,
                 fontSize = 21.sp,
                 fontWeight = FontWeight.Medium,
                 color = Ink
@@ -101,7 +102,7 @@ fun TransactionHistoryScreen(
                     shape = RoundedCornerShape(999.dp)
                 ) {
                     Text(
-                        text = "सुरक्षित ✓",
+                        text = "सुरक्षित",
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Bold,
                         color = Sage,
@@ -118,7 +119,7 @@ fun TransactionHistoryScreen(
             com.example.ui.components.DevEmptyState(
                 title = "कोई लेन-देन उपलब्ध नहीं है",
                 description = "आपके वॉलेट से संबंधित सभी जमा व खर्च के लेन-देन यहाँ सुरक्षित रूप से दिखाई देंगे।",
-                symbol = "📜"
+                icon = Icons.Outlined.ReceiptLong
             )
         } else {
             LazyColumn(

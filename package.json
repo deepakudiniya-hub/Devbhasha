@@ -1,0 +1,14 @@
+{
+  "name": "devbhasha-tests",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "test": "node --test functions/session-policy.test.js",
+    "test:rules": "firebase emulators:exec --only firestore --project demo-devbhasha --config firebase.test.json \"node --test firestore.test.js security-regression.test.js functions/integration.test.js functions/deletion.integration.test.js\""
+  },
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "^3.0.4",
+    "firebase-admin": "^12.5.0",
+    "firebase-tools": "^14.0.0"
+  }
+}

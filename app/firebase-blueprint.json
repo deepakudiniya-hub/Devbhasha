@@ -1,0 +1,64 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "User Profile",
+      "description": "User profile data including streak, coins, and level",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "Owner UID" },
+        "displayName": { "type": "string", "description": "User display name" },
+        "streak": { "type": "integer", "description": "Current practice streak" },
+        "coins": { "type": "integer", "description": "User coins / gold balance" },
+        "level": { "type": "string", "description": "Sadhak level" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Creation timestamp" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Last update timestamp" }
+      },
+      "required": ["userId", "displayName", "streak", "coins", "level", "createdAt"]
+    },
+    "Sadhak": {
+      "title": "Sadhak Profile",
+      "description": "Sadhak profile with dynamic pricing",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "Owner UID" },
+        "name": { "type": "string", "description": "Name" },
+        "chatPricePerMin": { "type": "integer", "description": "Chat rate in rupees" },
+        "callPricePerMin": { "type": "integer", "description": "Call rate in rupees" },
+        "sessionPrice30Min": { "type": "integer", "description": "30 min session price in rupees" },
+        "isAvailable": { "type": "boolean" },
+        "isOnline": { "type": "boolean" }
+      },
+      "required": ["userId", "name", "chatPricePerMin", "callPricePerMin", "sessionPrice30Min"]
+    },
+    "Session": {
+      "title": "Session",
+      "description": "Consultation session",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "participants": { "type": "array", "items": { "type": "string" } },
+        "status": { "type": "string" },
+        "chatPricePerMin": { "type": "integer" },
+        "callPricePerMin": { "type": "integer" },
+        "sessionPrice30Min": { "type": "integer" },
+        "startsAt": { "type": "string", "format": "date-time" },
+        "endsAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "participants", "status"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "User profile document"
+    },
+    "/sadhaks/{sadhakId}": {
+      "schema": "Sadhak",
+      "description": "Sadhak profile document"
+    },
+    "/sessions/{sessionId}": {
+      "schema": "Session",
+      "description": "Consultation session document"
+    }
+  }
+}

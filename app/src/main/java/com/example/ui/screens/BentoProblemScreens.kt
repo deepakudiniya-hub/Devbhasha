@@ -16,6 +16,7 @@ import androidx.compose.material.icons.automirrored.outlined.Chat
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.outlined.Phone
+import androidx.compose.material.icons.outlined.SupportAgent
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -30,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.ui.models.SadhakItem
 import com.example.ui.theme.*
+import com.example.utils.Pricing
 
 // Generic data class for Vedic problem categories
 data class LifeProblemCategory(
@@ -42,7 +44,7 @@ data class LifeProblemCategory(
 )
 
 /**
- * 1. HEALTH ISSUES (स्वास्थ्य समस्या व वैदिक आरोग्य समाधान)
+// English comment placeholder
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -80,7 +82,7 @@ fun BentoHealthIssuesScreen(
                 id = "mental_stress",
                 titleHi = "मानसिक तनाव व अनिद्रा",
                 titleEn = "Stress & Insomnia",
-                emoji = "🧠",
+                emoji = "",
                 description = "अकारण चिंता, बेचैनी, रात को नींद न आना, नकारात्मक विचार व सिर में भारीपन का समाधान।",
                 remedies = listOf(
                     "सोमवार को शिवलिंग पर कच्चा दूध, जल व बेलपत्र अर्पित करें।",
@@ -92,7 +94,7 @@ fun BentoHealthIssuesScreen(
                 id = "vitality_fatigue",
                 titleHi = "ऊर्जा ह्रास व आलस्य",
                 titleEn = "Low Energy & Fatigue",
-                emoji = "🧘",
+                emoji = "",
                 description = "शरीर में भारीपन, बिना कारण थकान, उत्साह की कमी व आलस्य से मुक्ति के सात्विक नियम।",
                 remedies = listOf(
                     "प्रातः सूर्योदय से पूर्व उठकर प्राणायाम व ॐ का 21 बार गुंजन करें।",
@@ -104,7 +106,7 @@ fun BentoHealthIssuesScreen(
                 id = "accidental_fear",
                 titleHi = "अकाल भय व सुरक्षा",
                 titleEn = "Longevity & Protection",
-                emoji = "🛡️",
+                emoji = "",
                 description = "स्वास्थ्य को लेकर अज्ञात भय, दुर्घटना से रक्षा व परिवार की दीर्घायु का दैवीय सुरक्षा कवच।",
                 remedies = listOf(
                     "शनिवार को काले तिल व सरसों का तेल पीपल के वृक्ष के नीचे अर्पित करें।",
@@ -133,7 +135,7 @@ fun BentoHealthIssuesScreen(
 }
 
 /**
- * 2. MONEY PROBLEM (धन समस्या व आर्थिक समृद्धि उपाय)
+// English comment placeholder
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -170,7 +172,7 @@ fun BentoMoneyProblemScreen(
                 id = "blocked_money",
                 titleHi = "रुका हुआ धन व व्यापार घाटा",
                 titleEn = "Blocked Wealth & Losses",
-                emoji = "💼",
+                emoji = "",
                 description = "किसी के पास फंसा हुआ धन वापस न मिलना, व्यापार में लगातार घाटा या बिक्री में मंदी।",
                 remedies = listOf(
                     "प्रातः सूर्य देव को जल में 21 लाल मिर्च के बीज डालकर अर्घ्य दें।",
@@ -182,7 +184,7 @@ fun BentoMoneyProblemScreen(
                 id = "income_barkat",
                 titleHi = "आमदनी में बरकत व बचत",
                 titleEn = "Savings & Prosperity",
-                emoji = "💰",
+                emoji = "",
                 description = "पैसा आता है पर टिकता नहीं, अनावश्यक खर्चे होना व घर में आर्थिक तंगी का निवारण।",
                 remedies = listOf(
                     "घर की तिजोरी या धन स्थान को उत्तर दिशा में रखें व उसमें लाल वस्त्र बिछाएं।",
@@ -194,7 +196,7 @@ fun BentoMoneyProblemScreen(
                 id = "job_promotion",
                 titleHi = "नौकरी, तरक्की व वेतन वृद्धि",
                 titleEn = "Career & Promotion",
-                emoji = "📈",
+                emoji = "",
                 description = "मेहनत के बाद भी प्रमोशन न मिलना, वेतन वृद्धि में रुकावट या नई नौकरी मिलने में विलंब।",
                 remedies = listOf(
                     "गुरुवार को भगवान विष्णु को पीले पुष्प व चने की दाल अर्पित करें।",
@@ -223,7 +225,7 @@ fun BentoMoneyProblemScreen(
 }
 
 /**
- * 3. NEGATIVITY (नकारात्मकता व नज़र दोष निवारण)
+// English comment placeholder
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -248,7 +250,7 @@ fun BentoNegativityScreen(
                 id = "nazar_dosh",
                 titleHi = "बुरी नज़र व टोक दोष",
                 titleEn = "Evil Eye / Nazar",
-                emoji = "🧿",
+                emoji = "",
                 description = "अचानक काम बिगड़ना, बच्चों का बार-बार बीमार पड़ना, घर में नकारात्मक ऊर्जा व नज़र लगना।",
                 remedies = listOf(
                     "शनिवार शाम को 7 साबुत लाल मिर्च व नमक सिर से 7 बार वारकर अग्नि में जलाएं।",
@@ -260,7 +262,7 @@ fun BentoNegativityScreen(
                 id = "sudden_obstacles",
                 titleHi = "अचानक बाधाएं व कार्य विघ्न",
                 titleEn = "Sudden Obstacles",
-                emoji = "⚡",
+                emoji = "",
                 description = "बनते-बनते काम रुक जाना, अंतिम क्षण में असफलता मिलना व अज्ञात कारणों से योजनाएं विफल होना।",
                 remedies = listOf(
                     "नित्य प्रातः श्री हनुमान चालीसा व संकटमोचन हनुमानाष्टक का पाठ करें।",
@@ -272,7 +274,7 @@ fun BentoNegativityScreen(
                 id = "house_heaviness",
                 titleHi = "घर में भारीपन व कलह",
                 titleEn = "Home Negative Energy",
-                emoji = "🏚️",
+                emoji = "",
                 description = "घर में प्रवेश करते ही सिर में भारीपन, चिड़चिड़ापन, सदस्यों में अकारण झगड़ा व घुटन महसूस होना।",
                 remedies = listOf(
                     "संध्याकाल में घर में शुद्ध कपूर व गुग्गल की धूप दिखाएं।",
@@ -284,7 +286,7 @@ fun BentoNegativityScreen(
                 id = "fear_nightmares",
                 titleHi = "भय, बुरे सपने व अशांति",
                 titleEn = "Fear & Bad Dreams",
-                emoji = "🛡️",
+                emoji = "",
                 description = "अज्ञात शक्तियों का भय, रात को अचानक डरकर जागना, डरावने सपने व मानसिक असुरक्षा।",
                 remedies = listOf(
                     "सोते समय सिरहाने लोहे की वस्तु या हनुमान चालीसा रखें।",
@@ -298,7 +300,7 @@ fun BentoNegativityScreen(
     GenericProblemScreenTemplate(
         screenTitle = if (currentLangCode == "hi") "नकारात्मकता व नज़र दोष निवारण" else "Negativity & Evil Eye Relief",
         subtitleText = if (currentLangCode == "hi") "बुरी नज़र, अचानक बाधा व घर के भारीपन को दूर करने के सात्विक उपाय" else "Sacred protection against evil eye, bad energies & obstacles",
-        heroEmoji = "🧿",
+        heroEmoji = "",
         categories = categories,
         inputLabel = if (currentLangCode == "hi") "नकारात्मकता / बाधा का विवरण लिखें:" else "Describe The Negative Energy or Obstacle:",
         inputPlaceholder = if (currentLangCode == "hi") "उदा. घर में भारीपन रहता है, बनते काम अचानक बिगड़ जाते हैं..." else "e.g. Unexplained heaviness at home, sudden repeated failures...",
@@ -313,7 +315,7 @@ fun BentoNegativityScreen(
 }
 
 /**
- * 4. PITR DOSH (पितृ दोष निवारण व तर्पण उपाय)
+// English comment placeholder
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -338,7 +340,7 @@ fun BentoPitrDoshScreen(
                 id = "pitr_symptoms",
                 titleHi = "पितृ दोष के प्रमुख लक्षण",
                 titleEn = "Pitr Dosh Symptoms",
-                emoji = "🙏",
+                emoji = "",
                 description = "संतान उत्पत्ति में बाधा, विवाह में अकारण देरी, कुल वृद्धि रुकना, घर में सदैव अशांति व दरिद्रता।",
                 remedies = listOf(
                     "प्रत्येक अमावस्या को पितरों के निमित्त कच्चा दूध, जल, काले तिल व सफेद फूल पीपल में चढ़ाएं।",
@@ -350,7 +352,7 @@ fun BentoPitrDoshScreen(
                 id = "tarpan_vidhi",
                 titleHi = "तर्पण व पिंडदान विधि",
                 titleEn = "Tarpan & Rituals",
-                emoji = "🌾",
+                emoji = "",
                 description = "अमावस्या या तीर्थ स्थल (गया, हरिद्वार) पर पितरों की आत्मा शांति के लिए तर्पण व पिंडदान के नियम।",
                 remedies = listOf(
                     "अमावस्या के दिन गाय, कौवे, कुत्ते व चींटियों को भोजन (पंचबलि) अवश्य कराएं।",
@@ -362,7 +364,7 @@ fun BentoPitrDoshScreen(
                 id = "pitr_blessings",
                 titleHi = "पितरों का आशीर्वाद व कृपा",
                 titleEn = "Ancestral Grace",
-                emoji = "🕊️",
+                emoji = "",
                 description = "पूर्वजों की प्रसन्नता से वंश वृद्धि, मान-सम्मान, संकटों से मुक्ति व कुल में खुशहाली प्राप्ति।",
                 remedies = listOf(
                     "परिवार के वरिष्ठजनों व माता-पिता का नित्य चरण स्पर्श कर आशीर्वाद लें।",
@@ -374,7 +376,7 @@ fun BentoPitrDoshScreen(
                 id = "peepal_annadan",
                 titleHi = "पीपल पूजन व अन्नदान",
                 titleEn = "Peepal Worship & Charity",
-                emoji = "🌳",
+                emoji = "",
                 description = "पीपल वृक्ष में ब्रह्मा, विष्णु व महेश तथा पितरों का वास माना गया है, इसकी शास्त्रीय सेवा विधि।",
                 remedies = listOf(
                     "शनिवार को दोपहर से पहले पीपल के वृक्ष में जल, दूध व तिल अर्पित करें।",
@@ -388,7 +390,7 @@ fun BentoPitrDoshScreen(
     GenericProblemScreenTemplate(
         screenTitle = if (currentLangCode == "hi") "पितृ दोष निवारण व तर्पण" else "Pitr Dosh & Ancestral Remedies",
         subtitleText = if (currentLangCode == "hi") "पूर्वजों की शांति, कुल वृद्धि व पितृ दोष मुक्ति के अचूक उपाय" else "Sacred Vedic rituals, tarpan & remedies for ancestral peace",
-        heroEmoji = "🙏",
+        heroEmoji = "",
         categories = categories,
         inputLabel = if (currentLangCode == "hi") "अपनी पारिवारिक/पितृ समस्या का विवरण लिखें:" else "Describe Pitr Dosh Concern:",
         inputPlaceholder = if (currentLangCode == "hi") "उदा. वंश वृद्धि में रुकावट, बार-बार काम रुकना या पूर्वजों के सपने आना..." else "e.g. Obstacles in lineage, recurring ancestor dreams, home disputes...",
@@ -427,10 +429,6 @@ private fun GenericProblemScreenTemplate(
     var isMicActive by remember { mutableStateOf(false) }
     var submittedMessage by remember { mutableStateOf<String?>(null) }
 
-    val saffronGradient = Brush.horizontalGradient(
-        listOf(SaffronGradientStart, SaffronGradientEnd)
-    )
-
     Scaffold(
         modifier = modifier.fillMaxSize(),
         containerColor = Color.White,
@@ -452,7 +450,7 @@ private fun GenericProblemScreenTemplate(
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
                         text = screenTitle,
-                        fontFamily = FontFamily.Serif,
+                        fontFamily = com.example.ui.theme.ManropeHindFontFamily,
                         fontWeight = FontWeight.Bold,
                         fontSize = 18.sp,
                         color = Color(0xFF000000)
@@ -495,7 +493,7 @@ private fun GenericProblemScreenTemplate(
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
                                 text = screenTitle,
-                                fontFamily = FontFamily.Serif,
+                                fontFamily = com.example.ui.theme.ManropeHindFontFamily,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 16.5.sp,
                                 color = Color(0xFF000000)
@@ -567,7 +565,7 @@ private fun GenericProblemScreenTemplate(
                             Column {
                                 Text(
                                     text = if (currentLangCode == "hi") selectedCategory.titleHi else selectedCategory.titleEn,
-                                    fontFamily = FontFamily.Serif,
+                                    fontFamily = com.example.ui.theme.ManropeHindFontFamily,
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 17.sp,
                                     color = Color(0xFF000000)
@@ -586,7 +584,7 @@ private fun GenericProblemScreenTemplate(
                         Spacer(modifier = Modifier.height(12.dp))
 
                         Text(
-                            text = if (currentLangCode == "hi") "✨ सरल शास्त्रीय शांति उपाय:" else "✨ Sacred Vedic Remedies:",
+                            text = if (currentLangCode == "hi") "सरल शास्त्रीय शांति उपाय:" else "Sacred Vedic Remedies:",
                             fontWeight = FontWeight.Bold,
                             fontSize = 13.sp,
                             color = Saffron
@@ -695,7 +693,7 @@ private fun GenericProblemScreenTemplate(
 
                             if (problemNote.isNotBlank()) {
                                 TextButton(onClick = { problemNote = "" }) {
-                                    Text("हटाएं ✕", fontSize = 11.5.sp, color = Color(0xFF737373))
+                                    Text("हटाएं", fontSize = 11.5.sp, color = Color(0xFF737373))
                                 }
                             }
                         }
@@ -722,10 +720,10 @@ private fun GenericProblemScreenTemplate(
             // Consult Verified Sadhak
             item {
                 Surface(
-                    shape = RoundedCornerShape(20.dp),
+                    shape = RoundedCornerShape(16.dp),
                     color = Color.White,
                     border = BorderStroke(1.dp, BorderLight),
-                    shadowElevation = 2.dp,
+                    shadowElevation = 0.dp,
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Column(modifier = Modifier.padding(18.dp)) {
@@ -733,17 +731,33 @@ private fun GenericProblemScreenTemplate(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(10.dp)
                         ) {
-                            Text(text = "🕉️", fontSize = 24.sp)
+                            Surface(
+                                shape = RoundedCornerShape(10.dp),
+                                color = SaffronSoftBg,
+                                modifier = Modifier.size(38.dp)
+                            ) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    Icon(
+                                        imageVector = Icons.Outlined.SupportAgent,
+                                        contentDescription = null,
+                                        tint = Saffron,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                }
+                            }
                             Column {
                                 Text(
                                     text = if (currentLangCode == "hi") "पंडित जी से सीधा परामर्श" else "Direct Consultation with Sadhak",
-                                    fontFamily = FontFamily.Serif,
+                                    fontFamily = com.example.ui.theme.ManropeHindFontFamily,
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 15.sp,
                                     color = Color(0xFF000000)
                                 )
                                 Text(
-                                    text = if (currentLangCode == "hi") "गोपनीय चैट व सीधी वॉइस कॉल पर व्यक्तिगत मार्गदर्शन" else "Private chat & voice call guidance",
+                                    text = if (currentLangCode == "hi") 
+                                        "व्यक्तिगत समाधान हेतु साधक से परामर्श करें" 
+                                    else 
+                                        "Consult verified sadhak for personal guidance",
                                     fontSize = 11.5.sp,
                                     color = Color(0xFF737373)
                                 )
@@ -752,79 +766,106 @@ private fun GenericProblemScreenTemplate(
 
                         Spacer(modifier = Modifier.height(14.dp))
 
-                        val targetSadhak = sadhaks.firstOrNull() ?: SadhakItem(
-                            id = "default_acharya",
-                            nameHi = "आचार्य देव शर्मा",
-                            nameEn = "Acharya Dev Sharma",
-                            titleHi = "वरिष्ठ वैदिक ज्योतिष एवं समाधान विशेषज्ञ",
-                            titleEn = "Vedic Problem Specialist",
-                            experienceHi = "18 वर्ष अनुभव",
-                            experienceEn = "18 Years Exp",
-                            rating = "4.9",
-                            isOnline = true,
-                            bio = "पारिवारिक शांति, आरोग्य, धन लाभ व दोष निवारण में सिद्धहस्त।",
-                            phone = "",
-                            initialHi = "आ",
-                            initialEn = "AD"
-                        )
-
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(10.dp)
-                        ) {
-                            // Instant Chat Button
-                            Surface(
-                                shape = RoundedCornerShape(14.dp),
-                                color = Color(0xFF000000),
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .clip(RoundedCornerShape(14.dp))
-                                    .clickable {
-                                        submittedMessage = "पंडित जी से चैट प्रारंभ की जा रही है..."
-                                        onStartChat(targetSadhak)
-                                    }
+                        val targetSadhak = sadhaks.firstOrNull()
+                        if (targetSadhak == null) {
+                            Text(
+                                text = if (currentLangCode == "hi") "अभी कोई साधक उपलब्ध नहीं हैं।" else "No sadhak available right now.",
+                                fontSize = 12.sp,
+                                color = Color(0xFF737373)
+                            )
+                        } else {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(10.dp)
                             ) {
-                                Row(
-                                    modifier = Modifier.padding(vertical = 12.dp, horizontal = 12.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.Center
-                                ) {
-                                    Icon(Icons.AutoMirrored.Outlined.Chat, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
-                                    Spacer(modifier = Modifier.width(6.dp))
-                                    Text(
-                                        text = if (currentLangCode == "hi") "चैट (₹499)" else "Chat (₹499)",
-                                        color = Color.White,
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 13.sp
-                                    )
+                                // Instant Chat Button
+                                if (targetSadhak.chatPricePerMin > 0) {
+                                    Surface(
+                                        shape = RoundedCornerShape(14.dp),
+                                        color = Color(0xFF000000),
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .clip(RoundedCornerShape(14.dp))
+                                            .clickable {
+                                                submittedMessage = "पंडित जी से चैट प्रारंभ की जा रही है..."
+                                                onStartChat(targetSadhak)
+                                            }
+                                    ) {
+                                        Row(
+                                            modifier = Modifier.padding(vertical = 12.dp, horizontal = 8.dp),
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.Center
+                                        ) {
+                                            Icon(Icons.AutoMirrored.Outlined.Chat, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
+                                            Spacer(modifier = Modifier.width(6.dp))
+                                            Text(
+                                                text = if (currentLangCode == "hi") "चैट ₹${targetSadhak.chatPricePerMin}/मि" else "Chat ₹${targetSadhak.chatPricePerMin}/min",
+                                                color = Color.White,
+                                                fontWeight = FontWeight.Bold,
+                                                fontSize = 13.sp
+                                            )
+                                        }
+                                    }
                                 }
-                            }
 
-                            // Instant Voice Call Button
-                            Surface(
-                                shape = RoundedCornerShape(14.dp),
-                                color = Saffron,
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .clip(RoundedCornerShape(14.dp))
-                                    .clickable {
-                                        submittedMessage = "पंडित जी से कॉल जोड़ी जा रही है..."
-                                        onStartCall(targetSadhak)
+                                // Instant Voice Call Button
+                                if (targetSadhak.callPricePerMin > 0) {
+                                    Surface(
+                                        shape = RoundedCornerShape(14.dp),
+                                        color = Saffron,
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .clip(RoundedCornerShape(14.dp))
+                                            .clickable {
+                                                submittedMessage = "पंडित जी से कॉल जोड़ी जा रही है..."
+                                                onStartCall(targetSadhak)
+                                            }
+                                    ) {
+                                        Row(
+                                            modifier = Modifier.padding(vertical = 12.dp, horizontal = 8.dp),
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.Center
+                                        ) {
+                                            Icon(Icons.Outlined.Phone, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
+                                            Spacer(modifier = Modifier.width(6.dp))
+                                            Text(
+                                                text = if (currentLangCode == "hi") "कॉल ₹${targetSadhak.callPricePerMin}/मि" else "Call ₹${targetSadhak.callPricePerMin}/min",
+                                                color = Color.White,
+                                                fontWeight = FontWeight.Bold,
+                                                fontSize = 13.sp
+                                            )
+                                        }
                                     }
-                            ) {
-                                Row(
-                                    modifier = Modifier.padding(vertical = 12.dp, horizontal = 12.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.Center
-                                ) {
-                                    Icon(Icons.Outlined.Phone, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
-                                    Spacer(modifier = Modifier.width(6.dp))
-                                    Text(
-                                        text = if (currentLangCode == "hi") "कॉल करें" else "Call Now",
-                                        color = Color.White,
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 13.sp
-                                    )
+                                }
+
+                                // 30-min Session Button
+                                if (targetSadhak.sessionPrice30Min > 0) {
+                                    Surface(
+                                        shape = RoundedCornerShape(14.dp),
+                                        color = Saffron,
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .clip(RoundedCornerShape(14.dp))
+                                            .clickable {
+                                                submittedMessage = "सत्र प्रारंभ किया जा रहा है..."
+                                                onStartCall(targetSadhak)
+                                            }
+                                    ) {
+                                        Row(
+                                            modifier = Modifier.padding(vertical = 12.dp, horizontal = 8.dp),
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.Center
+                                        ) {
+                                            Icon(Icons.Outlined.Phone, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
+                                            Spacer(modifier = Modifier.width(6.dp))
+                                            Text(
+                                                text = if (currentLangCode == "hi") "सत्र ₹${targetSadhak.sessionPrice30Min}" else "Session ₹${targetSadhak.sessionPrice30Min}",
+                                                color = Color.White,
+                                                fontWeight = FontWeight.Bold,
+                                                fontSize = 13.sp
+                                            )
+                                        }
+                                    }
                                 }
                             }
                         }

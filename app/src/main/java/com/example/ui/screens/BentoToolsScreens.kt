@@ -50,7 +50,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 // =========================================================================
-// 1. FAMILY PROBLEMS (पारिवारिक समस्या, गृह क्लेश निवारण व साधक परामर्श)
+// English comment placeholder
 // =========================================================================
 data class FamilyProblemCategory(
     val id: String,
@@ -84,7 +84,7 @@ fun BentoFamilyProblemsScreen(
                 id = "griha_klesh",
                 titleHi = "गृह क्लेश व अशांति",
                 titleEn = "Household Conflict",
-                emoji = "🏡",
+                emoji = "",
                 description = "घर में अकारण तनाव, झगड़े, अशांति और नकारात्मक माहौल को समाप्त कर शांति स्थापित करें।",
                 remedies = listOf(
                     "संध्याकाल में कर्पूर और 2 लौंग जलाकर पूरे घर में घुमाएं।",
@@ -96,7 +96,7 @@ fun BentoFamilyProblemsScreen(
                 id = "marital_discord",
                 titleHi = "पति-पत्नी में मतभेद",
                 titleEn = "Marital Discord",
-                emoji = "❤️",
+                emoji = "",
                 description = "वैवाहिक संबंधों में संवाद हीनता, गलतफहमी, क्रोध या अलगाव की स्थिति में सामंजस्य।",
                 remedies = listOf(
                     "शुक्रवार को मां लक्ष्मी व नारायण को सफेद मिठाई का भोग लगाएं।",
@@ -108,7 +108,7 @@ fun BentoFamilyProblemsScreen(
                 id = "children_worry",
                 titleHi = "संतान चिंता व पढ़ाई",
                 titleEn = "Children & Future",
-                emoji = "👶",
+                emoji = "",
                 description = "संतान के स्वास्थ्य, पढ़ाई में एकाग्रता, संस्कार या भविष्य को लेकर चिंता निवारण।",
                 remedies = listOf(
                     "बुधवार को भगवान गणेश को दूर्वा व मोदक अर्पित कर बुद्धि मंत्र जपें।",
@@ -120,7 +120,7 @@ fun BentoFamilyProblemsScreen(
                 id = "inlaws_relation",
                 titleHi = "सास-बहू व रिश्ते",
                 titleEn = "In-laws & Harmony",
-                emoji = "🤝",
+                emoji = "",
                 description = "पारिवारिक रिश्तों में सम्मान, प्रेम, कड़वाहट दूर करने व संयुक्त परिवार में सौहार्द।",
                 remedies = listOf(
                     "पूर्णिमा के दिन घर में खीर बनाकर पूरे परिवार के साथ प्रसाद ग्रहण करें।",
@@ -132,7 +132,7 @@ fun BentoFamilyProblemsScreen(
                 id = "property_dispute",
                 titleHi = "पैतृक संपत्ति विवाद",
                 titleEn = "Property Disputes",
-                emoji = "⚖️",
+                emoji = "",
                 description = "पारिवारिक भूमि, मकान, जायदाद या बंटवारे से जुड़े तनाव और कानूनी उलझनों का उपाय।",
                 remedies = listOf(
                     "शनिवार को शनि मंदिर में सरसों के तेल का दीपक प्रज्वलित करें।",
@@ -144,7 +144,7 @@ fun BentoFamilyProblemsScreen(
                 id = "nazar_dosh",
                 titleHi = "नज़र दोष व नकारात्मकता",
                 titleEn = "Evil Eye / Negativity",
-                emoji = "🛡️",
+                emoji = "",
                 description = "घर में बीमारी, अचानक तरक्की में बाधा, भारीपन या बुरी नज़र का प्रभाव दूर करना।",
                 remedies = listOf(
                     "शनिवार शाम को नमक मिले पानी से पूरे घर में पोछा लगाएं।",
@@ -159,10 +159,6 @@ fun BentoFamilyProblemsScreen(
     var problemNote by remember { mutableStateOf("") }
     var isMicActive by remember { mutableStateOf(false) }
     var submittedMessage by remember { mutableStateOf<String?>(null) }
-
-    val saffronGradient = Brush.horizontalGradient(
-        listOf(SaffronGradientStart, SaffronGradientEnd)
-    )
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -185,7 +181,7 @@ fun BentoFamilyProblemsScreen(
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
                         text = if (currentLangCode == "hi") "पारिवारिक समस्या व समाधान" else "Family Problems & Solutions",
-                        fontFamily = FontFamily.Serif,
+                        fontFamily = com.example.ui.theme.ManropeHindFontFamily,
                         fontWeight = FontWeight.Bold,
                         fontSize = 18.sp,
                         color = Color(0xFF000000)
@@ -207,7 +203,7 @@ fun BentoFamilyProblemsScreen(
                 Column(modifier = Modifier.fillMaxWidth().padding(top = 4.dp)) {
                     Text(
                         text = if (currentLangCode == "hi") "गृह शांति व पारिवारिक समाधान" else "Family Peace & Spiritual Guidance",
-                        fontFamily = FontFamily.Serif,
+                        fontFamily = com.example.ui.theme.ManropeHindFontFamily,
                         fontSize = 23.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color(0xFF000000)
@@ -215,7 +211,7 @@ fun BentoFamilyProblemsScreen(
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = if (currentLangCode == "hi")
-                            "गृह क्लेश, वैवाहिक मतभेद, संतान चिंता या पारिवारिक विवादों का वैदिक उपाय व अनुभवी साधक से परामर्श पाएं।"
+                            "गृह क्लेश, वैवाहिक मतभेद, संतान चिंता या पारिवारिक विवादों का वैदिक उपाय व अनुभवी Sadhak से परामर्श पाएं।"
                         else
                             "Find remedies and consult verified sadhaks for household discord, relationships, children and peace.",
                         fontSize = 12.5.sp,
@@ -258,7 +254,20 @@ fun BentoFamilyProblemsScreen(
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(6.dp)
                             ) {
-                                Text(text = cat.emoji, fontSize = 14.sp)
+                                Icon(
+                                    imageVector = when (cat.id) {
+                                        "griha_klesh" -> Icons.Default.Home
+                                        "marital_discord" -> Icons.Default.Favorite
+                                        "children_worry" -> Icons.Default.ChildCare
+                                        "inlaws_relation" -> Icons.Default.Handshake
+                                        "property_dispute" -> Icons.Default.Balance
+                                        "nazar_dosh" -> Icons.Default.Shield
+                                        else -> Icons.Default.SelfImprovement
+                                    },
+                                    contentDescription = null,
+                                    tint = if (isSelected) Color.White else Color(0xFF737373),
+                                    modifier = Modifier.size(15.dp)
+                                )
                                 Text(
                                     text = if (currentLangCode == "hi") cat.titleHi else cat.titleEn,
                                     fontSize = 12.sp,
@@ -284,11 +293,24 @@ fun BentoFamilyProblemsScreen(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(10.dp)
                         ) {
-                            Text(text = selectedCategory.emoji, fontSize = 28.sp)
+                            Icon(
+                                imageVector = when (selectedCategory.id) {
+                                    "griha_klesh" -> Icons.Default.Home
+                                    "marital_discord" -> Icons.Default.Favorite
+                                    "children_worry" -> Icons.Default.ChildCare
+                                    "inlaws_relation" -> Icons.Default.Handshake
+                                    "property_dispute" -> Icons.Default.Balance
+                                    "nazar_dosh" -> Icons.Default.Shield
+                                    else -> Icons.Default.SelfImprovement
+                                },
+                                contentDescription = null,
+                                tint = SaffronPrimary,
+                                modifier = Modifier.size(28.dp)
+                            )
                             Column {
                                 Text(
                                     text = if (currentLangCode == "hi") selectedCategory.titleHi else selectedCategory.titleEn,
-                                    fontFamily = FontFamily.Serif,
+                                    fontFamily = com.example.ui.theme.ManropeHindFontFamily,
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 17.sp,
                                     color = Color(0xFF000000)
@@ -306,12 +328,23 @@ fun BentoFamilyProblemsScreen(
                         HorizontalDivider(color = BorderLight)
                         Spacer(modifier = Modifier.height(12.dp))
 
-                        Text(
-                            text = if (currentLangCode == "hi") "✨ सरल वैदिक शांति उपाय:" else "✨ Sacred Vedic Remedies:",
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 13.sp,
-                            color = Saffron
-                        )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.AutoAwesome,
+                                contentDescription = null,
+                                tint = SaffronPrimary,
+                                modifier = Modifier.size(14.dp)
+                            )
+                            Text(
+                                text = if (currentLangCode == "hi") "सरल वैदिक शांति उपाय:" else "Sacred Vedic Remedies:",
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 13.sp,
+                                color = Saffron
+                            )
+                        }
                         Spacer(modifier = Modifier.height(6.dp))
                         selectedCategory.remedies.forEach { remedy ->
                             Row(
@@ -438,8 +471,8 @@ fun BentoFamilyProblemsScreen(
                 ) {
                     Column(modifier = Modifier.padding(18.dp)) {
                         Text(
-                            text = if (currentLangCode == "hi") "साधक से परामर्श लें (Live Consultation)" else "Consult Verified Sadhak",
-                            fontFamily = FontFamily.Serif,
+                            text = if (currentLangCode == "hi") "Sadhak से परामर्श लें (Live Consultation)" else "Consult Verified Sadhak",
+                            fontFamily = com.example.ui.theme.ManropeHindFontFamily,
                             fontWeight = FontWeight.Bold,
                             fontSize = 16.sp,
                             color = Color(0xFF000000)
@@ -447,7 +480,7 @@ fun BentoFamilyProblemsScreen(
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
                             text = if (currentLangCode == "hi")
-                                "पारिवारिक शांति व समाधान हेतु अनुभवी साधक से चैट या सीधे वॉइस कॉल द्वारा बात करें।"
+                                "पारिवारिक शांति व समाधान हेतु अनुभवी Sadhak से चैट या सीधे वॉइस कॉल द्वारा बात करें।"
                             else
                                 "Connect with experienced spiritual mentors via chat or voice call for direct solutions.",
                             fontSize = 11.5.sp,
@@ -465,14 +498,13 @@ fun BentoFamilyProblemsScreen(
 
                             // Primary Saffron: Chat
                             Surface(
-                                shape = RoundedCornerShape(999.dp),
-                                color = Color.Transparent,
-                                shadowElevation = 2.dp,
+                                shape = RoundedCornerShape(12.dp),
+                                color = Saffron,
+                                shadowElevation = 0.dp,
                                 modifier = Modifier
                                     .weight(1f)
                                     .height(48.dp)
-                                    .clip(RoundedCornerShape(999.dp))
-                                    .background(saffronGradient)
+                                    .clip(RoundedCornerShape(12.dp))
                                     .clickable {
                                         if (activeSadhak != null && onStartChat != null) {
                                             onStartChat(activeSadhak)
@@ -647,7 +679,7 @@ fun BentoTarotScreen(
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
                         text = "Vedic Oracle & Tarot Spread",
-                        fontFamily = FontFamily.Serif,
+                        fontFamily = com.example.ui.theme.ManropeHindFontFamily,
                         fontWeight = FontWeight.Bold,
                         fontSize = 19.sp,
                         color = Ink
@@ -667,7 +699,7 @@ fun BentoTarotScreen(
             item {
                 Text(
                     text = "3-Card Sacred Oracle",
-                    fontFamily = FontFamily.Serif,
+                    fontFamily = com.example.ui.theme.ManropeHindFontFamily,
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
                     color = Ink
@@ -716,7 +748,12 @@ fun BentoTarotScreen(
                                 .padding(vertical = 32.dp, horizontal = 20.dp),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            Text("🪔", fontSize = 34.sp)
+                            Icon(
+                                imageVector = Icons.Default.SelfImprovement,
+                                contentDescription = null,
+                                tint = Terra,
+                                modifier = Modifier.size(36.dp)
+                            )
                             Spacer(modifier = Modifier.height(10.dp))
                             Text(
                                 text = card.position,
@@ -751,7 +788,7 @@ fun BentoTarotScreen(
 
                             Text(
                                 text = card.title,
-                                fontFamily = FontFamily.Serif,
+                                fontFamily = com.example.ui.theme.ManropeHindFontFamily,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 18.sp,
                                 color = Ink
@@ -780,7 +817,12 @@ fun BentoTarotScreen(
                                 modifier = Modifier.fillMaxWidth()
                             ) {
                                 Row(modifier = Modifier.padding(10.dp), verticalAlignment = Alignment.CenterVertically) {
-                                    Text("✨", fontSize = 14.sp)
+                                    Icon(
+                                        imageVector = Icons.Default.AutoAwesome,
+                                        contentDescription = null,
+                                        tint = SaffronPrimary,
+                                        modifier = Modifier.size(16.dp)
+                                    )
                                     Spacer(modifier = Modifier.width(6.dp))
                                     Text(text = card.advice, fontSize = 11.5.sp, color = InkSoft)
                                 }
@@ -801,7 +843,14 @@ fun BentoTarotScreen(
                         colors = ButtonDefaults.buttonColors(containerColor = Ink),
                         shape = RoundedCornerShape(12.dp)
                     ) {
-                        Text("Shuffle & Draw Again 🪔", fontWeight = FontWeight.Bold, color = Color.White)
+                        Icon(
+                            imageVector = Icons.Default.Refresh,
+                            contentDescription = "Shuffle",
+                            tint = Color.White,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Shuffle & Draw Again", fontWeight = FontWeight.Bold, color = Color.White)
                     }
                 }
             }
@@ -843,7 +892,7 @@ fun BentoKundliMatchScreen(
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
                         text = "Vedic Kundli Milan (36 Gunas)",
-                        fontFamily = FontFamily.Serif,
+                        fontFamily = com.example.ui.theme.ManropeHindFontFamily,
                         fontWeight = FontWeight.Bold,
                         fontSize = 19.sp,
                         color = Ink
@@ -863,7 +912,7 @@ fun BentoKundliMatchScreen(
             item {
                 Text(
                     text = "Ashta Kuta Compatibility",
-                    fontFamily = FontFamily.Serif,
+                    fontFamily = com.example.ui.theme.ManropeHindFontFamily,
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
                     color = Ink
@@ -966,7 +1015,7 @@ fun BentoKundliMatchScreen(
                             Row(verticalAlignment = Alignment.Bottom) {
                                 Text(
                                     text = "31",
-                                    fontFamily = FontFamily.Serif,
+                                    fontFamily = com.example.ui.theme.ManropeHindFontFamily,
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 46.sp,
                                     color = SageDeep
@@ -1107,7 +1156,7 @@ fun BentoDailyPoojaScreen(
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
                         text = "Nitya Pooja & Daily Rituals",
-                        fontFamily = FontFamily.Serif,
+                        fontFamily = com.example.ui.theme.ManropeHindFontFamily,
                         fontWeight = FontWeight.Bold,
                         fontSize = 19.sp,
                         color = Ink
@@ -1127,7 +1176,7 @@ fun BentoDailyPoojaScreen(
             item {
                 Text(
                     text = "Daily Spiritual Rituals",
-                    fontFamily = FontFamily.Serif,
+                    fontFamily = com.example.ui.theme.ManropeHindFontFamily,
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
                     color = Ink
@@ -1154,7 +1203,7 @@ fun BentoDailyPoojaScreen(
                     ) {
                         Column {
                             Text(text = "$completedCount of ${steps.size} Rituals Done", fontWeight = FontWeight.Bold, fontSize = 15.sp, color = Ink)
-                            Text(text = if (completedCount == steps.size) "Daily Nitya Pooja Completed ✨" else "Complete all 4 steps today", fontSize = 12.sp, color = InkSoft)
+                            Text(text = if (completedCount == steps.size) "Daily Nitya Pooja Completed" else "Complete all 4 steps today", fontSize = 12.sp, color = InkSoft)
                         }
                         CircularProgressIndicator(
                             progress = { completedCount.toFloat() / steps.size.toFloat() },
@@ -1208,7 +1257,7 @@ fun BentoDailyPoojaScreen(
                             Column(modifier = Modifier.padding(12.dp)) {
                                 Text(
                                     text = step.mantra,
-                                    fontFamily = FontFamily.Serif,
+                                    fontFamily = com.example.ui.theme.ManropeHindFontFamily,
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 13.5.sp,
                                     color = TerraDeep,
@@ -1249,11 +1298,11 @@ fun BentoSacredHabitsScreen(
 ) {
     val initialHabits = remember {
         listOf(
-            SacredHabit("1", "Surya Namaskar & Yoga", "प्रातः सूर्य नमस्कार (12 चक्र)", "☀️", true),
-            SacredHabit("2", "Mantra Japa Meditation", "108 गायत्री / महामृत्युंजय जप", "📿", true),
-            SacredHabit("3", "Satvik Food & Hydration", "सात्विक आहार व पर्याप्त जल", "🌿", false),
-            SacredHabit("4", "Gita / Sacred Reading", "श्रीमद्भगवद्गीता के 2 श्लोक", "📖", false),
-            SacredHabit("5", "Sandhya Diya & Gratitude", "संध्या दीप प्रज्वलन व धन्यवाद", "🪔", false)
+            SacredHabit("1", "Surya Namaskar & Yoga", "प्रातः सूर्य नमस्कार (12 चक्र)", "", true),
+            SacredHabit("2", "Mantra Japa Meditation", "108 गायत्री / महामृत्युंजय जप", "", true),
+            SacredHabit("3", "Satvik Food & Hydration", "सात्विक आहार व पर्याप्त जल", "", false),
+            SacredHabit("4", "Gita / Sacred Reading", "श्रीमद्भगवद्गीता के 2 श्लोक", "", false),
+            SacredHabit("5", "Sandhya Diya & Gratitude", "संध्या दीप प्रज्वलन व धन्यवाद", "", false)
         )
     }
 
@@ -1275,7 +1324,7 @@ fun BentoSacredHabitsScreen(
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
                         text = "Sacred Habits (Nitya Karma)",
-                        fontFamily = FontFamily.Serif,
+                        fontFamily = com.example.ui.theme.ManropeHindFontFamily,
                         fontWeight = FontWeight.Bold,
                         fontSize = 19.sp,
                         color = Ink
@@ -1295,7 +1344,7 @@ fun BentoSacredHabitsScreen(
             item {
                 Text(
                     text = "Daily Spiritual Streak",
-                    fontFamily = FontFamily.Serif,
+                    fontFamily = com.example.ui.theme.ManropeHindFontFamily,
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
                     color = Ink
@@ -1321,10 +1370,15 @@ fun BentoSacredHabitsScreen(
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Column {
-                            Text(text = "🔥 7 Days Streak Active", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Ink)
+                            Text(text = "7 Days Streak Active", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Ink)
                             Text(text = "Completed $doneCount of ${habits.size} sacred tasks today", fontSize = 12.sp, color = InkSoft)
                         }
-                        Text("🎯", fontSize = 28.sp)
+                        Icon(
+                            imageVector = Icons.Default.TrackChanges,
+                            contentDescription = null,
+                            modifier = Modifier.size(28.dp),
+                            tint = Terra
+                        )
                     }
                 }
             }
@@ -1434,7 +1488,7 @@ fun BentoJapaTimerScreen(
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
                         text = "108 Japa Mala & Chanting Counter",
-                        fontFamily = FontFamily.Serif,
+                        fontFamily = com.example.ui.theme.ManropeHindFontFamily,
                         fontWeight = FontWeight.Bold,
                         fontSize = 19.sp,
                         color = Ink
@@ -1454,7 +1508,7 @@ fun BentoJapaTimerScreen(
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
                     text = "Digital Rudraksha Mala",
-                    fontFamily = FontFamily.Serif,
+                    fontFamily = com.example.ui.theme.ManropeHindFontFamily,
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
                     color = Ink
@@ -1490,19 +1544,15 @@ fun BentoJapaTimerScreen(
                 modifier = Modifier
                     .size(230.dp)
                     .clip(CircleShape)
-                    .background(
-                        brush = Brush.radialGradient(
-                            colors = listOf(Terra, TerraDeep, Ink)
-                        )
-                    )
-                    .border(4.dp, GoldStamp, CircleShape)
+                    .background(Color(0xFF2B2019))
+                    .border(3.dp, Saffron, CircleShape)
                     .clickable { handleBeadCount() },
                 contentAlignment = Alignment.Center
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
                         text = "$japaCount",
-                        fontFamily = FontFamily.Serif,
+                        fontFamily = com.example.ui.theme.ManropeHindFontFamily,
                         fontSize = 58.sp,
                         fontWeight = FontWeight.Bold,
                         color = PaperCard

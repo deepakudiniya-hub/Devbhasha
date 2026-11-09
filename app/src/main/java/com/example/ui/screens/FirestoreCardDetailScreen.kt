@@ -13,18 +13,25 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.Chat
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.SelfImprovement
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.outlined.Phone
 import androidx.compose.material.icons.outlined.Share
+import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material3.*
 import androidx.compose.material3.pulltorefresh.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.animation.core.*
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.ui.models.SadhakItem
@@ -62,6 +69,7 @@ fun FirestoreCardDetailScreen(
     var submittedMessage by remember { mutableStateOf<String?>(null) }
     var commentsList by remember { mutableStateOf<List<CardComment>>(emptyList()) }
     var newCommentText by remember { mutableStateOf("") }
+    var selectedRating by remember { mutableStateOf(5) }
     var isPostingComment by remember { mutableStateOf(false) }
 
     // State-based fetching from Firestore using the card's unique ID with fallback empty state handling
@@ -84,7 +92,7 @@ fun FirestoreCardDetailScreen(
             commentsList = CommentRepository.fetchComments(cardId)
         } catch (e: Exception) {
             cardContent = getDefaultCardContent(cardId, isHindi)
-            errorMessage = if (isHindi) "क्लाउड फेच त्रुटि: ${e.localizedMessage}" else "Cloud fetch error: ${e.localizedMessage}"
+            errorMessage = if (isHindi) "क्लाउड फेच Error: ${e.localizedMessage}" else "Cloud fetch error: ${e.localizedMessage}"
             commentsList = CommentRepository.fetchComments(cardId)
         } finally {
             isLoading = false
@@ -123,11 +131,11 @@ fun FirestoreCardDetailScreen(
                     IconButton(
                         onClick = {
                             val shareText = buildString {
-                                appendLine("${displayContent.emoji} $title")
+                                appendLine(title)
                                 appendLine()
                                 appendLine(description)
                                 appendLine()
-                                appendLine("✨ वैदिक उपाय / Remedies:")
+                                appendLine("वैदिक उपाय / Remedies:")
                                 displayContent.remedies.forEach { remedy ->
                                     appendLine("• $remedy")
                                 }
@@ -210,7 +218,7 @@ fun FirestoreCardDetailScreen(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(10.dp)
                         ) {
-                            Text(text = "⚠️", fontSize = 22.sp)
+                            Icon(Icons.Default.Warning, contentDescription = null, tint = Color(0xFF991B1B), modifier = Modifier.size(22.dp))
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
                                     text = if (isHindi) "क्लाउड दस्तावेज़ अनुपलब्ध (Empty State)" else "Cloud Document Not Found",
@@ -294,13 +302,13 @@ fun FirestoreCardDetailScreen(
 
                         Surface(
                             shape = RoundedCornerShape(999.dp),
-                            color = if (displayContent.existsInCloud) Color(0xFFFAF6EA) else Color(0xFFF1F5F9)
+                            color = if (displayContent.existsInCloud) Color(0xFFF1F5F9) else Color(0xFFF1F5F9)
                         ) {
                             Text(
-                                text = if (displayContent.existsInCloud) "☁️ Cloud Synced ID: ${displayContent.cardId}" else "📌 Local Fallback ID: ${displayContent.cardId}",
+                                text = if (displayContent.existsInCloud) "Cloud Synced ID: ${displayContent.cardId}" else "Local Fallback ID: ${displayContent.cardId}",
                                 fontSize = 11.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = if (displayContent.existsInCloud) Color(0xFF125157) else Color(0xFF475569),
+                                color = if (displayContent.existsInCloud) SaffronDeep else Color(0xFF475569),
                                 modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
                             )
                         }
@@ -311,7 +319,7 @@ fun FirestoreCardDetailScreen(
             // Remedies Section
             item {
                 Text(
-                    text = if (currentLangCode == "hi") "✨ वैदिक उपाय एवं मार्गदर्शन" else "✨ Vedic Remedies & Guidance",
+                    text = if (currentLangCode == "hi") "वैदिक उपाय एवं मार्गदर्शन" else "Vedic Remedies & Guidance",
                     fontFamily = AppFontFamily,
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp,
@@ -337,7 +345,7 @@ fun FirestoreCardDetailScreen(
                             modifier = Modifier.size(24.dp)
                         ) {
                             Box(contentAlignment = Alignment.Center) {
-                                Text(text = "🕉️", fontSize = 12.sp)
+                                Icon(Icons.Default.SelfImprovement, contentDescription = null, tint = SaffronPrimary, modifier = Modifier.size(14.dp))
                             }
                         }
                         Text(
@@ -366,11 +374,11 @@ fun FirestoreCardDetailScreen(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(10.dp)
                         ) {
-                            Text(text = "🕉️", fontSize = 24.sp)
+                            Icon(Icons.Default.SelfImprovement, contentDescription = null, tint = SaffronPrimary, modifier = Modifier.size(24.dp))
                             Column {
                                 Text(
                                     text = if (currentLangCode == "hi") "पंडित जी से सीधा परामर्श" else "Direct Consultation",
-                                    fontFamily = FontFamily.Serif,
+                                    fontFamily = com.example.ui.theme.ManropeHindFontFamily,
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 15.sp,
                                     color = Color(0xFF000000)
@@ -385,77 +393,62 @@ fun FirestoreCardDetailScreen(
 
                         Spacer(modifier = Modifier.height(14.dp))
 
-                        val targetSadhak = sadhaks.firstOrNull() ?: SadhakItem(
-                            id = "default_acharya",
-                            nameHi = "आचार्य देव शर्मा",
-                            nameEn = "Acharya Dev Sharma",
-                            titleHi = "वरिष्ठ वैदिक ज्योतिष विशेषज्ञ",
-                            titleEn = "Vedic Problem Specialist",
-                            experienceHi = "18 वर्ष अनुभव",
-                            experienceEn = "18 Years Exp",
-                            rating = "4.9",
-                            isOnline = true,
-                            bio = "पारिवारिक शांति, आरोग्य, धन लाभ व दोष निवारण में सिद्धहस्त।",
-                            phone = "",
-                            initialHi = "आ",
-                            initialEn = "AD"
-                        )
-
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(10.dp)
-                        ) {
-                            Surface(
-                                shape = RoundedCornerShape(14.dp),
-                                color = Color(0xFF000000),
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .clip(RoundedCornerShape(14.dp))
-                                    .clickable {
-                                        submittedMessage = "पंडित जी से चैट प्रारंभ की जा रही है..."
-                                        onStartChat(targetSadhak)
-                                    }
+                        val targetSadhak = sadhaks.firstOrNull()
+                        if (targetSadhak == null) {
+                            Text(
+                                text = if (currentLangCode == "hi") "अभी कोई साधक उपलब्ध नहीं हैं।" else "No sadhak available right now.",
+                                fontSize = 12.sp,
+                                color = Color(0xFF737373)
+                            )
+                        } else {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(10.dp)
                             ) {
-                                Row(
-                                    modifier = Modifier.padding(vertical = 12.dp, horizontal = 12.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.Center
-                                ) {
-                                    Icon(Icons.AutoMirrored.Outlined.Chat, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
-                                    Spacer(modifier = Modifier.width(6.dp))
-                                    Text(
-                                        text = if (currentLangCode == "hi") "चैट (₹499)" else "Chat (₹499)",
-                                        color = Color.White,
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 13.sp
-                                    )
+                                if (targetSadhak.chatPricePerMin > 0) {
+                                    Surface(
+                                        shape = RoundedCornerShape(14.dp),
+                                        color = Color(0xFF000000),
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .clip(RoundedCornerShape(14.dp))
+                                            .clickable {
+                                                submittedMessage = "पंडित जी से चैट प्रारंभ की जा रही है..."
+                                                onStartChat(targetSadhak)
+                                            }
+                                    ) {
+                                        Text("Chat\n₹${targetSadhak.chatPricePerMin}/min", color = Color.White, textAlign = TextAlign.Center, modifier = Modifier.padding(12.dp), fontWeight = FontWeight.Bold)
+                                    }
                                 }
-                            }
-
-                            Surface(
-                                shape = RoundedCornerShape(14.dp),
-                                color = Saffron,
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .clip(RoundedCornerShape(14.dp))
-                                    .clickable {
-                                        submittedMessage = "पंडित जी से कॉल जोड़ी जा रही है..."
-                                        onStartCall(targetSadhak)
+                                if (targetSadhak.callPricePerMin > 0) {
+                                    Surface(
+                                        shape = RoundedCornerShape(14.dp),
+                                        color = Saffron,
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .clip(RoundedCornerShape(14.dp))
+                                            .clickable {
+                                                submittedMessage = "पंडित जी से कॉल जोड़ी जा रही है..."
+                                                onStartCall(targetSadhak)
+                                            }
+                                    ) {
+                                        Text("Call\n₹${targetSadhak.callPricePerMin}/min", color = Color.White, textAlign = TextAlign.Center, modifier = Modifier.padding(12.dp), fontWeight = FontWeight.Bold)
                                     }
-                            ) {
-                                Row(
-                                    modifier = Modifier.padding(vertical = 12.dp, horizontal = 12.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.Center
-                                ) {
-                                    Icon(Icons.Outlined.Phone, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
-                                    Spacer(modifier = Modifier.width(6.dp))
-                                    Text(
-                                        text = if (currentLangCode == "hi") "कॉल करें" else "Call Now",
-                                        color = Color.White,
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 13.sp
-                                    )
+                                }
+                                if (targetSadhak.sessionPrice30Min > 0) {
+                                    Surface(
+                                        shape = RoundedCornerShape(14.dp),
+                                        color = Saffron,
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .clip(RoundedCornerShape(14.dp))
+                                            .clickable {
+                                                submittedMessage = "सत्र प्रारंभ किया जा रहा है..."
+                                                onStartCall(targetSadhak)
+                                            }
+                                    ) {
+                                        Text("Session (30m)\n₹${targetSadhak.sessionPrice30Min}", color = Color.White, textAlign = TextAlign.Center, modifier = Modifier.padding(12.dp), fontWeight = FontWeight.Bold)
+                                    }
                                 }
                             }
                         }
@@ -494,9 +487,9 @@ fun FirestoreCardDetailScreen(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            Text(text = "💬", fontSize = 20.sp)
+                            Icon(Icons.AutoMirrored.Outlined.Chat, contentDescription = null, tint = SaffronPrimary, modifier = Modifier.size(20.dp))
                             Text(
-                                text = if (currentLangCode == "hi") "साधक अनुभव एवं टिप्पणियाँ" else "User Comments & Feedback",
+                                text = if (currentLangCode == "hi") "Sadhak अनुभव एवं टिप्पणियाँ" else "User Comments & Feedback",
                                 fontFamily = AppFontFamily,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 16.sp,
@@ -505,6 +498,44 @@ fun FirestoreCardDetailScreen(
                         }
 
                         Spacer(modifier = Modifier.height(12.dp))
+
+                        // Star Rating Selector
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(2.dp)
+                        ) {
+                            Text(
+                                text = if (currentLangCode == "hi") "रेटिंग दें (Rating):" else "Rate:",
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Ink
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            for (i in 1..5) {
+                                val isSelected = i <= selectedRating
+                                val scale by animateFloatAsState(
+                                    targetValue = if (isSelected) 1.25f else 1.0f,
+                                    animationSpec = spring(
+                                        dampingRatio = Spring.DampingRatioMediumBouncy,
+                                        stiffness = Spring.StiffnessLow
+                                    ),
+                                    label = "star_scale_$i"
+                                )
+                                IconButton(
+                                    onClick = { selectedRating = i },
+                                    modifier = Modifier.size(28.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = if (isSelected) androidx.compose.material.icons.Icons.Default.Star else androidx.compose.material.icons.Icons.Outlined.Star,
+                                        contentDescription = "$i stars",
+                                        tint = if (isSelected) SaffronPrimary else InkFaint,
+                                        modifier = Modifier.size(18.dp).scale(scale)
+                                    )
+                                }
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(8.dp))
 
                         // Comment Input Field
                         OutlinedTextField(
@@ -536,9 +567,10 @@ fun FirestoreCardDetailScreen(
                                 if (newCommentText.isNotBlank()) {
                                     coroutineScope.launch {
                                         isPostingComment = true
-                                        val success = CommentRepository.postComment(cardId, "साधक", newCommentText.trim())
+                                        val success = CommentRepository.postComment(cardId, "Sadhak", newCommentText.trim(), selectedRating)
                                         if (success) {
                                             newCommentText = ""
+                                            selectedRating = 5
                                             commentsList = CommentRepository.fetchComments(cardId)
                                         }
                                         isPostingComment = false
@@ -587,12 +619,28 @@ fun FirestoreCardDetailScreen(
                                                 horizontalArrangement = Arrangement.SpaceBetween,
                                                 verticalAlignment = Alignment.CenterVertically
                                             ) {
-                                                Text(
-                                                    text = comment.userName,
-                                                    fontWeight = FontWeight.Bold,
-                                                    fontSize = 12.5.sp,
-                                                    color = Ink
-                                                )
+                                                Row(
+                                                    verticalAlignment = Alignment.CenterVertically,
+                                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                                ) {
+                                                    Text(
+                                                        text = comment.userName,
+                                                        fontWeight = FontWeight.Bold,
+                                                        fontSize = 12.5.sp,
+                                                        color = Ink
+                                                    )
+                                                    Spacer(modifier = Modifier.width(6.dp))
+                                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                                        for (s in 1..5) {
+                                                            Icon(
+                                                                imageVector = if (s <= comment.rating) androidx.compose.material.icons.Icons.Default.Star else androidx.compose.material.icons.Icons.Outlined.Star,
+                                                                contentDescription = null,
+                                                                tint = if (s <= comment.rating) SaffronPrimary else InkFaint,
+                                                                modifier = Modifier.size(12.dp)
+                                                            )
+                                                        }
+                                                    }
+                                                }
                                                 val dateStr = java.text.SimpleDateFormat("d MMM, HH:mm", java.util.Locale.getDefault()).format(java.util.Date(comment.timestamp))
                                                 Text(
                                                     text = dateStr,
@@ -626,7 +674,7 @@ private fun getDefaultCardContent(cardId: String, isHindi: Boolean): FirestoreCa
             cardId = cardId,
             titleHi = "पारिवारिक शांति एवं क्लेश निवारण",
             titleEn = "Family Peace & Harmony",
-            emoji = "🏡",
+            emoji = "",
             descriptionHi = "परिवार में आपसी मनमुटाव, गृह क्लेश, आपसी प्रेम की कमी और वास्तु दोष का वैदिक समाधान।",
             descriptionEn = "Vedic solutions for family disputes, lack of harmony, and domestic peace.",
             remedies = listOf(
@@ -640,7 +688,7 @@ private fun getDefaultCardContent(cardId: String, isHindi: Boolean): FirestoreCa
             cardId = cardId,
             titleHi = "करियर, व्यापार एवं सफलता",
             titleEn = "Career & Business Success",
-            emoji = "💼",
+            emoji = "",
             descriptionHi = "नौकरी में उन्नति, व्यवसाय में वृद्धि, आर्थिक बाधाओं और साक्षात्कार में सफलता के उपाय।",
             descriptionEn = "Solutions for career advancement, business growth, and overcoming obstacles.",
             remedies = listOf(
@@ -654,7 +702,7 @@ private fun getDefaultCardContent(cardId: String, isHindi: Boolean): FirestoreCa
             cardId = cardId,
             titleHi = "विवाह, प्रेम एवं संबंध",
             titleEn = "Marriage & Relationships",
-            emoji = "❤️",
+            emoji = "",
             descriptionHi = "विवाह में आ रही बाधाएं, मांगलिक दोष, वैवाहिक जीवन में मधुरता और प्रेम संबंध के उपाय।",
             descriptionEn = "Remedies for marriage delays, manglik dosha, and relationship harmony.",
             remedies = listOf(
@@ -664,11 +712,53 @@ private fun getDefaultCardContent(cardId: String, isHindi: Boolean): FirestoreCa
             ),
             existsInCloud = false
         )
+        "wealth" -> FirestoreCardContent(
+            cardId = cardId,
+            titleHi = "धन, समृद्धि एवं लक्ष्मी कृपा",
+            titleEn = "Wealth, Prosperity & Abundance",
+            emoji = "",
+            descriptionHi = "आर्थिक तंगी, व्यापार में नुकसान, धन संचय में बाधा और स्थिर आय हेतु शास्त्रसम्मत वैदिक उपाय।",
+            descriptionEn = "Vedic solutions for financial stability, wealth accumulation, and business prosperity.",
+            remedies = listOf(
+                "शुक्रवार को कनकधारा स्तोत्र अथवा श्री सूक्त का पाठ करें।",
+                "घर की तिजोरी या धन स्थान पर लाल कपड़े में एकाक्षी नारियल रखें।",
+                "प्रतिदिन प्रथम रोटी गौमाता को गुड़ के साथ अर्पित करें।"
+            ),
+            existsInCloud = false
+        )
+        "negativity" -> FirestoreCardContent(
+            cardId = cardId,
+            titleHi = "नकारात्मक ऊर्जा एवं नजर दोष निवारण",
+            titleEn = "Negativity & Evil Eye Protection",
+            emoji = "",
+            descriptionHi = "अकारण भय, घर में भारीपन, नजर दोष, नकारात्मक ऊर्जा और मानसिक अशांति से संपूर्ण मुक्ति के उपाय।",
+            descriptionEn = "Vedic protective remedies against negative energies, evil eye, and distress.",
+            remedies = listOf(
+                "प्रतिदिन संध्याकाल में घर में गूगल और लोबान की धूप दें।",
+                "नित्य हनुमान चालीसा अथवा बजरंग बाण का 7 बार पाठ करें।",
+                "शनिवार को सेंधा नमक मिले जल से घर में पोंछा लगाएं।"
+            ),
+            existsInCloud = false
+        )
+        "pitrdosh" -> FirestoreCardContent(
+            cardId = cardId,
+            titleHi = "पितृदोष शांति एवं पितृ कृपा",
+            titleEn = "Pitra Dosh Relief & Ancestral Blessings",
+            emoji = "",
+            descriptionHi = "वंश वृद्धि में बाधा, पारिवारिक अशांति, कार्यों में अड़चन और पितृ दोष से मुक्ति के प्रामाणिक उपाय।",
+            descriptionEn = "Authentic Vedic remedies for Pitra Dosh relief, peace of ancestors, and family blessings.",
+            remedies = listOf(
+                "प्रत्येक अमावस्या को पितरों के निमित्त काले तिल, जल और दुग्ध से तर्पण करें।",
+                "पीपल के वृक्ष में दोपहर से पूर्व जल और कच्चा दूध अर्पित कर परिक्रमा करें।",
+                "ब्राह्मण अथवा जरूरतमंद को अन्न, वस्त्र और फल का दान करें।"
+            ),
+            existsInCloud = false
+        )
         "health" -> FirestoreCardContent(
             cardId = cardId,
             titleHi = "स्वास्थ्य, आरोग्य एवं शांति",
             titleEn = "Health & Well-being",
-            emoji = "🩺",
+            emoji = "",
             descriptionHi = "दीर्घकालिक स्वास्थ्य समस्याएं, मानसिक तनाव, अनिद्रा और शारीरिक ऊर्जा में वृद्धि के उपाय।",
             descriptionEn = "Vedic health remedies for chronic issues, stress, and vitality.",
             remedies = listOf(
@@ -682,7 +772,7 @@ private fun getDefaultCardContent(cardId: String, isHindi: Boolean): FirestoreCa
             cardId = cardId,
             titleHi = "वैदिक समाधान एवं मार्गदर्शन",
             titleEn = "Vedic Guidance & Remedies",
-            emoji = "✨",
+            emoji = "",
             descriptionHi = "आपके जीवन की विशिष्ट समस्याओं के लिए पराशर पद्धति एवं वैदिक ज्योतिष आधारित समाधान।",
             descriptionEn = "Personalized Vedic solutions based on your unique card selection.",
             remedies = listOf(

@@ -3,6 +3,7 @@ package com.example.ui.screens
 import android.app.Activity
 import android.widget.Toast
 import androidx.compose.animation.*
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -16,12 +17,19 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Flag
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.outlined.Language
+import androidx.compose.material.icons.automirrored.filled.Backspace
+import com.example.R
+import androidx.compose.ui.res.painterResource
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -35,7 +43,12 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalHapticFeedback
+import com.example.utils.HapticFeedbackHelper
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -48,6 +61,7 @@ import androidx.compose.ui.unit.sp
 import com.example.ui.theme.*
 import com.example.ui.components.DevLogoIcon
 import com.example.utils.UserManager
+import com.example.utils.UserSession
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.PhoneAuthProvider
 import kotlinx.coroutines.delay
@@ -74,17 +88,19 @@ fun LoginScreen(
     val focusManager = LocalFocusManager.current
     val coroutineScope = rememberCoroutineScope()
 
+    val userSession = remember { UserSession(context) }
     var phoneNumber by remember { mutableStateOf("") }
     var otpCode by remember { mutableStateOf("") }
-    var enteredUserName by remember { mutableStateOf("दीपक जी") }
+    var enteredUserName by remember { mutableStateOf("Devotee") }
     var walkthroughStep by remember { mutableIntStateOf(0) }
-    var selectedLanguage by remember { mutableStateOf("hi") }
+    var selectedLanguage by remember { mutableStateOf("en") }
     var selectedZodiac by remember { mutableStateOf("aries") }
     var userGender by remember { mutableStateOf("male") }
     var userDob by remember { mutableStateOf("15/08/1998") }
     var userTob by remember { mutableStateOf("08:30 AM") }
-    var userPob by remember { mutableStateOf("वाराणसी, उत्तर प्रदेश") }
+    var userPob by remember { mutableStateOf("Varanasi, Uttar Pradesh") }
     var viewState by remember { mutableStateOf(LoginViewState.PHONE_INPUT) }
+    var isOtpSent by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(false) }
     var otpTimer by remember { mutableIntStateOf(30) }
     var isTimerRunning by remember { mutableStateOf(false) }
@@ -129,10 +145,10 @@ fun LoginScreen(
     }
 
     fun authErrorMessage(e: Exception?): String = when (e) {
-        is com.google.firebase.auth.FirebaseAuthInvalidCredentialsException -> "गलत OTP या नंबर। कृपया दोबारा जाँचें।"
-        is com.google.firebase.FirebaseTooManyRequestsException -> "बहुत अधिक प्रयास। कृपया कुछ देर बाद कोशिश करें।"
-        is com.google.firebase.FirebaseNetworkException -> "नेटवर्क त्रुटि। इंटरनेट कनेक्शन जाँचें।"
-        else -> "सत्यापन विफल: " + (e?.localizedMessage ?: "अज्ञात त्रुटि")
+        is com.google.firebase.auth.FirebaseAuthInvalidCredentialsException -> "Invalid OTP or number. Please check again."
+        is com.google.firebase.FirebaseTooManyRequestsException -> "Too many requests. Please try again later."
+        is com.google.firebase.FirebaseNetworkException -> "Network error. Check internet connection."
+        else -> "Verification failed: " + (e?.localizedMessage ?: "Unknown error")
     }
 
     fun signInWithPhoneCredential(credential: com.google.firebase.auth.PhoneAuthCredential) {
@@ -141,63 +157,23 @@ fun LoginScreen(
             .addOnCompleteListener { task ->
                 isLoading = false
                 if (task.isSuccessful && auth.currentUser != null) {
-                    viewState = LoginViewState.LANGUAGE_SELECT
-                    showToast("OTP verified successfully! ✨")
+                    val firebaseUser = auth.currentUser!!
+                    val uid = firebaseUser.uid
+                    val finalName = enteredUserName.trim().ifBlank { "Devotee" }
+                    UserManager.initializeOrSyncUser(
+                        uid = uid,
+                        userName = finalName,
+                        phoneNumber = if (phoneNumber.isNotBlank()) "+91$phoneNumber" else (firebaseUser.phoneNumber ?: ""),
+                        email = ""
+                    )
+                    showToast(if (selectedLanguage == "hi") "लॉगिन सफल!" else "Login successful!")
+                    onLoginSuccess(uid, finalName, if (phoneNumber.isNotBlank()) "+91$phoneNumber" else (firebaseUser.phoneNumber ?: ""), "user")
                 } else {
                     // Never fall through to success on failure.
                     otpCode = ""
                     showToast(authErrorMessage(task.exception))
                 }
             }
-    }
-
-    val callbacks = remember {
-        object : PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
-            override fun onVerificationCompleted(credential: com.google.firebase.auth.PhoneAuthCredential) {
-                // Instant verification / SMS auto-retrieval
-                credential.smsCode?.let { otpCode = it }
-                signInWithPhoneCredential(credential)
-            }
-            override fun onVerificationFailed(e: com.google.firebase.FirebaseException) {
-                isLoading = false
-                verificationId = ""
-                showToast(authErrorMessage(e))
-            }
-            override fun onCodeSent(id: String, token: PhoneAuthProvider.ForceResendingToken) {
-                verificationId = id
-                resendToken = token
-                isLoading = false
-                viewState = LoginViewState.OTP_VERIFY
-                startTimer()
-            }
-        }
-    }
-
-    fun triggerSendOtp(isResend: Boolean = false) {
-        if (phoneNumber.length != 10 || !phoneNumber.all { it.isDigit() }) {
-            showToast("Please enter a valid 10-digit mobile number")
-            return
-        }
-        val activity = context as? Activity
-        if (activity == null) {
-            showToast("OTP नहीं भेजा जा सका। ऐप दोबारा खोलें।")
-            return
-        }
-
-        isLoading = true
-        try {
-            val builder = com.google.firebase.auth.PhoneAuthOptions.newBuilder(auth)
-                .setPhoneNumber("+91$phoneNumber")
-                .setTimeout(60L, TimeUnit.SECONDS)
-                .setActivity(activity)
-                .setCallbacks(callbacks)
-            val token = resendToken
-            if (isResend && token != null) builder.setForceResendingToken(token)
-            PhoneAuthProvider.verifyPhoneNumber(builder.build())
-        } catch (e: Exception) {
-            isLoading = false
-            showToast(authErrorMessage(e))
-        }
     }
 
     fun triggerVerifyOtp() {
@@ -213,6 +189,125 @@ fun LoginScreen(
         signInWithPhoneCredential(credential)
     }
 
+    val callbacks = remember {
+        object : PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
+            override fun onVerificationCompleted(credential: com.google.firebase.auth.PhoneAuthCredential) {
+                // Instant verification / SMS auto-retrieval via Play Services Phone Auth
+                credential.smsCode?.let { otpCode = it }
+                signInWithPhoneCredential(credential)
+            }
+            override fun onVerificationFailed(e: com.google.firebase.FirebaseException) {
+                isLoading = false
+                verificationId = ""
+                showToast(authErrorMessage(e))
+            }
+            override fun onCodeSent(id: String, token: PhoneAuthProvider.ForceResendingToken) {
+                verificationId = id
+                resendToken = token
+                isLoading = false
+                isOtpSent = true
+                startTimer()
+            }
+        }
+    }
+
+    fun startSmsRetrieverUserConsent(activity: Activity) {
+        try {
+            com.google.android.gms.auth.api.phone.SmsRetriever.getClient(activity)
+                .startSmsUserConsent(null)
+                .addOnSuccessListener {
+                    // SMS User Consent listener active
+                }
+                .addOnFailureListener {
+                    // Fallback to manual entry if SMS Retriever is unavailable
+                }
+        } catch (e: Exception) {
+            // Fallback gracefully
+        }
+    }
+
+    fun triggerSendOtp(isResend: Boolean = false) {
+        if (phoneNumber.length != 10 || !phoneNumber.all { it.isDigit() }) {
+            showToast("Please enter a valid 10-digit mobile number")
+            return
+        }
+        val activity = context as? Activity
+        if (activity == null) {
+            showToast("OTP नहीं भेजा जा सका। ऐप दोबारा खोलें।")
+            return
+        }
+
+        isLoading = true
+        startSmsRetrieverUserConsent(activity)
+
+        try {
+            val builder = com.google.firebase.auth.PhoneAuthOptions.newBuilder(auth)
+                .setPhoneNumber("+91$phoneNumber")
+                .setTimeout(60L, TimeUnit.SECONDS)
+                .setActivity(activity)
+                .setCallbacks(callbacks)
+            val token = resendToken
+            if (isResend && token != null) builder.setForceResendingToken(token)
+            PhoneAuthProvider.verifyPhoneNumber(builder.build())
+        } catch (e: Exception) {
+            isLoading = false
+            showToast(authErrorMessage(e))
+        }
+    }
+
+    // SMS Retriever BroadcastReceiver for automatic OTP auto-fill & auto-submit
+    DisposableEffect(context, isOtpSent) {
+        if (!isOtpSent) return@DisposableEffect onDispose {}
+
+        val smsReceiver = object : android.content.BroadcastReceiver() {
+            override fun onReceive(ctx: android.content.Context?, intent: android.content.Intent?) {
+                if (intent?.action == com.google.android.gms.auth.api.phone.SmsRetriever.SMS_RETRIEVED_ACTION) {
+                    val extras = intent.extras
+                    val status = extras?.get(com.google.android.gms.auth.api.phone.SmsRetriever.EXTRA_STATUS) as? com.google.android.gms.common.api.Status
+                    when (status?.statusCode) {
+                        com.google.android.gms.common.api.CommonStatusCodes.SUCCESS -> {
+                            val message = extras.get(com.google.android.gms.auth.api.phone.SmsRetriever.EXTRA_SMS_MESSAGE) as? String
+                            if (!message.isNullOrEmpty()) {
+                                val extractedCode = Regex("\\b\\d{6}\\b").find(message)?.value
+                                if (!extractedCode.isNullOrEmpty()) {
+                                    otpCode = extractedCode
+                                    showToast("OTP स्वतः डिटेक्ट हुआ: $extractedCode")
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        val filter = android.content.IntentFilter(com.google.android.gms.auth.api.phone.SmsRetriever.SMS_RETRIEVED_ACTION)
+        try {
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+                context.registerReceiver(smsReceiver, filter, android.content.Context.RECEIVER_EXPORTED)
+            } else {
+                context.registerReceiver(smsReceiver, filter)
+            }
+        } catch (e: Exception) {
+            // Ignore registration issues if receiver already registered
+        }
+
+        onDispose {
+            try {
+                context.unregisterReceiver(smsReceiver)
+            } catch (e: Exception) {
+                // Ignore unregister issues
+            }
+        }
+    }
+
+    // Auto-verify when full 6-digit OTP code is populated (manual or SMS Retriever)
+    LaunchedEffect(otpCode, isOtpSent) {
+        if (isOtpSent && otpCode.length == 6 && otpCode.all { it.isDigit() } && !isLoading && verificationId.isNotBlank()) {
+            delay(200L)
+            triggerVerifyOtp()
+        }
+    }
+
     fun completeFirebaseLogin(email: String, name: String) {
         isLoading = false
         val user = auth.currentUser
@@ -220,14 +315,14 @@ fun LoginScreen(
             showToast("लॉगिन विफल। कृपया दोबारा कोशिश करें।")
             return
         }
-        val finalName = name.ifBlank { user.displayName ?: "साधक" }
+        val finalName = name.ifBlank { user.displayName ?: "Sadhak" }
         UserManager.initializeOrSyncUser(
             uid = user.uid,
             userName = finalName,
             phoneNumber = user.phoneNumber ?: "",
             email = email.ifBlank { user.email ?: "" }
         )
-        showToast("लॉगिन सफल: $finalName ✨")
+        showToast("लॉगिन सफल: $finalName")
         onLoginSuccess(user.uid, finalName, user.phoneNumber ?: "", "user")
     }
 
@@ -242,9 +337,14 @@ fun LoginScreen(
             isLoading = true
             try {
                 val credentialManager = androidx.credentials.CredentialManager.create(context)
+                val clientId = try {
+                    context.getString(com.example.R.string.default_web_client_id)
+                } catch (e: Exception) {
+                    "1059256538774-idma03hbteibb7k0vq75f9clq8e6qgis.apps.googleusercontent.com"
+                }
                 val googleIdOption = com.google.android.libraries.identity.googleid.GetGoogleIdOption.Builder()
                     .setFilterByAuthorizedAccounts(false)
-                    .setServerClientId("1059256538774-idma03hbteibb7k0vq75f9clq8e6qgis.apps.googleusercontent.com")
+                    .setServerClientId(clientId)
                     .setAutoSelectEnabled(true)
                     .build()
 
@@ -286,10 +386,19 @@ fun LoginScreen(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(PaperBg)
-            .statusBarsPadding()
+            .background(Color.White)
             .navigationBarsPadding()
     ) {
+        Box(modifier = Modifier.align(Alignment.TopEnd).padding(16.dp)) {
+            LanguageToggle(
+                selectedLanguage = selectedLanguage,
+                onLanguageChange = {
+                    selectedLanguage = it
+                    userSession.setLanguage(it)
+                }
+            )
+        }
+
         Crossfade(
             targetState = viewState,
             label = "login_screen_crossfade",
@@ -298,53 +407,74 @@ fun LoginScreen(
             when (state) {
                 LoginViewState.WALKTHROUGH,
                 LoginViewState.PHONE_INPUT -> {
-                    AstrotalkLoginScreen(
+                    DevbhashaLoginScreen(
                         phoneNumber = phoneNumber,
                         onPhoneNumberChange = {
                             phoneNumber = it
+                            if (isOtpSent) {
+                                isOtpSent = false
+                                otpCode = ""
+                                verificationId = ""
+                            }
                         },
                         onGetOtpClick = {
                             focusManager.clearFocus()
-                            triggerSendOtp()
-                        },
-                        onGoogleLoginClick = { triggerGoogleSignIn() },
-                        onAppleLoginClick = { showToast("Apple लॉगिन जल्द आ रहा है") },
-                        onFacebookLoginClick = { showToast("Facebook लॉगिन जल्द आ रहा है") },
-                        onSkip = {
-                            if (onSkip != null) {
-                                onSkip("user")
+                            if (phoneNumber.length == 10) {
+                                triggerSendOtp()
+                                viewState = LoginViewState.OTP_VERIFY
                             } else {
-                                onLoginSuccess("guest_explorer", "साधक", "", "user")
+                                showToast(if (selectedLanguage == "hi") "कृपया 10-अंकों का मोबाइल नंबर दर्ज करें" else "Please enter a valid 10-digit mobile number")
                             }
                         },
-                        isLoading = isLoading
+                        onGoogleSignIn = {
+                            triggerGoogleSignIn()
+                        },
+                        isLoading = isLoading,
+                        currentLanguage = selectedLanguage,
+                        onLanguageToggle = {
+                            val newLang = if (selectedLanguage == "hi") "en" else "hi"
+                            selectedLanguage = newLang
+                            userSession.setLanguage(newLang)
+                            showToast(if (newLang == "hi") "भाषा हिंदी में बदली गई" else "Language switched to English")
+                        }
                     )
                 }
 
                 LoginViewState.OTP_VERIFY -> {
-                    AstrotalkOtpScreen(
+                    OtpVerificationScreen(
                         phoneNumber = phoneNumber,
                         otpCode = otpCode,
                         onOtpChange = {
                             otpCode = it
                             if (it.length == 6) {
                                 focusManager.clearFocus()
+                                triggerVerifyOtp()
                             }
                         },
                         otpTimer = otpTimer,
-                        isLoading = isLoading,
-                        onBackClick = {
-                            otpCode = ""
-                            viewState = LoginViewState.PHONE_INPUT
-                        },
-                        onResendClick = {
-                            triggerSendOtp(isResend = true)
-                            showToast("Code resent to +91 $phoneNumber")
-                        },
-                        onVerifyClick = {
+                        isTimerRunning = isTimerRunning,
+                        onVerifyOtpClick = {
                             focusManager.clearFocus()
                             triggerVerifyOtp()
-                        }
+                        },
+                        onResendOtpClick = {
+                            triggerSendOtp(isResend = true)
+                            showToast(if (selectedLanguage == "hi") "+91 $phoneNumber पर पुनः OTP भेजा गया" else "Code resent to +91 $phoneNumber")
+                        },
+                        onBackClick = {
+                            isOtpSent = false
+                            otpCode = ""
+                            verificationId = ""
+                            viewState = LoginViewState.PHONE_INPUT
+                        },
+                        onEditNumberClick = {
+                            isOtpSent = false
+                            otpCode = ""
+                            verificationId = ""
+                            viewState = LoginViewState.PHONE_INPUT
+                        },
+                        isLoading = isLoading,
+                        currentLanguage = selectedLanguage
                     )
                 }
 
@@ -391,7 +521,7 @@ fun LoginScreen(
                                 return@AstrotalkAllSetScreen
                             }
                             val uid = firebaseUser.uid
-                            val finalName = enteredUserName.trim().ifBlank { "दीपक जी" }
+                            val finalName = enteredUserName.trim().ifBlank { "Devotee" }
                             UserManager.initializeOrSyncUser(
                                 uid = uid,
                                 userName = finalName,
@@ -438,8 +568,6 @@ private fun BentoPhoneInputView(
     isLoading: Boolean,
     onSendCode: () -> Unit,
     onGoogleSignIn: () -> Unit,
-    onQuickDemoLogin: () -> Unit,
-    onSkipClick: () -> Unit,
     showToast: (String) -> Unit
 ) {
     Column(
@@ -449,27 +577,46 @@ private fun BentoPhoneInputView(
             .padding(horizontal = 28.dp, vertical = 20.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Masthead: 72x72 dp Dev Logo, center aligned
-        Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(top = 20.dp, bottom = 20.dp)) {
+        // Masthead: 72.dp circular container with deep saffron spiritual lotus icon, Hindi title and subtitle
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.padding(top = 20.dp, bottom = 20.dp)
+        ) {
             DevLogoIcon(
                 size = 72.dp,
-                elevation = 6.dp,
+                elevation = 4.dp,
                 showGlow = false
             )
-            Spacer(modifier = Modifier.height(14.dp))
-            Text("देव भाषा", style = MaterialTheme.typography.titleLarge, letterSpacing = 1.sp, color = Ink, fontWeight = FontWeight.Bold)
+            Text(
+                text = "देवभाषा",
+                fontFamily = TiroDevanagariHindi,
+                fontSize = 28.sp,
+                fontWeight = FontWeight.Bold,
+                color = Ink,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(top = 12.dp)
+            )
+            Text(
+                text = "Devbhasha",
+                fontFamily = NotoSansDevanagari,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Medium,
+                color = SaffronDark,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(top = 2.dp)
+            )
         }
         
         // Greeting
         Text(
-            text = "नमस्ते, साधक",
+            text = "नमस्ते, Sadhak",
             style = MaterialTheme.typography.headlineSmall,
             color = Ink,
             fontWeight = FontWeight.Bold
         )
         Spacer(modifier = Modifier.height(4.dp))
         Text(
-            text = "वैदिक साधक, स्वप्न विचार एवं सीधा सात्विक समाधान।",
+            text = "वैदिक Sadhak, स्वप्न विचार एवं सीधा सात्विक समाधान।",
             style = MaterialTheme.typography.bodyMedium,
             color = InkSoft,
             textAlign = TextAlign.Center
@@ -499,21 +646,16 @@ private fun BentoPhoneInputView(
         
         Spacer(modifier = Modifier.height(20.dp))
         
-        // Send OTP Button (Premium Gradient)
-        val buttonGradient = Brush.horizontalGradient(listOf(SaffronGradientStart, SaffronGradientEnd))
-        val backgroundModifier = if (phoneNumber.length == 10) {
-            Modifier.background(buttonGradient)
-        } else {
-            Modifier.background(InkFaint)
-        }
+        // Send OTP Button (Solid Saffron)
+        val isButtonActive = phoneNumber.length == 10
         Box(
             contentAlignment = Alignment.Center,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(52.dp)
-                .clip(RoundedCornerShape(999.dp))
-                .then(backgroundModifier)
-                .clickable(enabled = phoneNumber.length == 10) { onSendCode() }
+                .height(50.dp)
+                .clip(RoundedCornerShape(12.dp))
+                .background(if (isButtonActive) MaterialTheme.colorScheme.primary else InkFaint)
+                .clickable(enabled = isButtonActive) { onSendCode() }
         ) {
             Text(
                 text = if (isLoading) "Sending..." else "OTP प्राप्त करें (Send Code) →",
@@ -551,11 +693,11 @@ private fun BentoPhoneInputView(
                 horizontalArrangement = Arrangement.Center,
                 modifier = Modifier.padding(horizontal = 12.dp)
             ) {
-                Text(
-                    text = "G",
-                    color = Ink,
-                    fontWeight = FontWeight.ExtraBold,
-                    fontSize = 18.sp
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_google_logo),
+                    contentDescription = "Google Logo",
+                    tint = Color.Unspecified,
+                    modifier = Modifier.size(20.dp)
                 )
                 Spacer(modifier = Modifier.width(10.dp))
                 Text(
@@ -567,41 +709,7 @@ private fun BentoPhoneInputView(
             }
         }
         
-        Spacer(modifier = Modifier.height(16.dp))
-        
-        // Instant Demo One-Click Login
-        OutlinedButton(
-            onClick = onQuickDemoLogin,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(48.dp),
-            shape = RoundedCornerShape(999.dp),
-            border = BorderStroke(1.dp, Saffron.copy(alpha = 0.5f))
-        ) {
-            Icon(
-                imageVector = Icons.Filled.AutoAwesome,
-                contentDescription = null,
-                tint = Saffron,
-                modifier = Modifier.size(16.dp)
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text("त्वरित डेमो लॉगिन (Explore App)", fontSize = 12.5.sp, fontWeight = FontWeight.SemiBold, color = Ink)
-        }
 
-        Spacer(modifier = Modifier.height(14.dp))
-        
-        // Skip & Explore
-        TextButton(
-            onClick = onSkipClick,
-            modifier = Modifier.height(44.dp)
-        ) {
-            Text(
-                text = "Skip & Explore App →",
-                color = InkSecondary,
-                fontSize = 13.sp,
-                fontWeight = FontWeight.SemiBold
-            )
-        }
         
         Spacer(modifier = Modifier.height(12.dp))
         
@@ -661,7 +769,7 @@ private fun BentoOtpVerifyView(
             Column {
                 Text(
                     text = "Verify",
-                    fontFamily = FontFamily.Serif,
+                    fontFamily = com.example.ui.theme.ManropeHindFontFamily,
                     fontSize = 19.sp,
                     fontWeight = FontWeight.Medium,
                     color = Ink
@@ -698,7 +806,7 @@ private fun BentoOtpVerifyView(
         Row(verticalAlignment = Alignment.Bottom) {
             Text(
                 text = "Check your\n",
-                fontFamily = FontFamily.Serif,
+                fontFamily = com.example.ui.theme.ManropeHindFontFamily,
                 fontWeight = FontWeight.Normal,
                 fontSize = 34.sp,
                 lineHeight = 36.sp,
@@ -707,7 +815,7 @@ private fun BentoOtpVerifyView(
         }
         Text(
             text = "messages.",
-            fontFamily = FontFamily.Serif,
+            fontFamily = com.example.ui.theme.ManropeHindFontFamily,
             fontStyle = FontStyle.Italic,
             fontWeight = FontWeight.Normal,
             fontSize = 34.sp,
@@ -747,16 +855,27 @@ private fun BentoOtpVerifyView(
 
         Surface(
             shape = RoundedCornerShape(8.dp),
-            color = Color(0xFFFAF6EA),
-            border = BorderStroke(1.dp, Color(0xFFE9DB97))
+            color = SaffronContainer,
+            border = BorderStroke(1.dp, SaffronPrimary)
         ) {
-            Text(
-                text = "💡 SMS न पहुँचे तो 30 सेकंड बाद दोबारा भेजें",
-                fontSize = 11.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFF125157),
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
-            )
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Info,
+                    contentDescription = null,
+                    modifier = Modifier.size(14.dp),
+                    tint = PrimaryPeacock
+                )
+                Spacer(modifier = Modifier.width(6.dp))
+                Text(
+                    text = "SMS न पहुँचे तो 30 सेकंड बाद दोबारा भेजें",
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = PrimaryPeacock
+                )
+            }
         }
 
         Spacer(modifier = Modifier.height(22.dp))
@@ -791,7 +910,7 @@ private fun BentoOtpVerifyView(
                         Box(contentAlignment = Alignment.Center) {
                             Text(
                                 text = charAtPos,
-                                fontFamily = FontFamily.Serif,
+                                fontFamily = com.example.ui.theme.ManropeHindFontFamily,
                                 fontSize = 24.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = Ink
@@ -818,32 +937,53 @@ private fun BentoOtpVerifyView(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Resend Timer Row
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.Center
+        // Resend Timer/Button Area
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier.fillMaxWidth()
         ) {
             if (isTimerRunning) {
-                Text(
-                    text = "Resend code in ",
-                    fontSize = 11.sp,
-                    color = InkSoft
-                )
-                Text(
-                    text = "0:${String.format("%02d", otpTimer)}",
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Ink
-                )
+                Surface(
+                    shape = RoundedCornerShape(999.dp),
+                    color = Color.Transparent,
+                    border = BorderStroke(1.dp, InkFaint),
+                    modifier = Modifier.height(36.dp)
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(horizontal = 16.dp)
+                    ) {
+                        Text(
+                            text = "Resend in ",
+                            fontSize = 12.sp,
+                            color = InkFaint
+                        )
+                        Text(
+                            text = "0:${String.format("%02d", otpTimer)}",
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = InkSoft
+                        )
+                    }
+                }
             } else {
-                Text(
-                    text = "Resend code",
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Terra,
-                    textDecoration = TextDecoration.Underline,
-                    modifier = Modifier.clickable { onResendCode() }
-                )
+                Surface(
+                    shape = RoundedCornerShape(999.dp),
+                    color = Color.Transparent,
+                    border = BorderStroke(1.dp, Terra),
+                    modifier = Modifier
+                        .height(36.dp)
+                        .clip(RoundedCornerShape(999.dp))
+                        .clickable { onResendCode() }
+                ) {
+                    Text(
+                        text = "Resend OTP",
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Terra,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 9.dp)
+                    )
+                }
             }
         }
 
@@ -868,7 +1008,7 @@ private fun BentoOtpVerifyView(
             ) {
                 Text(
                     text = if (isLoading) "Verifying..." else "Verify & continue",
-                    fontFamily = FontFamily.Default,
+                    fontFamily = com.example.ui.theme.ManropeHindFontFamily,
                     fontSize = 13.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.White
@@ -888,7 +1028,7 @@ private fun BentoOtpVerifyView(
 }
 
 /**
- * 3. Bento Editorial Verified Success Screen (Big Sage Stamp + Barcode + Enter देव)
+// English comment placeholder
  */
 @Composable
 private fun BentoVerifiedSuccessView(
@@ -940,7 +1080,7 @@ private fun BentoVerifiedSuccessView(
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
                             text = "Verified",
-                            fontFamily = FontFamily.Serif,
+                            fontFamily = com.example.ui.theme.ManropeHindFontFamily,
                             fontStyle = FontStyle.Italic,
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Bold,
@@ -962,15 +1102,15 @@ private fun BentoVerifiedSuccessView(
 
         Text(
             text = "The sky awaits, ",
-            fontFamily = FontFamily.Serif,
+            fontFamily = com.example.ui.theme.ManropeHindFontFamily,
             fontWeight = FontWeight.Normal,
             fontSize = 28.sp,
             color = Ink,
             textAlign = TextAlign.Center
         )
         Text(
-            text = if (userName.isNotBlank() && userName != "साधक") "$userName." else "Sadhak.",
-            fontFamily = FontFamily.Serif,
+            text = if (userName.isNotBlank() && userName != "Sadhak") "$userName." else "Sadhak.",
+            fontFamily = com.example.ui.theme.ManropeHindFontFamily,
             fontStyle = FontStyle.Italic,
             fontWeight = FontWeight.Normal,
             fontSize = 28.sp,
@@ -982,7 +1122,7 @@ private fun BentoVerifiedSuccessView(
 
         // Optional Name Input Field
         OutlinedTextField(
-            value = if (userName == "साधक") "" else userName,
+            value = if (userName == "Sadhak") "" else userName,
             onValueChange = { onNameChange(it) },
             placeholder = { Text("Enter your name (उदा. राहुल / प्रिया)", fontSize = 13.sp, color = InkFaint) },
             label = { Text("Your Name (वैकल्पिक)", fontSize = 11.5.sp) },
@@ -1040,7 +1180,7 @@ private fun BentoVerifiedSuccessView(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Enter देव Button
+// English comment placeholder
         Surface(
             shape = RoundedCornerShape(999.dp),
             color = Ink,
@@ -1056,7 +1196,7 @@ private fun BentoVerifiedSuccessView(
             ) {
                 Text(
                     text = "Enter देव",
-                    fontFamily = FontFamily.Default,
+                    fontFamily = com.example.ui.theme.ManropeHindFontFamily,
                     fontSize = 13.5.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.White
@@ -1138,3 +1278,355 @@ private fun SocialLoginButton(
         )
     }
 }
+
+@Composable
+fun DevbhashaLoginScreen(
+    phoneNumber: String,
+    onPhoneNumberChange: (String) -> Unit,
+    onGetOtpClick: () -> Unit,
+    onGoogleSignIn: () -> Unit = {},
+    isLoading: Boolean = false,
+    currentLanguage: String = "hi",
+    onLanguageToggle: () -> Unit = {},
+    modifier: Modifier = Modifier
+) {
+    var termsAccepted by remember { mutableStateOf(true) }
+    val isHindi = currentLanguage == "hi"
+    val haptic = LocalHapticFeedback.current
+    val primarySaffron = Color(0xFFFF9800)
+    val lightCardBg = Color(0xFFFFFBF0)
+
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .background(Color.White)
+            .statusBarsPadding()
+            .navigationBarsPadding()
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 24.dp, vertical = 16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            // Top Bar: Language Toggle Pill Button
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Surface(
+                    shape = RoundedCornerShape(999.dp),
+                    color = Color(0xFFF8FAFC),
+                    border = BorderStroke(1.dp, Color(0xFFE2E8F0)),
+                    modifier = Modifier
+                        .clickable {
+                            HapticFeedbackHelper.playClick(haptic)
+                            onLanguageToggle()
+                        }
+                        .height(34.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.Language,
+                            contentDescription = "Language toggle",
+                            tint = primarySaffron,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Text(
+                            text = if (isHindi) "EN" else "अ",
+                            style = MaterialTheme.typography.labelMedium.copy(
+                                color = Color.Black,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 12.sp
+                            )
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Brand Header: App Logo, Welcome Title & Subtitle
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                DevLogoIcon(
+                    size = 72.dp,
+                    elevation = 3.dp,
+                    showGlow = true
+                )
+                Spacer(modifier = Modifier.height(14.dp))
+                Text(
+                    text = if (isHindi) "देवभाषा में आपका स्वागत है" else "Welcome to Devbhasha",
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF1E293B),
+                    textAlign = TextAlign.Center
+                )
+                Spacer(modifier = Modifier.height(6.dp))
+                Text(
+                    text = if (isHindi) "साधकों से जुड़ें" else "Connect with Sadhaks",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = Color(0xFF64748B),
+                    textAlign = TextAlign.Center
+                )
+            }
+
+            Spacer(modifier = Modifier.height(28.dp))
+
+            // Main Mobile Login Card
+            Surface(
+                shape = RoundedCornerShape(24.dp),
+                color = lightCardBg,
+                border = BorderStroke(1.dp, Color(0xFFFDE68A)),
+                shadowElevation = 2.dp,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(24.dp)
+                ) {
+                    Text(
+                        text = if (isHindi) "मोबाइल नंबर" else "Mobile Number",
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF1E293B),
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+
+                    // Country Code Prefix (+91) & Number Input Field
+                    Surface(
+                        shape = RoundedCornerShape(14.dp),
+                        color = Color.White,
+                        border = BorderStroke(1.dp, Color(0xFFCBD5E1)),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(54.dp)
+                                .padding(horizontal = 14.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Flag,
+                                contentDescription = "India country code",
+                                modifier = Modifier.size(20.dp),
+                                tint = primarySaffron
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(
+                                text = "+91",
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF1E293B)
+                            )
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Box(
+                                modifier = Modifier
+                                    .width(1.dp)
+                                    .height(24.dp)
+                                    .background(Color(0xFFE2E8F0))
+                            )
+                            Spacer(modifier = Modifier.width(12.dp))
+                            OutlinedTextField(
+                                value = phoneNumber,
+                                onValueChange = {
+                                    if (it.length <= 10 && it.all { c -> c.isDigit() }) {
+                                        onPhoneNumberChange(it)
+                                    }
+                                },
+                                singleLine = true,
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                                textStyle = TextStyle(
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color(0xFF1E293B)
+                                ),
+                                placeholder = {
+                                    Text(
+                                        text = if (isHindi) "10-अंकों का मोबाइल नंबर" else "10-digit mobile number",
+                                        fontSize = 14.sp,
+                                        color = Color(0xFF94A3B8)
+                                    )
+                                },
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    focusedBorderColor = Color.Transparent,
+                                    unfocusedBorderColor = Color.Transparent,
+                                    focusedContainerColor = Color.Transparent,
+                                    unfocusedContainerColor = Color.Transparent
+                                ),
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // Terms & Conditions Checkbox
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { termsAccepted = !termsAccepted }
+                            .padding(vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Checkbox(
+                            checked = termsAccepted,
+                            onCheckedChange = { termsAccepted = it },
+                            colors = CheckboxDefaults.colors(
+                                checkedColor = primarySaffron,
+                                uncheckedColor = Color(0xFF94A3B8)
+                            ),
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        val consentText = if (isHindi) {
+                            buildAnnotatedString {
+                                append("मैं ")
+                                withStyle(style = SpanStyle(color = primarySaffron, fontWeight = FontWeight.Bold)) {
+                                    append("नियम व शर्तें")
+                                }
+                                append(" से सहमत हूँ")
+                            }
+                        } else {
+                            buildAnnotatedString {
+                                append("I agree to ")
+                                withStyle(style = SpanStyle(color = primarySaffron, fontWeight = FontWeight.Bold)) {
+                                    append("Terms & Conditions")
+                                }
+                            }
+                        }
+                        Text(
+                            text = consentText,
+                            fontSize = 13.sp,
+                            color = Color(0xFF475569)
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(20.dp))
+
+                    // Solid Primary Saffron Button: "Get OTP"
+                    val isGetOtpEnabled = !isLoading && termsAccepted && phoneNumber.length == 10
+                    Button(
+                        onClick = {
+                            HapticFeedbackHelper.playClick(haptic)
+                            onGetOtpClick()
+                        },
+                        enabled = isGetOtpEnabled,
+                        shape = RoundedCornerShape(14.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = primarySaffron,
+                            contentColor = Color.White,
+                            disabledContainerColor = primarySaffron.copy(alpha = 0.4f),
+                            disabledContentColor = Color.White.copy(alpha = 0.7f)
+                        ),
+                        elevation = ButtonDefaults.buttonElevation(
+                            defaultElevation = 2.dp,
+                            pressedElevation = 4.dp
+                        ),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(52.dp)
+                    ) {
+                        if (isLoading) {
+                            CircularProgressIndicator(
+                                color = Color.White,
+                                strokeWidth = 2.5.dp,
+                                modifier = Modifier.size(22.dp)
+                            )
+                        } else {
+                            Text(
+                                text = if (isHindi) "ओटीपी प्राप्त करें" else "Get OTP",
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White
+                            )
+                        }
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Google Sign-In Option
+            Surface(
+                shape = RoundedCornerShape(14.dp),
+                color = Color.White,
+                border = BorderStroke(1.dp, Color(0xFFCBD5E1)),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(52.dp)
+                    .clickable { onGoogleSignIn() }
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxSize(),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.AccountCircle,
+                        contentDescription = "Google Sign In",
+                        tint = primarySaffron,
+                        modifier = Modifier.size(22.dp)
+                    )
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Text(
+                        text = if (isHindi) "Google के साथ लॉगिन करें" else "Continue with Google",
+                        color = Color(0xFF1E293B),
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 14.sp
+                    )
+                }
+            }
+        }
+    }
+}
+
+
+
+@Composable
+private fun LanguageToggle(
+    selectedLanguage: String,
+    onLanguageChange: (String) -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .padding(8.dp)
+            .clip(RoundedCornerShape(8.dp))
+            .background(Color.White.copy(alpha = 0.8f))
+            .border(1.dp, Color.LightGray, RoundedCornerShape(8.dp))
+            .padding(2.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        val languages = listOf("en" to "English", "hi" to "हिंदी")
+        languages.forEach { (code, name) ->
+            val isSelected = selectedLanguage == code
+            Text(
+                text = name,
+                fontSize = 12.sp,
+                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                color = if (isSelected) MaterialTheme.colorScheme.primary else Color.DarkGray,
+                modifier = Modifier
+                    .clip(RoundedCornerShape(6.dp))
+                    .background(if (isSelected) MaterialTheme.colorScheme.primaryContainer else Color.Transparent)
+                    .clickable { onLanguageChange(code) }
+                    .padding(horizontal = 8.dp, vertical = 4.dp)
+            )
+        }
+    }
+}
+
+@Composable fun AstrotalkLanguageSelectionScreen(selectedLanguage: String, onLanguageSelected: (String) -> Unit, onContinue: () -> Unit, onSkip: () -> Unit) {}
+@Composable fun AstrotalkZodiacSelectionScreen(selectedZodiac: String, onZodiacSelected: (String) -> Unit, onContinue: () -> Unit, onSkip: () -> Unit) {}
+@Composable fun AstrotalkPersonalDetailsScreen(initialName: String, onSaveDetails: (String, String, String, String, String) -> Unit, onBackClick: () -> Unit) {}
+@Composable fun AstrotalkAllSetScreen(onLetsGo: () -> Unit) { LaunchedEffect(Unit) { onLetsGo() } }

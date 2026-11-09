@@ -20,6 +20,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.Locale
+import com.example.ui.theme.*
 
 /**
  * Holds the state of one server-billed session. All timing comes from the
@@ -35,11 +36,11 @@ class SessionController internal constructor(
         private set
     var endsAtMillis by mutableLongStateOf(0L)
         private set
+    var startedAtMillis by mutableLongStateOf(0L)
+        private set
     var remainingSeconds by mutableLongStateOf(0L)
         internal set
     var isStarting by mutableStateOf(true)
-        private set
-    var isExtending by mutableStateOf(false)
         private set
     var error by mutableStateOf<SessionBillingException?>(null)
         private set
@@ -50,39 +51,36 @@ class SessionController internal constructor(
         private set
 
     val sessionId: String get() = session?.sessionId ?: ""
-    val isActive: Boolean get() = session != null && !isEnded
-    val showExtendWarning: Boolean
-        get() = isActive && remainingSeconds in 1..PriceLabels.EXTEND_WARNING_SECONDS
+    var serverStatus by mutableStateOf("pending")
+        private set
+    val isActive: Boolean get() = session != null && serverStatus == "active" && !isEnded
+    private val requestKey = java.util.UUID.randomUUID().toString()
+    internal fun applySnapshot(snapshot: com.google.firebase.firestore.DocumentSnapshot) {
+        serverStatus = snapshot.getString("status") ?: "pending"
+        endsAtMillis = snapshot.getTimestamp("endsAt")?.toDate()?.time ?: endsAtMillis
+        startedAtMillis = snapshot.getTimestamp("startedAt")?.toDate()?.time ?: 0L
+        if (snapshot.getBoolean("settled") == true) isEnded = true
+    }
+
+    val elapsedSeconds: Long
+        get() = if (startedAtMillis > 0L) {
+            ((System.currentTimeMillis() - startedAtMillis) / 1000L).coerceAtLeast(0L)
+        } else 0L
 
     internal suspend fun start() {
         isStarting = true
         error = null
-        SessionBilling.startSession(type, providerId)
+        SessionBilling.startSession(type, providerId, requestKey)
             .onSuccess {
                 session = it
                 endsAtMillis = it.endsAtMillis
+                startedAtMillis = 0L
                 lastAmountPaise = it.amountPaise
                 remainingSeconds = secondsLeft()
+                if (isEnded) SessionBilling.endSessionAsync(it.sessionId)
             }
             .onFailure { error = it as? SessionBillingException ?: SessionBillingException(it.message ?: "") }
         isStarting = false
-    }
-
-    fun extend(onResult: (Result<Unit>) -> Unit = {}) {
-        val id = sessionId
-        if (id.isBlank() || isExtending || isEnded) return
-        isExtending = true
-        scope.launch {
-            SessionBilling.extendSession(id)
-                .onSuccess {
-                    endsAtMillis = it.endsAtMillis
-                    lastAmountPaise = it.amountPaise
-                    remainingSeconds = secondsLeft()
-                    onResult(Result.success(Unit))
-                }
-                .onFailure { onResult(Result.failure(it)) }
-            isExtending = false
-        }
     }
 
     fun end() {
@@ -125,6 +123,13 @@ fun rememberSessionController(
         }
     }
 
+    DisposableEffect(controller.sessionId) {
+        val listener = controller.sessionId.takeIf { it.isNotBlank() }?.let { id ->
+            com.example.utils.FirestoreProvider.get().collection("sessions").document(id)
+                .addSnapshotListener { snapshot, _ -> if (snapshot != null && snapshot.exists()) controller.applySnapshot(snapshot) }
+        }
+        onDispose { listener?.remove() }
+    }
     DisposableEffect(controller) {
         onDispose { controller.end() }
     }
@@ -134,74 +139,111 @@ fun rememberSessionController(
 fun formatMmSs(totalSeconds: Long): String =
     String.format(Locale.getDefault(), "%02d:%02d", totalSeconds / 60, totalSeconds % 60)
 
-/** Remaining-time pill, free-trial badge, and the 2-minute extend warning. */
+/**
+ * Session status indicator:
+ * For per-minute sessions (CHAT_PER_MIN, CALL_PER_MIN):
+ * - Displays running time (MM:SS) and amount spent so far (based on actual minutes used rounded up).
+ * - Shows an alert warning when 1 minute of balance is remaining.
+ * For fixed sessions:
+ * - Displays time left countdown and free trial badge if applicable.
+ */
 @Composable
 fun SessionStatusBar(
     controller: SessionController,
     isHindi: Boolean,
     darkBackground: Boolean,
-    modifier: Modifier = Modifier,
-    onExtendFailed: (Throwable) -> Unit = {}
+    modifier: Modifier = Modifier
 ) {
     val fg = if (darkBackground) Color.White else Color(0xFF1E293B)
     val startError = controller.error
+    val session = controller.session
+    val isPerMinute = controller.type == SessionType.CHAT_PER_MIN || controller.type == SessionType.CALL_PER_MIN
+
     Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
         when {
             controller.isStarting -> Text(
                 text = if (isHindi) "सत्र शुरू हो रहा है…" else "Starting session…",
                 color = fg, fontSize = 12.sp
             )
-            startError != null && controller.session == null -> Text(
+            startError != null && session == null -> Text(
                 text = sessionErrorText(startError, isHindi),
                 color = Color(0xFFEF4444), fontSize = 12.sp, fontWeight = FontWeight.SemiBold
             )
-            controller.session != null -> {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = (if (isHindi) "शेष समय " else "Time left ") + formatMmSs(controller.remainingSeconds),
-                        color = fg, fontSize = 12.sp, fontWeight = FontWeight.SemiBold
-                    )
-                    if (controller.session?.isFreeTrial == true) {
-                        Spacer(Modifier.width(8.dp))
-                        Surface(shape = RoundedCornerShape(999.dp), color = Color(0xFF10B981)) {
+            session != null && !controller.isActive && !controller.isEnded -> Text(
+                text = if (isHindi) "साधक की स्वीकृति का इंतज़ार… अभी शुल्क नहीं लगा है" else "Waiting for provider acceptance… no charge yet",
+                color = fg, fontSize = 12.sp
+            )
+            session != null -> {
+                if (isPerMinute) {
+                    val elapsedSec = controller.elapsedSeconds
+                    val runningTime = formatMmSs(elapsedSec)
+                    val minutesBilled = Math.max(1L, (elapsedSec + 59L) / 60L)
+                    val pricePerMinRupees = (session.pricePerMinPaise / 100L).coerceAtLeast(1L)
+                    val spentRupees = minutesBilled * pricePerMinRupees
+
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Surface(
+                            shape = RoundedCornerShape(999.dp),
+                            color = SaffronContainer
+                        ) {
                             Text(
-                                text = if (isHindi) PriceLabels.FREE_TRIAL_BADGE else PriceLabels.FREE_TRIAL_BADGE_EN,
-                                color = Color.White, fontSize = 10.sp, fontWeight = FontWeight.Bold,
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                                text = (if (isHindi) "समय: " else "Time: ") + runningTime,
+                                color = SaffronDeep,
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
+                            )
+                        }
+                        Surface(
+                            shape = RoundedCornerShape(999.dp),
+                            color = SaffronPrimary
+                        ) {
+                            Text(
+                                text = (if (isHindi) "खर्च: ₹" else "Spent: ₹") + spentRupees,
+                                color = Color.White,
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
                             )
                         }
                     }
-                }
-            }
-        }
 
-        if (controller.showExtendWarning) {
-            Spacer(Modifier.height(8.dp))
-            Surface(
-                shape = RoundedCornerShape(12.dp),
-                color = Color(0xFFFAF6EA),
-                border = BorderStroke(1.dp, Color(0xFF0D656C))
-            ) {
-                Row(
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = if (isHindi) "⏳ केवल 2 मिनट शेष" else "⏳ Only 2 minutes left",
-                        color = Color(0xFF125157), fontSize = 12.sp, fontWeight = FontWeight.SemiBold
-                    )
-                    Spacer(Modifier.width(10.dp))
-                    Button(
-                        onClick = { controller.extend { r -> r.onFailure(onExtendFailed) } },
-                        enabled = !controller.isExtending,
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0D656C)),
-                        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
-                        modifier = Modifier.height(32.dp)
-                    ) {
+                    // Warning when 1 minute of balance is remaining
+                    if (controller.remainingSeconds in 1L..60L) {
+                        Spacer(Modifier.height(6.dp))
+                        Surface(
+                            shape = RoundedCornerShape(10.dp),
+                            color = Color(0xFFFEF2F2),
+                            border = BorderStroke(1.dp, Color(0xFFEF4444))
+                        ) {
+                            Text(
+                                text = if (isHindi) "⚠️ केवल 1 मिनट का बैलेंस शेष है" else "⚠️ Low balance: only 1 min left",
+                                color = Color(0xFFDC2626),
+                                fontSize = 11.5.sp,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
+                            )
+                        }
+                    }
+                } else {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
-                            text = if (controller.isExtending) "…" else (if (isHindi) "बढ़ाएँ " else "Extend ") + PriceLabels.EXTEND,
-                            fontSize = 11.sp
+                            text = (if (isHindi) "शेष समय " else "Time left ") + formatMmSs(controller.remainingSeconds),
+                            color = fg, fontSize = 12.sp, fontWeight = FontWeight.SemiBold
                         )
+                        if (session.isFreeTrial) {
+                            Spacer(Modifier.width(8.dp))
+                            Surface(shape = RoundedCornerShape(999.dp), color = Color(0xFF10B981)) {
+                                Text(
+                                    text = if (isHindi) PriceLabels.FREE_TRIAL_BADGE else PriceLabels.FREE_TRIAL_BADGE_EN,
+                                    color = Color.White, fontSize = 10.sp, fontWeight = FontWeight.Bold,
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                                )
+                            }
+                        }
                     }
                 }
             }
@@ -213,9 +255,9 @@ fun sessionErrorText(e: Throwable, isHindi: Boolean): String {
     val be = e as? SessionBillingException
     return when {
         be?.isInsufficientBalance == true ->
-            if (isHindi) "वॉलेट में पर्याप्त राशि नहीं है। कृपया रिचार्ज करें।" else "Insufficient wallet balance. Please recharge."
+            if (isHindi) "Insufficient wallet balance. Please recharge." else "Insufficient wallet balance. Please recharge."
         be?.isUnauthenticated == true ->
-            if (isHindi) "कृपया पहले लॉगिन करें।" else "Please log in first."
+            if (isHindi) "Please login first." else "Please log in first."
         else -> if (isHindi) "सत्र शुरू नहीं हो सका। दोबारा प्रयास करें।" else "Could not start session. Please try again."
     }
 }
